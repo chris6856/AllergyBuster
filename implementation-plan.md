@@ -45,14 +45,15 @@ All API integrations, normalisation, and hooks. Build and test services in isola
 - [ ] 3.4 Build `allergenParser.ts` — strip `en:` prefix from OFF tags, title-case, map to display names, separate declared vs traces
 - [ ] 3.5 Build `edamam.ts` — barcode lookup (`/parser?upc=`) and search (`/parser?ingr=`); parse ingredient text for allergen presence (do not trust health labels)
 - [ ] 3.6 Build `productService.ts` — orchestrates OFF → Edamam fallback for both barcode and search; returns `NormalizedProduct | null`
-- [ ] 3.7 Evaluate and select restaurant data source — assess OpenMenu (open source), Yelp Fusion (paid), or equivalent; confirm allergen/menu data availability and cost
-- [ ] 3.8 Define `restaurant.ts` types — `Restaurant`, `MenuItem`, `RestaurantAllergenInfo`
-- [ ] 3.9 Build `restaurantService.ts` — search restaurants by name; return menu items with allergen data where available
-- [ ] 3.10 Build `useProductByBarcode` hook — `useQuery` wrapper, handles loading / error / no-result states
-- [ ] 3.11 Build `useProductSearch` hook — `useQuery` wrapper; `enabled` flag only fires on explicit submit
-- [ ] 3.12 Build `useRestaurantSearch` hook — `useQuery` wrapper; `enabled` flag only fires on explicit submit
-- [ ] 3.13 Build `useNetworkStatus` hook — wraps NetInfo, returns `isConnected: boolean`
-- [ ] 3.14 Manually test all service calls against live APIs with sample barcodes, product queries, and restaurant name queries
+- [ ] 3.7 Define `restaurant.ts` types — `Restaurant`, `MenuItem`, `RestaurantAllergenInfo`
+- [ ] 3.8 Build `openMenu.ts` — search restaurants by name via OpenMenu API; extract menu items and allergen data
+- [ ] 3.9 Build `yelp.ts` — search restaurants by name via Yelp Fusion API; extract menu items and allergen data
+- [ ] 3.10 Build `restaurantService.ts` — orchestrates OpenMenu → Yelp fallback; returns `Restaurant | null`
+- [ ] 3.11 Build `useProductByBarcode` hook — `useQuery` wrapper, handles loading / error / no-result states
+- [ ] 3.12 Build `useProductSearch` hook — `useQuery` wrapper; `enabled` flag only fires on explicit submit
+- [ ] 3.13 Build `useRestaurantSearch` hook — `useQuery` wrapper; `enabled` flag only fires on explicit submit
+- [ ] 3.14 Build `useNetworkStatus` hook — wraps NetInfo, returns `isConnected: boolean`
+- [ ] 3.15 Manually test all service calls against live APIs with sample barcodes, product queries, and restaurant name queries
 
 ---
 
@@ -85,12 +86,13 @@ All API integrations, normalisation, and hooks. Build and test services in isola
 
 ## Phase 6: Text Search Feature
 
-- [ ] 6.1 Build `TextSearchScreen` — auto-focused text input, search submit button, accepts `initialQuery` nav param; toggle between "Products" and "Restaurants" search modes; 400ms debounce guard (do not fire on every keystroke — only on submit)
-- [ ] 6.2 Build `SearchResultScreen` for products — `FlatList` of product rows (name, brand, thumbnail); tap row navigates to `ScanResultScreen` reused as product detail (pass `productId`); empty state uses `NoResultsBanner`; skeleton loading rows
-- [ ] 6.3 Build `RestaurantResultScreen` — `FlatList` of restaurant rows (name, cuisine type); tap row navigates to `RestaurantDetailScreen`
-- [ ] 6.4 Build `RestaurantDetailScreen` — restaurant name, menu items list, allergen tags per item; "No allergen data available" fallback per item where API data is absent
-- [ ] 6.5 Update `ScanResultScreen` to accept either `barcode` or `productId` as nav params and resolve whichever is present via `productService`
-- [ ] 6.6 End-to-end test: search by product name → results → allergen detail; search by restaurant name → menu items → allergen info per item
+- [ ] 6.1 Build `SearchSegmentedControl` component — pill-style toggle with "Products" and "Restaurants" segments; single tap switches mode; selected segment visually highlighted
+- [ ] 6.2 Build `TextSearchScreen` — `SearchSegmentedControl` at top, auto-focused text input below, search submit button; accepts `initialQuery` and `initialMode` nav params; fires product or restaurant query based on active segment; only fires on explicit submit
+- [ ] 6.3 Build `SearchResultScreen` for products — `FlatList` of product rows (name, brand, thumbnail); tap row navigates to `ScanResultScreen` reused as product detail (pass `productId`); empty state uses `NoResultsBanner`; skeleton loading rows
+- [ ] 6.4 Build `RestaurantResultScreen` — `FlatList` of restaurant rows (name, cuisine type); tap row navigates to `RestaurantDetailScreen`
+- [ ] 6.5 Build `RestaurantDetailScreen` — restaurant name, menu items list, allergen tags per item; "No allergen data available" fallback per item where API data is absent
+- [ ] 6.6 Update `ScanResultScreen` to accept either `barcode` or `productId` as nav params and resolve whichever is present via `productService`
+- [ ] 6.7 End-to-end test: search by product name → results → allergen detail; search by restaurant name → menu items → allergen info per item
 
 ---
 
