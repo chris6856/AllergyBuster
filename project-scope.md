@@ -20,15 +20,17 @@ All possible allergens are displayed for any given product. No user-specific fil
 
 * Scan a product barcode and see allergy information on that product
 * Take a photo of a product label and see allergy information for that label
-* Enter search criteria (product name, ingredient, brand, etc.) and retrieve allergy information
+* Enter search criteria (product name, ingredient, brand, restaurant name, etc.) and retrieve allergy information
+* Search for restaurant allergen information by name
 * If barcode or photo scan returns no results, display "No results found" and offer an empty manual text search as the next step
 * Show daily allergy tips on app open (AI-generated)
+* Display user testimonials in the app
 
 ## Data Sources
 
 * **Product data**: Open Food Facts (free, open source) as primary source; supplement with a paid API (e.g. Edamam, Nutritionix, or Spoonacular) if coverage gaps exist
+* **Restaurant data**: Open source or purchased API (e.g. OpenMenu, Yelp Fusion, or similar); include allergen/menu data where available
 * **Daily tips**: AI-generated (provider TBD — e.g. Claude, OpenAI)
-* **Restaurants**: No reliable data source available — excluded from MVP
 * If no results are found from any source, display "No results found"
 * If no network connection is available, display a "No network found" message
 
@@ -44,7 +46,7 @@ All possible allergens are displayed for any given product. No user-specific fil
 
 ## Out of Scope
 
-* Restaurant search and allergen data
+* Restaurant search by GPS/location
 * In-app sharing
 * User allergen profiles / personalized filtering
 * Saving user-entered product data

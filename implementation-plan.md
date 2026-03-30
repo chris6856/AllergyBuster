@@ -45,10 +45,14 @@ All API integrations, normalisation, and hooks. Build and test services in isola
 - [ ] 3.4 Build `allergenParser.ts` — strip `en:` prefix from OFF tags, title-case, map to display names, separate declared vs traces
 - [ ] 3.5 Build `edamam.ts` — barcode lookup (`/parser?upc=`) and search (`/parser?ingr=`); parse ingredient text for allergen presence (do not trust health labels)
 - [ ] 3.6 Build `productService.ts` — orchestrates OFF → Edamam fallback for both barcode and search; returns `NormalizedProduct | null`
-- [ ] 3.7 Build `useProductByBarcode` hook — `useQuery` wrapper, handles loading / error / no-result states
-- [ ] 3.8 Build `useProductSearch` hook — `useQuery` wrapper; `enabled` flag only fires on explicit submit
-- [ ] 3.9 Build `useNetworkStatus` hook — wraps NetInfo, returns `isConnected: boolean`
-- [ ] 3.10 Manually test all service calls against live APIs with sample barcodes and queries
+- [ ] 3.7 Evaluate and select restaurant data source — assess OpenMenu (open source), Yelp Fusion (paid), or equivalent; confirm allergen/menu data availability and cost
+- [ ] 3.8 Define `restaurant.ts` types — `Restaurant`, `MenuItem`, `RestaurantAllergenInfo`
+- [ ] 3.9 Build `restaurantService.ts` — search restaurants by name; return menu items with allergen data where available
+- [ ] 3.10 Build `useProductByBarcode` hook — `useQuery` wrapper, handles loading / error / no-result states
+- [ ] 3.11 Build `useProductSearch` hook — `useQuery` wrapper; `enabled` flag only fires on explicit submit
+- [ ] 3.12 Build `useRestaurantSearch` hook — `useQuery` wrapper; `enabled` flag only fires on explicit submit
+- [ ] 3.13 Build `useNetworkStatus` hook — wraps NetInfo, returns `isConnected: boolean`
+- [ ] 3.14 Manually test all service calls against live APIs with sample barcodes, product queries, and restaurant name queries
 
 ---
 
@@ -81,10 +85,12 @@ All API integrations, normalisation, and hooks. Build and test services in isola
 
 ## Phase 6: Text Search Feature
 
-- [ ] 6.1 Build `TextSearchScreen` — auto-focused text input, search submit button, accepts `initialQuery` nav param; 400ms debounce guard (do not fire on every keystroke — only on submit)
-- [ ] 6.2 Build `SearchResultScreen` — `FlatList` of product rows (name, brand, thumbnail); tap row navigates to `ScanResultScreen` reused as product detail (pass `productId`); empty state uses `NoResultsBanner`; skeleton loading rows
-- [ ] 6.3 Update `ScanResultScreen` to accept either `barcode` or `productId` as nav params and resolve whichever is present via `productService`
-- [ ] 6.4 End-to-end test: search by product name and brand → results list → tap result → allergen detail
+- [ ] 6.1 Build `TextSearchScreen` — auto-focused text input, search submit button, accepts `initialQuery` nav param; toggle between "Products" and "Restaurants" search modes; 400ms debounce guard (do not fire on every keystroke — only on submit)
+- [ ] 6.2 Build `SearchResultScreen` for products — `FlatList` of product rows (name, brand, thumbnail); tap row navigates to `ScanResultScreen` reused as product detail (pass `productId`); empty state uses `NoResultsBanner`; skeleton loading rows
+- [ ] 6.3 Build `RestaurantResultScreen` — `FlatList` of restaurant rows (name, cuisine type); tap row navigates to `RestaurantDetailScreen`
+- [ ] 6.4 Build `RestaurantDetailScreen` — restaurant name, menu items list, allergen tags per item; "No allergen data available" fallback per item where API data is absent
+- [ ] 6.5 Update `ScanResultScreen` to accept either `barcode` or `productId` as nav params and resolve whichever is present via `productService`
+- [ ] 6.6 End-to-end test: search by product name → results → allergen detail; search by restaurant name → menu items → allergen info per item
 
 ---
 
@@ -112,6 +118,11 @@ All API integrations, normalisation, and hooks. Build and test services in isola
 - [ ] 8.7 Accessibility pass — ensure all interactive elements have `accessibilityLabel`; test with iOS VoiceOver and Android TalkBack
 - [ ] 8.8 Performance pass — confirm no re-render loops; memoize heavy list components
 - [ ] 8.9 Set up app icons and splash screen for both platforms
+- [ ] 8.10 Define `testimonial.ts` type — `Testimonial { id, author, quote, rating, date }`
+- [ ] 8.11 Create static testimonials data file (`src/constants/testimonials.ts`) with initial set of testimonials; replace with API endpoint later if needed
+- [ ] 8.12 Build `TestimonialCard` component — author name, star rating, quote text
+- [ ] 8.13 Build `TestimonialsCarousel` component — horizontally scrollable row of `TestimonialCard` items
+- [ ] 8.14 Add `TestimonialsCarousel` to `HomeScreen` below the three search entry cards
 
 ---
 
@@ -121,12 +132,13 @@ All API integrations, normalisation, and hooks. Build and test services in isola
 - [ ] 9.2 Test barcode scan on physical Android device with the same set
 - [ ] 9.3 Test photo OCR on labels with small print, curved surfaces, and metallic packaging — document failure cases
 - [ ] 9.4 Test text search with product names, brands, and ingredient terms
-- [ ] 9.5 Test all "no results" fallback paths for all three modes
-- [ ] 9.6 Test full offline mode — disable network, open app, use all features
-- [ ] 9.7 Test disclaimer — uninstall/reinstall, verify appears once only
-- [ ] 9.8 Test daily tip cache — verify no duplicate proxy calls within the same day
-- [ ] 9.9 Test camera permission denied flow on both platforms — verify "Open Settings" deep-link works
-- [ ] 9.10 Test on minimum supported OS versions (iOS 15, Android 8)
+- [ ] 9.5 Test restaurant search with known restaurant names — verify menu items and allergen data display correctly; verify "no allergen data" fallback per item
+- [ ] 9.6 Test all "no results" fallback paths for all three modes
+- [ ] 9.7 Test full offline mode — disable network, open app, use all features
+- [ ] 9.8 Test disclaimer — uninstall/reinstall, verify appears once only
+- [ ] 9.9 Test daily tip cache — verify no duplicate proxy calls within the same day
+- [ ] 9.10 Test camera permission denied flow on both platforms — verify "Open Settings" deep-link works
+- [ ] 9.11 Test on minimum supported OS versions (iOS 15, Android 8)
 
 ---
 
