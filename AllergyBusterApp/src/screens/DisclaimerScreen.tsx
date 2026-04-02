@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -16,48 +15,26 @@ export function DisclaimerScreen() {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.heading}>Important Notice</Text>
-        <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={false}>
+        <View style={styles.bodyArea}>
           <Text style={styles.body}>
-            AllergyBuster is designed to help you identify potential allergens in
-            food products and restaurant menu items. However, please read the
-            following carefully before using this app.
+            AllergyBuster is an informational tool to help you identify
+            potential allergens in food products and restaurants. The information
+            provided does not constitute medical advice, diagnosis, or treatment.
           </Text>
 
-          <Text style={styles.sectionHeading}>Non-Medical Advice</Text>
           <Text style={styles.body}>
-            The information provided by AllergyBuster is for informational
-            purposes only and does not constitute medical advice, diagnosis, or
-            treatment. Always seek the guidance of your doctor, allergist, or
-            other qualified health professional with any questions you may have
-            regarding a medical condition or allergy.
+            Allergen data is sourced from third-party databases and may not
+            always be complete or up to date. Always verify allergen information
+            on product packaging or with restaurant staff, and consult your
+            doctor or allergist for personalised medical guidance.
           </Text>
 
-          <Text style={styles.sectionHeading}>Data Accuracy</Text>
           <Text style={styles.body}>
-            Allergen information is sourced from third-party databases and
-            community-contributed data. AllergyBuster cannot guarantee the
-            accuracy, completeness, or timeliness of any allergen information
-            displayed. Always verify allergen information directly on product
-            packaging or with restaurant staff before consuming any food.
+            By tapping "I Understand" you acknowledge that this app is not a
+            substitute for professional medical advice and that you will not rely
+            solely on it to make health decisions.
           </Text>
-
-          <Text style={styles.sectionHeading}>Life-Threatening Allergies</Text>
-          <Text style={styles.body}>
-            If you have a severe or life-threatening allergy, do not rely solely
-            on this app. Cross-contamination and labelling errors can occur.
-            Always carry your prescribed emergency medication (such as an
-            epinephrine auto-injector) and consult your healthcare provider for
-            personalised advice.
-          </Text>
-
-          <Text style={styles.sectionHeading}>No Liability</Text>
-          <Text style={styles.body}>
-            By using AllergyBuster, you acknowledge that the developers and
-            publishers of this app accept no liability for any harm, injury, or
-            adverse reaction resulting from reliance on information provided by
-            this app.
-          </Text>
-        </ScrollView>
+        </View>
 
         <TouchableOpacity
           style={styles.button}
@@ -91,15 +68,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     textAlign: 'center',
   },
-  scrollArea: {
+  bodyArea: {
     marginBottom: spacing.md,
-  },
-  sectionHeading: {
-    fontSize: fontSizes.md,
-    fontWeight: fontWeights.semibold,
-    color: colors.danger,
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
   },
   body: {
     fontSize: fontSizes.sm,
