@@ -29,7 +29,7 @@ export function SearchStack() {
       <Stack.Screen
         name="RestaurantDetail"
         component={RestaurantDetailScreen}
-        options={({route}) => ({title: route.params.restaurantName})}
+        options={({route}) => ({title: route.params.restaurant.name})}
       />
     </Stack.Navigator>
   );

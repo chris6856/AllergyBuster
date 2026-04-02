@@ -1,92 +1,150 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
+  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {SearchSegmentedControl, SearchMode} from '../../components/SearchSegmentedControl';
+import {NoNetworkBanner} from '../../components/NoNetworkBanner';
+import {useNetworkStatus} from '../../hooks/useNetworkStatus';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
-import {MainTabNavigationProp} from '../../navigation/navigationTypes';
+import {SearchStackScreenProps} from '../../navigation/navigationTypes';
 
-type SearchMethod = {
+type Props = SearchStackScreenProps<'TextSearch'>;
+
+type GuidanceCard = {
   icon: string;
   title: string;
   description: string;
-  action: string;
-  tab?: keyof {ScanTab: undefined; PhotoTab: undefined};
+  mode: SearchMode;
+  example: string;
 };
 
-const SEARCH_METHODS: SearchMethod[] = [
+const GUIDANCE: GuidanceCard[] = [
   {
-    icon: '📷',
-    title: 'Scan a Barcode',
-    description: 'Point your camera at any product barcode to instantly see its allergen information.',
-    action: 'Tap the Scan tab at the bottom of the screen.',
-    tab: 'ScanTab',
+    icon: '🥜',
+    title: 'Search by product name',
+    description: 'Find allergen info for any packaged food product.',
+    mode: 'products',
+    example: 'e.g. "Skippy peanut butter"',
   },
   {
-    icon: '🖼️',
-    title: 'Photograph a Label',
-    description: 'Take a photo of an ingredient label and we\'ll extract the allergen information for you.',
-    action: 'Tap the Photo tab at the bottom of the screen.',
-    tab: 'PhotoTab',
+    icon: '🌾',
+    title: 'Search by ingredient or brand',
+    description: 'Look up a specific ingredient or brand across products.',
+    mode: 'products',
+    example: 'e.g. "wheat flour" or "Kelloggs"',
   },
   {
-    icon: '🔍',
-    title: 'Search by Name',
-    description: 'Type a product name, brand, or ingredient to search our database.',
-    action: 'Use the search bar below and select Products.',
-  },
-  {
-    icon: '🍽️',
-    title: 'Search Restaurants',
-    description: 'Look up a restaurant by name to browse their menu allergen information.',
-    action: 'Use the search bar below and select Restaurants.',
+    icon: '🍔',
+    title: 'Search by restaurant name',
+    description: 'Browse allergen information for menu items.',
+    mode: 'restaurants',
+    example: 'e.g. "McDonald\'s" or "Olive Garden"',
   },
 ];
 
-export function TextSearchScreen() {
-  const navigation = useNavigation<MainTabNavigationProp>();
+export function TextSearchScreen({route}: Props) {
+  const navigation = useNavigation<Props['navigation']>();
+  const {isConnected} = useNetworkStatus();
+
+  const [mode, setMode] = useState<SearchMode>(
+    route.params?.initialMode ?? 'products',
+  );
+  const [query, setQuery] = useState(route.params?.initialQuery ?? '');
+  const inputRef = useRef<TextInput>(null);
+
+  // Auto-focus if we arrive with an initial query (e.g. from scan fallback)
+  useEffect(() => {
+    if (route.params?.initialQuery) {
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [route.params?.initialQuery]);
+
+  const handleSubmit = () => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      return;
+    }
+    Keyboard.dismiss();
+    navigation.navigate('SearchResult', {query: trimmed, mode});
+  };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
-      <Text style={styles.heading}>How can we help?</Text>
-      <Text style={styles.subheading}>
-        Choose one of the methods below to look up allergen information.
-      </Text>
+    <View style={styles.container}>
+      {!isConnected && <NoNetworkBanner />}
 
-      {SEARCH_METHODS.map(method => (
+      <SearchSegmentedControl mode={mode} onChange={setMode} />
+
+      {/* Search input row */}
+      <View style={styles.inputRow}>
+        <TextInput
+          ref={inputRef}
+          style={styles.input}
+          value={query}
+          onChangeText={setQuery}
+          placeholder={
+            mode === 'products'
+              ? 'Product name, brand or ingredient…'
+              : 'Restaurant name…'
+          }
+          placeholderTextColor={colors.textDisabled}
+          returnKeyType="search"
+          onSubmitEditing={handleSubmit}
+          autoCapitalize="none"
+          autoCorrect={false}
+          accessibilityLabel="Search input"
+        />
         <TouchableOpacity
-          key={method.title}
-          style={styles.card}
-          activeOpacity={method.tab ? 0.7 : 1}
-          onPress={() => {
-            if (method.tab) {
-              navigation.navigate(method.tab as any);
-            }
-          }}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.icon}>{method.icon}</Text>
-            <Text style={styles.cardTitle}>{method.title}</Text>
-          </View>
-          <Text style={styles.cardDescription}>{method.description}</Text>
-          <View style={styles.actionRow}>
-            <Text style={styles.actionText}>{method.action}</Text>
-          </View>
+          style={[styles.searchButton, !query.trim() && styles.searchButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={!query.trim()}
+          accessibilityLabel="Search"
+          accessibilityRole="button">
+          <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
-      ))}
-
-      <View style={styles.searchPlaceholder}>
-        <Text style={styles.searchPlaceholderText}>
-          Search bar coming soon — tap Scan or Photo tabs above to get started.
-        </Text>
       </View>
-    </ScrollView>
+
+      {/* Guidance cards — shown when input is empty */}
+      {!query.trim() && (
+        <ScrollView
+          style={styles.guidance}
+          contentContainerStyle={styles.guidanceContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
+          <Text style={styles.guidanceHeading}>What can we look up?</Text>
+          {GUIDANCE.filter(c => c.mode === mode).map(card => (
+            <TouchableOpacity
+              key={card.title}
+              style={styles.card}
+              onPress={() => {
+                setQuery('');
+                inputRef.current?.focus();
+              }}
+              activeOpacity={0.8}>
+              <Text style={styles.cardIcon}>{card.icon}</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{card.title}</Text>
+                <Text style={styles.cardDescription}>{card.description}</Text>
+                <Text style={styles.cardExample}>{card.example}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+
+          {/* Cross-mode tip */}
+          <Text style={styles.modeTip}>
+            {mode === 'products'
+              ? '🍽️  Looking for a restaurant? Switch to Restaurants above.'
+              : '🛒  Looking for a product? Switch to Products above.'}
+          </Text>
+        </ScrollView>
+      )}
+    </View>
   );
 }
 
@@ -95,77 +153,95 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  content: {
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: fontSizes.md,
+    color: colors.textPrimary,
+  },
+  searchButton: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 1,
+  },
+  searchButtonDisabled: {
+    backgroundColor: colors.textDisabled,
+  },
+  searchButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: fontSizes.sm,
+  },
+  guidance: {
+    flex: 1,
+  },
+  guidanceContent: {
     padding: spacing.md,
     paddingBottom: spacing.xxl,
   },
-  heading: {
-    fontSize: fontSizes.xxl,
+  guidanceHeading: {
+    fontSize: fontSizes.lg,
     fontWeight: '700',
     color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  subheading: {
-    fontSize: fontSizes.md,
-    color: colors.textSecondary,
-    marginBottom: spacing.lg,
-    lineHeight: 22,
+    marginBottom: spacing.md,
   },
   card: {
+    flexDirection: 'row',
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
     borderLeftWidth: 4,
     borderLeftColor: colors.primary,
-    elevation: 2,
+    elevation: 1,
     shadowColor: colors.black,
     shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
+  cardIcon: {
+    fontSize: 28,
+    marginRight: spacing.md,
+    marginTop: 2,
   },
-  icon: {
-    fontSize: 24,
-    marginRight: spacing.sm,
+  cardBody: {
+    flex: 1,
   },
   cardTitle: {
-    fontSize: fontSizes.lg,
+    fontSize: fontSizes.md,
     fontWeight: '600',
     color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
   cardDescription: {
     fontSize: fontSizes.sm,
     color: colors.textSecondary,
-    lineHeight: 20,
-    marginBottom: spacing.sm,
+    lineHeight: 18,
+    marginBottom: spacing.xs,
   },
-  actionRow: {
-    backgroundColor: colors.background,
-    borderRadius: borderRadius.sm,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  actionText: {
-    fontSize: fontSizes.sm,
-    color: colors.primary,
-    fontWeight: '500',
-  },
-  searchPlaceholder: {
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: 'dashed',
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  searchPlaceholderText: {
-    fontSize: fontSizes.sm,
+  cardExample: {
+    fontSize: fontSizes.xs,
     color: colors.textDisabled,
+    fontStyle: 'italic',
+  },
+  modeTip: {
+    fontSize: fontSizes.sm,
+    color: colors.textSecondary,
     textAlign: 'center',
+    marginTop: spacing.sm,
+    fontStyle: 'italic',
   },
 });

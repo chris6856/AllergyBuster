@@ -1,6 +1,7 @@
 import {NativeStackNavigationProp, NativeStackScreenProps} from '@react-navigation/native-stack';
 import {BottomTabNavigationProp, BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {CompositeNavigationProp, CompositeScreenProps, NavigatorScreenParams} from '@react-navigation/native';
+import {Restaurant} from '../types/restaurant';
 
 // --- Stack param lists ---
 
@@ -17,7 +18,7 @@ export type PhotoStackParamList = {
 export type SearchStackParamList = {
   TextSearch: {initialQuery?: string; initialMode?: 'products' | 'restaurants'};
   SearchResult: {query: string; mode: 'products' | 'restaurants'};
-  RestaurantDetail: {restaurantId: string; restaurantName: string};
+  RestaurantDetail: {restaurant: Restaurant};
 };
 
 // --- Tab param list ---
