@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(java --version)",
+      "Bash(javac --version)",
+      "Bash(echo $JAVA_HOME)",
+      "Bash(echo $ANDROID_HOME)",
+      "Bash(echo $ANDROID_SDK_ROOT)",
+      "Read(//c/Users/david/AppData/Local/Android/**)",
+      "Bash(watchman --version)",
+      "Bash(adb --version)",
+      "Read(//c/Program Files/Eclipse Adoptium//**)",
+      "Read(//c/Program Files/**)",
+      "Bash(cmd.exe /c \"echo JAVA_HOME=%JAVA_HOME% && echo ANDROID_HOME=%ANDROID_HOME% && java --version && adb --version\")",
+      "Bash(cmd.exe /c \"set JAVA_HOME && set ANDROID_HOME && java -version && adb version\")",
+      "Bash(cmd.exe /c \"set\")",
+      "Bash(cmd.exe /c \"reg query \"\"HKLM\\\\SYSTEM\\\\CurrentControlSet\\\\Control\\\\Session Manager\\\\Environment\"\" /v JAVA_HOME && reg query \"\"HKLM\\\\SYSTEM\\\\CurrentControlSet\\\\Control\\\\Session Manager\\\\Environment\"\" /v ANDROID_HOME\")",
+      "Bash(powershell.exe -Command \"[System.Environment]::GetEnvironmentVariable\\(''JAVA_HOME'', ''Machine''\\); [System.Environment]::GetEnvironmentVariable\\(''ANDROID_HOME'', ''Machine''\\)\")",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(powershell.exe -Command \"& 'C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\emulator\\\\emulator.exe' -list-avds\")",
+      "Bash(powershell.exe -Command \"Start-Process -NoNewWindow 'C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\emulator\\\\emulator.exe' -ArgumentList '-avd Pixel_9'\")",
+      "Bash(s\\\\\")",
+      "Bash(powershell.exe -Command ':*)",
+      "Bash(powershell.exe -Command \"& 'C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe' shell getprop sys.boot_completed\")",
+      "Bash(powershell.exe -Command \"& 'C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe' devices\")",
+      "Bash(powershell.exe -Command \"npx react-native run-android 2>&1\")",
+      "Bash(cmd.exe /c \"npx react-native run-android\")"
+    ]
+  }
+}

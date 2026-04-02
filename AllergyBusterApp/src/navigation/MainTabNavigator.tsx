@@ -27,6 +27,7 @@ function TabIcon({label, focused}: {label: string; focused: boolean}) {
 export function MainTabNavigator() {
   return (
     <Tab.Navigator
+      initialRouteName="SearchTab"
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
