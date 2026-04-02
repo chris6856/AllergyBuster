@@ -4,7 +4,11 @@ import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 
 export function NoNetworkBanner() {
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessible
+      accessibilityRole="alert"
+      accessibilityLabel="No network connection. Please check your internet and try again.">
       <Text style={styles.icon}>📡</Text>
       <Text style={styles.text}>No network connection. Please check your internet and try again.</Text>
     </View>

@@ -9,7 +9,11 @@ interface Props {
 
 export function TipCard({text, isLoading}: Props) {
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessible={!isLoading}
+      accessibilityRole="text"
+      accessibilityLabel={text ? `Tip of the day: ${text}` : undefined}>
       <View style={styles.header}>
         <Text style={styles.icon}>💡</Text>
         <Text style={styles.heading}>Tip of the Day</Text>

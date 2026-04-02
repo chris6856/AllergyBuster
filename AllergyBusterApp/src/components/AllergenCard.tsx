@@ -10,7 +10,13 @@ interface Props {
 export function AllergenCard({name, variant = 'declared'}: Props) {
   const isDeclared = variant === 'declared';
   return (
-    <View style={[styles.tag, isDeclared ? styles.declared : styles.trace]}>
+    <View
+      style={[styles.tag, isDeclared ? styles.declared : styles.trace]}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={
+        isDeclared ? `Contains ${name}` : `May contain ${name}`
+      }>
       <Text style={[styles.text, isDeclared ? styles.declaredText : styles.traceText]}>
         {name}
       </Text>

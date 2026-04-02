@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {TipCard} from '../components/TipCard';
+import {TestimonialsCarousel} from '../components/TestimonialsCarousel';
 import {useDailyTip} from '../hooks/useDailyTip';
 import {useNetworkStatus} from '../hooks/useNetworkStatus';
 import {NoNetworkBanner} from '../components/NoNetworkBanner';
@@ -18,6 +19,7 @@ type QuickAction = {
   icon: string;
   label: string;
   description: string;
+  hint: string;
   tab: 'ScanTab' | 'PhotoTab' | 'SearchTab';
 };
 
@@ -26,18 +28,21 @@ const QUICK_ACTIONS: QuickAction[] = [
     icon: '📷',
     label: 'Scan Barcode',
     description: 'Instant allergen lookup from a product barcode',
+    hint: 'Opens the barcode scanner',
     tab: 'ScanTab',
   },
   {
     icon: '🔍',
     label: 'Scan Label',
     description: 'Photograph an ingredient list and extract allergens',
+    hint: 'Opens the camera to photograph a product label',
     tab: 'PhotoTab',
   },
   {
     icon: '🛒',
-    label: 'Search Products',
-    description: 'Look up packaged foods by name, brand or ingredient',
+    label: 'Search Products & Restaurants',
+    description: 'Look up packaged foods, brands, ingredients or restaurants',
+    hint: 'Opens the text search screen',
     tab: 'SearchTab',
   },
 ];
@@ -84,7 +89,8 @@ export function HomeScreen() {
             onPress={() => navigation.navigate(action.tab)}
             activeOpacity={0.75}
             accessibilityRole="button"
-            accessibilityLabel={action.label}>
+            accessibilityLabel={action.label}
+            accessibilityHint={action.hint}>
             <View style={styles.actionIcon}>
               <Text style={styles.actionIconText}>{action.icon}</Text>
             </View>
@@ -97,8 +103,14 @@ export function HomeScreen() {
         ))}
       </View>
 
+      {/* Testimonials */}
+      <TestimonialsCarousel />
+
       {/* Disclaimer footer */}
-      <Text style={styles.disclaimer}>
+      <Text
+        style={styles.disclaimer}
+        accessibilityRole="text"
+        accessibilityLabel="Medical disclaimer">
         AllergyBuster provides general information only and is not a substitute
         for medical advice. Always verify allergen information on product
         packaging and consult a healthcare professional regarding your specific

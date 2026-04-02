@@ -42,6 +42,7 @@ export function MainTabNavigator() {
         component={HomeScreen}
         options={{
           title: 'Home',
+          headerShown: false,
           tabBarIcon: ({focused}) => <TabIcon label="Home" focused={focused} />,
         }}
       />
