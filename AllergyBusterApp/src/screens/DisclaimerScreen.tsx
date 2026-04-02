@@ -1,17 +1,18 @@
 import React, {useEffect} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {fontSizes, spacing} from '../constants/theme';
-import {useDisclaimerAccepted} from '../hooks/useDisclaimerAccepted';
+import {RootNavigationProp} from '../navigation/navigationTypes';
 
 export function DisclaimerScreen() {
-  const {accept} = useDisclaimerAccepted();
+  const navigation = useNavigation<RootNavigationProp>();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      accept();
+      navigation.replace('MainTabs', undefined);
     }, 3000);
     return () => clearTimeout(timer);
-  }, [accept]);
+  }, [navigation]);
 
   return (
     <View style={styles.container}>

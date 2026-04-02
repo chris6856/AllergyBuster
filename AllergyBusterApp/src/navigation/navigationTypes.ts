@@ -33,7 +33,7 @@ export type MainTabParamList = {
 
 export type RootStackParamList = {
   Disclaimer: undefined;
-  MainTabs: NavigatorScreenParams<MainTabParamList>;
+  MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
 };
 
 // --- Typed navigation props ---
