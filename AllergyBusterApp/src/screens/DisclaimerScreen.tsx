@@ -1,8 +1,16 @@
 import React, {useEffect} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {fontSizes, spacing} from '../constants/theme';
+import {spacing} from '../constants/theme';
 import {RootNavigationProp} from '../navigation/navigationTypes';
+
+// Save the hero image to src/assets/splash-hero.png
+const splashHero = require('../assets/splash-hero.png');
 
 export function DisclaimerScreen() {
   const navigation = useNavigation<RootNavigationProp>();
@@ -10,29 +18,40 @@ export function DisclaimerScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.replace('MainTabs', undefined);
-    }, 3000);
+    }, 10000);
     return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      {/* Green top section */}
+      <View style={styles.top}>
         <Text style={styles.appName}>AllergyBuster</Text>
-
-        <Text style={styles.welcome}>
-          Welcome to AllergyBuster — your own personal assistant helping to
-          keep you safe and your EpiPen in your pocket where it belongs.
-        </Text>
-
         <Text style={styles.tagline}>What can we look up for you today?</Text>
       </View>
 
-      <Text style={styles.disclaimer}>
-        This app provides general allergen information only and does not
-        constitute medical advice. Always verify allergen data on product
-        packaging or with restaurant staff, and consult your doctor or
-        allergist for personalised guidance.
-      </Text>
+      {/* Hero image */}
+      <ImageBackground
+        source={splashHero}
+        style={styles.hero}
+        resizeMode="contain"
+        accessibilityLabel="AllergyBuster superhero mascot"
+      />
+
+      {/* Welcome message + disclaimer */}
+      <View style={styles.bottom}>
+        <Text style={styles.welcome}>
+          Welcome to AllergyBuster, your personal assistant keeping you safe
+          and your EpiPen in your pocket.
+        </Text>
+
+        <Text style={styles.disclaimer}>
+          This app provides general allergen information only and does not
+          constitute medical advice. Always verify allergen data on product
+          packaging or with restaurant staff, and consult your doctor or
+          allergist for personalised guidance.
+        </Text>
+      </View>
     </View>
   );
 }
@@ -41,43 +60,47 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2E7D32',
+  },
+  top: {
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xxl * 2,
-    paddingBottom: spacing.xl,
-    justifyContent: 'space-between',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
+    paddingBottom: spacing.md,
+    alignItems: 'center',
   },
   appName: {
-    fontFamily: 'sans-serif',
-    fontSize: fontSizes.xxxl,
-    fontWeight: '700',
+    fontSize: 36,
+    fontWeight: '800',
     color: '#FFFFFF',
-    marginBottom: spacing.xl,
     letterSpacing: 1,
-  },
-  welcome: {
-    fontFamily: 'sans-serif',
-    fontSize: fontSizes.xl,
-    fontWeight: '300',
-    color: '#FFFFFF',
-    lineHeight: 32,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xs,
   },
   tagline: {
-    fontFamily: 'sans-serif',
-    fontSize: fontSizes.lg,
+    fontSize: 15,
     fontWeight: '400',
-    color: 'rgba(255,255,255,0.85)',
+    color: 'rgba(255,255,255,0.8)',
     fontStyle: 'italic',
   },
+  hero: {
+    flex: 1,
+    width: '100%',
+  },
+  bottom: {
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xl,
+    alignItems: 'center',
+  },
+  welcome: {
+    fontSize: 25,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    lineHeight: 34,
+    marginBottom: spacing.md,
+  },
   disclaimer: {
-    fontFamily: 'sans-serif',
-    fontSize: fontSizes.xs,
+    fontSize: 9,
     color: 'rgba(255,255,255,0.55)',
-    lineHeight: 16,
+    lineHeight: 13,
     textAlign: 'center',
   },
 });
