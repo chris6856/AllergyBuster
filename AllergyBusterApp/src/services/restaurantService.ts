@@ -1,5 +1,6 @@
 import * as openMenu from './openMenu';
 import * as yelp from './yelp';
+import {searchRemoteChains} from './chainsService';
 import {Restaurant} from '../types/restaurant';
 import {CHAIN_ALLERGEN_DATA} from '../data/chainAllergenData';
 
@@ -31,11 +32,18 @@ function searchLocalChains(query: string): Restaurant[] {
 
 /**
  * Search for restaurants by name.
- * Checks local chain data first, then OpenMenu, then Yelp.
- * Local results appear at the top — they have the richest allergen data.
+ * Priority: remote chain DB → local static chains → OpenMenu → Yelp.
+ * Chain results (remote or local) always appear first — richest allergen data.
  */
 export async function searchRestaurants(query: string, location?: string): Promise<Restaurant[]> {
-  const localResults = searchLocalChains(query);
+  // Try remote chain database first (updatable without app release)
+  const remoteChains = await searchRemoteChains(query);
+
+  // Fall back to bundled static data for any chains not in the remote DB
+  const remoteIds = new Set(remoteChains.map(r => r.id));
+  const localResults = searchLocalChains(query).filter(r => !remoteIds.has(r.id));
+
+  const chainResults = [...remoteChains, ...localResults];
 
   let remoteResults: Restaurant[] = [];
 
@@ -56,13 +64,13 @@ export async function searchRestaurants(query: string, location?: string): Promi
     }
   }
 
-  // Deduplicate: remove remote results that match a local chain by name
-  const localNames = new Set(localResults.map(r => r.name.toLowerCase()));
+  // Deduplicate Yelp/OpenMenu results against chain results
+  const chainNames = new Set(chainResults.map(r => r.name.toLowerCase()));
   const deduped = remoteResults.filter(
-    r => !localNames.has(r.name.toLowerCase()),
+    r => !chainNames.has(r.name.toLowerCase()),
   );
 
-  return [...localResults, ...deduped];
+  return [...chainResults, ...deduped];
 }
 
 /**

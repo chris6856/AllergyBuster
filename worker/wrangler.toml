@@ -8,8 +8,14 @@ compatibility_flags = ["nodejs_compat"]
 # Then replace the id below with the output ID.
 [[kv_namespaces]]
 binding = "TIPS_CACHE"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "8aa10f18e2fd4fa7aa25bf69ba08ab38"
 
-# Secrets — set with: wrangler secret put ANTHROPIC_API_KEY
-# [vars]
-# ANTHROPIC_API_KEY is set as a secret, not a plain var
+# Chain allergen database — create with: wrangler kv namespace create CHAINS_DB
+# Then replace the id below with the output ID.
+[[kv_namespaces]]
+binding = "CHAINS_DB"
+id = "REPLACE_WITH_CHAINS_DB_NAMESPACE_ID"
+
+# Secrets — set with:
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler secret put ADMIN_KEY   (used to protect PUT/DELETE /chains endpoints)
