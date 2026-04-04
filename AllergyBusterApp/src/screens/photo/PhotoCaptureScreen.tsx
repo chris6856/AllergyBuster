@@ -25,11 +25,13 @@ export function PhotoCaptureScreen(_props: Props) {
   const cameraRef = useRef<Camera>(null);
   const [torchOn, setTorchOn] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const processingRef = useRef(false);
 
   const handleCapture = useCallback(async () => {
-    if (!cameraRef.current || isProcessing) {
+    if (!cameraRef.current || processingRef.current) {
       return;
     }
+    processingRef.current = true;
     setIsProcessing(true);
     try {
       const photo = await cameraRef.current.takePhoto({
@@ -41,23 +43,23 @@ export function PhotoCaptureScreen(_props: Props) {
         ? photo.path
         : `file://${photo.path}`;
 
-      const result = await TextRecognition.recognize(imagePath);
-
-      // ML Kit may return text as a flat string or only in blocks depending
-      // on the device — try both and take whichever has content
-      const blockText = (result as any).blocks
-        ?.map((b: any) => b.text)
-        .join('\n') ?? '';
-      const ocrText = result.text?.trim() ? result.text : blockText;
-
-      console.log('[OCR] raw text length:', ocrText.length);
-      console.log('[OCR] first 300 chars:', ocrText.slice(0, 300));
+      let ocrText = '';
+      try {
+        const result = await TextRecognition.recognize(imagePath);
+        const blockText = (result as any).blocks
+          ?.map((b: any) => b.text)
+          .join('\n') ?? '';
+        ocrText = result.text?.trim() ? result.text : blockText;
+      } catch {
+        // OCR failed — navigate with empty text
+      }
 
       const extraction = extractAllergensFromOcr(ocrText);
       navigation.navigate('PhotoResult', {rawOcrText: extraction.rawText});
     } catch (e) {
       navigation.navigate('PhotoResult', {rawOcrText: ''});
     } finally {
+      processingRef.current = false;
       setIsProcessing(false);
     }
   }, [isProcessing, torchOn, navigation]);
@@ -110,7 +112,7 @@ export function PhotoCaptureScreen(_props: Props) {
         ref={cameraRef}
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={isFocused && status === 'granted' && !isProcessing}
+        isActive={isFocused && status === 'granted'}
         photo
         torch={torchOn ? 'on' : 'off'}
         accessibilityLabel="Camera viewfinder"

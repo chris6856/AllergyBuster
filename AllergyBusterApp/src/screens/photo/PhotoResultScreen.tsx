@@ -26,16 +26,18 @@ export function PhotoResultScreen({route}: Props) {
   // No usable text detected at all
   if (!rawText.trim()) {
     return (
-      <NoResultsBanner
-        message="We couldn't read any text from the label. Try again in better lighting, holding the camera flat over the ingredient list."
-        ctaLabel="Search Instead"
-        onCta={() =>
-          navigation.navigate('SearchTab', {
-            screen: 'TextSearch',
-            params: {initialMode: 'products'},
-          })
-        }
-      />
+      <ScrollView>
+        <NoResultsBanner
+          message="We couldn't read any text from the label. Try again in better lighting, holding the camera flat over the ingredient list."
+          ctaLabel="Search Instead"
+          onCta={() =>
+            navigation.navigate('SearchTab', {
+              screen: 'TextSearch',
+              params: {initialMode: 'products'},
+            })
+          }
+        />
+      </ScrollView>
     );
   }
 
