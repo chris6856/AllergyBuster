@@ -35,7 +35,7 @@ export async function searchRestaurants(query: string): Promise<Restaurant[]> {
 
   const response = await yelpClient.get<YelpSearchResponse>('/businesses/search', {
     headers: {Authorization: `Bearer ${YELP_API_KEY}`},
-    params: {term: query, limit: 10, categories: 'restaurants'},
+    params: {term: query, limit: 10, categories: 'restaurants', location: 'United States'},
   });
 
   return (response.data.businesses ?? []).map(normalize);
