@@ -65,7 +65,7 @@ export function SearchResultScreen({route}: Props) {
       {!isLoading && !isError && mode === 'products' && (
         <FlatList
           data={products}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
           contentContainerStyle={
             products.length === 0 ? styles.emptyContainer : styles.listContent
           }
@@ -88,7 +88,7 @@ export function SearchResultScreen({route}: Props) {
       {!isLoading && !isError && mode === 'restaurants' && (
         <FlatList
           data={restaurants}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
           contentContainerStyle={
             restaurants.length === 0
               ? styles.emptyContainer
