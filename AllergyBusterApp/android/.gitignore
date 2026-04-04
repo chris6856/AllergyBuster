@@ -1,0 +1,6 @@
+# Release keystore — never commit
+*.keystore
+!debug.keystore
+
+# Gradle credentials — never commit
+gradle.properties
