@@ -44,9 +44,9 @@ export function RestaurantDetailScreen({route}: Props) {
               <TouchableOpacity
                 onPress={() => Linking.openURL(restaurant.sourceUrl!)}
                 accessibilityRole="link"
-                accessibilityLabel="View official allergen guide">
+                accessibilityLabel="View official allergen guide — opens browser">
                 <Text style={styles.sourceLinkLabel}>
-                  📋  View official allergen guide ›
+                  📋  View official allergen guide (opens browser) ›
                 </Text>
               </TouchableOpacity>
             ) : (
@@ -75,19 +75,24 @@ export function RestaurantDetailScreen({route}: Props) {
           </View>
 
           {name ? (
-            <TouchableOpacity
-              style={styles.searchButton}
-              onPress={() =>
-                Linking.openURL(
-                  `https://www.google.com/search?q=${encodeURIComponent(name + ' allergen menu')}`,
-                )
-              }
-              accessibilityRole="button"
-              accessibilityLabel={`Search online for ${name} allergen menu`}>
-              <Text style={styles.searchButtonText}>
-                🔍  Search "{name}" allergen menu online
+            <View style={styles.externalButtonWrapper}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={() =>
+                  Linking.openURL(
+                    `https://www.google.com/search?q=${encodeURIComponent(name + ' allergen menu')}`,
+                  )
+                }
+                accessibilityRole="button"
+                accessibilityLabel={`Search online for ${name} allergen menu`}>
+                <Text style={styles.searchButtonText}>
+                  🔍  Search "{name}" allergen menu online
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.externalNote}>
+                Opens your browser — use the back button to return to AllergyBuster
               </Text>
-            </TouchableOpacity>
+            </View>
           ) : null}
         </View>
       }
@@ -274,6 +279,17 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: fontSizes.sm,
     fontWeight: '600',
+  },
+  externalButtonWrapper: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  externalNote: {
+    marginTop: spacing.sm,
+    fontSize: fontSizes.xs,
+    color: colors.textDisabled,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
   card: {
     backgroundColor: colors.surface,
