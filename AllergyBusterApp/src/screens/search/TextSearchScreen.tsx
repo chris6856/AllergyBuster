@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Keyboard,
   ScrollView,
@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {SearchSegmentedControl, SearchMode} from '../../components/SearchSegmentedControl';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
@@ -62,16 +62,17 @@ export function TextSearchScreen({route}: Props) {
 
   // Clear query when returning from results so the field is ready for next search
   const isFirstFocus = useRef(true);
-  useFocusEffect(
-    useCallback(() => {
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
       if (isFirstFocus.current) {
         isFirstFocus.current = false;
         return;
       }
       setQuery('');
       setLocation('');
-    }, []),
-  );
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   // Auto-focus if we arrive with an initial query (e.g. from scan fallback)
   useEffect(() => {
