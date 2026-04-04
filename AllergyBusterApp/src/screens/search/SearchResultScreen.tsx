@@ -211,11 +211,11 @@ function RestaurantRow({
         <Text style={styles.chevron}>›</Text>
       </View>
 
-      {itemCount > 0 && (
-        <Text style={styles.menuItemCount}>
-          {itemCount} menu item{itemCount !== 1 ? 's' : ''} with allergen info
-        </Text>
-      )}
+      <Text style={styles.menuItemCount}>
+        {itemCount > 0
+          ? `${itemCount} menu item${itemCount !== 1 ? 's' : ''} with allergen info`
+          : 'Tap for guidance on getting allergen information'}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   menuItemCount: {
     marginTop: spacing.sm,
     fontSize: fontSizes.xs,
-    color: colors.primary,
-    fontWeight: '600',
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
 });

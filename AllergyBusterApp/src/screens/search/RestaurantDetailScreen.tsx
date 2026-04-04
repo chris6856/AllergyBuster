@@ -1,8 +1,10 @@
 import React from 'react';
 import {
   FlatList,
+  Linking,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {AllergenCard} from '../../components/AllergenCard';
@@ -46,12 +48,36 @@ export function RestaurantDetailScreen({route}: Props) {
       }
       ListEmptyComponent={
         <View style={styles.emptyInner}>
-          <Text style={styles.emptyIcon}>🍴</Text>
-          <Text style={styles.emptyTitle}>No menu data available</Text>
+          <Text style={styles.emptyIcon}>ℹ️</Text>
+          <Text style={styles.emptyTitle}>Allergen data not available</Text>
           <Text style={styles.emptyBody}>
-            Allergen information for this restaurant's menu isn't available yet.
-            Contact the restaurant directly for detailed allergen information.
+            Restaurants are not required to publish allergen information
+            digitally, and most don't provide it through third-party services.
           </Text>
+
+          <View style={styles.tipCard}>
+            <Text style={styles.tipTitle}>What to do instead</Text>
+            <Text style={styles.tipItem}>📞  Call the restaurant and ask to speak with a manager or chef about your specific allergens</Text>
+            <Text style={styles.tipItem}>🌐  Check the restaurant's own website — many chains publish full allergen menus</Text>
+            <Text style={styles.tipItem}>📋  When you arrive, ask for a printed allergen menu or ingredient list</Text>
+            <Text style={styles.tipItem}>⚠️  Always mention your allergy when ordering, even if you've eaten there before</Text>
+          </View>
+
+          {name ? (
+            <TouchableOpacity
+              style={styles.searchButton}
+              onPress={() =>
+                Linking.openURL(
+                  `https://www.google.com/search?q=${encodeURIComponent(name + ' allergen menu')}`,
+                )
+              }
+              accessibilityRole="button"
+              accessibilityLabel={`Search online for ${name} allergen menu`}>
+              <Text style={styles.searchButtonText}>
+                🔍  Search "{name}" allergen menu online
+              </Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       }
       renderItem={({item}) => <MenuItemRow item={item} />}
@@ -174,9 +200,9 @@ const styles = StyleSheet.create({
   emptyInner: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: spacing.xxl,
-    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   emptyIcon: {
     fontSize: 48,
@@ -187,12 +213,50 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.textPrimary,
     marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   emptyBody: {
     fontSize: fontSizes.md,
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+    marginBottom: spacing.lg,
+  },
+  tipCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    width: '100%',
+    marginBottom: spacing.lg,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  tipTitle: {
+    fontSize: fontSizes.sm,
+    fontWeight: '700',
+    color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: spacing.sm,
+  },
+  tipItem: {
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    lineHeight: 22,
+    marginBottom: spacing.sm,
+  },
+  searchButton: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    width: '100%',
+    alignItems: 'center',
+  },
+  searchButtonText: {
+    color: colors.white,
+    fontSize: fontSizes.sm,
+    fontWeight: '600',
   },
   card: {
     backgroundColor: colors.surface,
