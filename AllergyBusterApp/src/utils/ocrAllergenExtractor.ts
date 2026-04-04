@@ -19,7 +19,9 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
     return {detected: [], rawText};
   }
 
-  const lower = rawText.toLowerCase();
+  // Normalise: lowercase and replace punctuation/special chars with spaces
+  // so "wheat," "milk." "(soy)" all match their keywords
+  const lower = rawText.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
   const found = new Set<string>();
 
   // Pattern 1: explicit "Contains:" / "Allergens:" sections

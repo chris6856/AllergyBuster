@@ -36,10 +36,24 @@ export function PhotoCaptureScreen(_props: Props) {
         flash: torchOn ? 'on' : 'off',
       });
 
-      const imagePath = `file://${photo.path}`;
-      const result = await TextRecognition.recognize(imagePath);
-      const extraction = extractAllergensFromOcr(result.text ?? '');
+      // Avoid doubling the file:// prefix on devices that already include it
+      const imagePath = photo.path.startsWith('file://')
+        ? photo.path
+        : `file://${photo.path}`;
 
+      const result = await TextRecognition.recognize(imagePath);
+
+      // ML Kit may return text as a flat string or only in blocks depending
+      // on the device — try both and take whichever has content
+      const blockText = (result as any).blocks
+        ?.map((b: any) => b.text)
+        .join('\n') ?? '';
+      const ocrText = result.text?.trim() ? result.text : blockText;
+
+      console.log('[OCR] raw text length:', ocrText.length);
+      console.log('[OCR] first 300 chars:', ocrText.slice(0, 300));
+
+      const extraction = extractAllergensFromOcr(ocrText);
       navigation.navigate('PhotoResult', {rawOcrText: extraction.rawText});
     } catch (e) {
       navigation.navigate('PhotoResult', {rawOcrText: ''});
