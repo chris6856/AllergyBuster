@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -20,6 +20,7 @@ export function PhotoResultScreen({route}: Props) {
   const {rawOcrText} = route.params;
   const navigation = useNavigation<MainTabNavigationProp>();
   const parentNav = useNavigation<Props['navigation']>();
+  const [showRawText, setShowRawText] = useState(false);
 
   const {detected, rawText} = extractAllergensFromOcr(rawOcrText);
 
@@ -41,10 +42,7 @@ export function PhotoResultScreen({route}: Props) {
     );
   }
 
-  const allergens = {
-    declared: detected,
-    traces: [],
-  };
+  const allergens = {declared: detected, traces: []};
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -54,26 +52,39 @@ export function PhotoResultScreen({route}: Props) {
         <AllergenList allergens={allergens} />
       </View>
 
-      {/* Raw OCR text panel */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recognised Label Text</Text>
-        <Text style={styles.caveat}>
-          Verify this matches the label — OCR may miss text on curved or glossy packaging.
+      {/* Collapsible raw text — hidden by default */}
+      <TouchableOpacity
+        style={styles.toggleRow}
+        onPress={() => setShowRawText(v => !v)}
+        accessibilityRole="button"
+        accessibilityLabel="Toggle recognised label text">
+        <Text style={styles.toggleLabel}>
+          {showRawText ? '▲  Hide label text' : '▼  Show recognised label text'}
         </Text>
-        <View style={styles.rawTextBox}>
-          <Text style={styles.rawText} selectable>
-            {rawText}
+      </TouchableOpacity>
+
+      {showRawText && (
+        <View style={styles.section}>
+          <Text style={styles.caveat}>
+            Verify this matches the label — OCR may miss text on curved or
+            glossy packaging.
           </Text>
+          <View style={styles.rawTextBox}>
+            <Text style={styles.rawText} selectable>
+              {rawText}
+            </Text>
+          </View>
         </View>
-      </View>
+      )}
 
       {/* Actions */}
       <View style={styles.actions}>
         <TouchableOpacity
           style={[styles.actionButton, styles.secondaryButton]}
           onPress={() => parentNav.goBack()}
-          accessibilityRole="button">
-          <Text style={styles.secondaryButtonText}>📷  Capture Again</Text>
+          accessibilityRole="button"
+          accessibilityLabel="Capture again">
+          <Text style={styles.secondaryButtonText}>📷  Scan Again</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -84,7 +95,8 @@ export function PhotoResultScreen({route}: Props) {
               params: {initialMode: 'products'},
             })
           }
-          accessibilityRole="button">
+          accessibilityRole="button"
+          accessibilityLabel="Search by name">
           <Text style={styles.primaryButtonText}>🔍  Search by Name</Text>
         </TouchableOpacity>
       </View>
@@ -99,7 +111,7 @@ const styles = StyleSheet.create({
   },
   section: {
     backgroundColor: colors.surface,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
   },
@@ -110,6 +122,16 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing.md,
+  },
+  toggleRow: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  toggleLabel: {
+    fontSize: fontSizes.sm,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
   caveat: {
     fontSize: fontSizes.xs,
