@@ -28,14 +28,19 @@ function normalize(business: YelpBusiness): Restaurant {
   };
 }
 
-export async function searchRestaurants(query: string): Promise<Restaurant[]> {
+export async function searchRestaurants(query: string, location?: string): Promise<Restaurant[]> {
   if (!YELP_API_KEY) {
     return [];
   }
 
   const response = await yelpClient.get<YelpSearchResponse>('/businesses/search', {
     headers: {Authorization: `Bearer ${YELP_API_KEY}`},
-    params: {term: query, limit: 10, categories: 'restaurants', location: 'United States'},
+    params: {
+      term: query,
+      limit: 20,
+      categories: 'restaurants',
+      location: location || 'United States',
+    },
   });
 
   return (response.data.businesses ?? []).map(normalize);

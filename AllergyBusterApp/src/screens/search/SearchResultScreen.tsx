@@ -21,13 +21,14 @@ import {Restaurant} from '../../types/restaurant';
 type Props = SearchStackScreenProps<'SearchResult'>;
 
 export function SearchResultScreen({route}: Props) {
-  const {query, mode} = route.params;
+  const {query, mode, location} = route.params;
   const navigation = useNavigation<Props['navigation']>();
   const {isConnected} = useNetworkStatus();
 
   const productQuery = useProductSearch(mode === 'products' ? query : undefined);
   const restaurantQuery = useRestaurantSearch(
     mode === 'restaurants' ? query : undefined,
+    location,
   );
 
   const isLoading =

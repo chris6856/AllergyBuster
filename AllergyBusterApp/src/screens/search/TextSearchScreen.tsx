@@ -57,6 +57,7 @@ export function TextSearchScreen({route}: Props) {
     route.params?.initialMode ?? 'products',
   );
   const [query, setQuery] = useState(route.params?.initialQuery ?? '');
+  const [location, setLocation] = useState('');
   const inputRef = useRef<TextInput>(null);
 
   // Auto-focus if we arrive with an initial query (e.g. from scan fallback)
@@ -72,7 +73,11 @@ export function TextSearchScreen({route}: Props) {
       return;
     }
     Keyboard.dismiss();
-    navigation.navigate('SearchResult', {query: trimmed, mode});
+    navigation.navigate('SearchResult', {
+      query: trimmed,
+      mode,
+      location: mode === 'restaurants' ? location.trim() || undefined : undefined,
+    });
   };
 
   return (
@@ -80,6 +85,23 @@ export function TextSearchScreen({route}: Props) {
       {!isConnected && <NoNetworkBanner />}
 
       <SearchSegmentedControl mode={mode} onChange={setMode} />
+
+      {/* Location input — restaurants only */}
+      {mode === 'restaurants' && (
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            value={location}
+            onChangeText={setLocation}
+            placeholder="City or ZIP code…"
+            placeholderTextColor={colors.textDisabled}
+            returnKeyType="next"
+            autoCapitalize="words"
+            autoCorrect={false}
+            accessibilityLabel="Location input"
+          />
+        </View>
+      )}
 
       {/* Search input row */}
       <View style={styles.inputRow}>

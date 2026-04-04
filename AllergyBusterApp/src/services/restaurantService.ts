@@ -7,7 +7,7 @@ import {Restaurant} from '../types/restaurant';
  * Tries OpenMenu first; falls back to Yelp if 0 results or on error.
  * Returns empty array if neither source returns results.
  */
-export async function searchRestaurants(query: string): Promise<Restaurant[]> {
+export async function searchRestaurants(query: string, location?: string): Promise<Restaurant[]> {
   try {
     const openMenuResults = await openMenu.searchRestaurants(query);
     if (openMenuResults.length > 0) {
@@ -18,7 +18,7 @@ export async function searchRestaurants(query: string): Promise<Restaurant[]> {
   }
 
   try {
-    return await yelp.searchRestaurants(query);
+    return await yelp.searchRestaurants(query, location);
   } catch {
     return [];
   }
