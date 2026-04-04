@@ -40,9 +40,20 @@ export function RestaurantDetailScreen({route}: Props) {
             {cuisineType ? (
               <Text style={styles.headerMeta}>{cuisineType}</Text>
             ) : null}
-            <Text style={styles.sourceLabel}>
-              {source === 'openmenu' ? 'OpenMenu' : 'Yelp'}
-            </Text>
+            {source === 'local' && restaurant.sourceUrl ? (
+              <TouchableOpacity
+                onPress={() => Linking.openURL(restaurant.sourceUrl!)}
+                accessibilityRole="link"
+                accessibilityLabel="View official allergen guide">
+                <Text style={styles.sourceLinkLabel}>
+                  📋  View official allergen guide ›
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.sourceLabel}>
+                {source === 'openmenu' ? 'OpenMenu' : 'Yelp'}
+              </Text>
+            )}
           </View>
         </View>
       }
@@ -196,6 +207,12 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.xs,
     color: colors.textDisabled,
     marginTop: spacing.xs,
+  },
+  sourceLinkLabel: {
+    fontSize: fontSizes.xs,
+    color: colors.primary,
+    marginTop: spacing.xs,
+    fontWeight: '600',
   },
   emptyInner: {
     flex: 1,

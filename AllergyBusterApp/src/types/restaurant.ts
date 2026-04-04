@@ -17,5 +17,6 @@ export interface Restaurant {
   address?: string;
   cuisineType?: string;
   menuItems: MenuItem[];
-  source: 'openmenu' | 'yelp';
+  source: 'openmenu' | 'yelp' | 'local';
+  sourceUrl?: string;    // link to restaurant's published allergen guide
 }
