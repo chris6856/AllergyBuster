@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllergyBuster — Know What's in Your Food</title>
+  <meta name="description" content="AllergyBuster instantly identifies allergens in any food product via barcode scan, photo, or search. Life-saving clarity for allergy sufferers." />
+  <meta property="og:title" content="AllergyBuster — Know What's in Your Food" />
+  <meta property="og:description" content="Scan, photograph, or search any food product and instantly see every allergen. Available on iOS and Android." />
+  <meta property="og:image" content="/assets/splash-hero.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────────────── */
+    :root {
+      --green-deep:   #0f2318;
+      --green-dark:   #1a3a2a;
+      --green-mid:    #2d5c40;
+      --green-light:  #4a8c62;
+      --green-pale:   #8aab8a;
+      --amber:        #e8a020;
+      --amber-light:  #f5c060;
+      --amber-pale:   #fdf0d0;
+      --cream:        #f7f2e8;
+      --cream-dark:   #ede7d9;
+      --charcoal:     #1a1a1a;
+      --muted:        #6b6b5a;
+      --white:        #ffffff;
+
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', sans-serif;
+      --font-mono:    'Courier Prime', 'Courier New', monospace;
+
+      --radius-sm:    6px;
+      --radius-md:    12px;
+      --radius-lg:    24px;
+      --radius-xl:    40px;
+
+      --shadow-sm:    0 2px 8px rgba(15,35,24,.12);
+      --shadow-md:    0 8px 32px rgba(15,35,24,.18);
+      --shadow-lg:    0 24px 64px rgba(15,35,24,.24);
+    }
+
+    /* ─── Reset ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--charcoal);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── Utility ────────────────────────────────────────────────── */
+    .container {
+      max-width: 1140px;
+      margin-inline: auto;
+      padding-inline: 2rem;
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--amber);
+      display: block;
+      margin-bottom: .75rem;
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .2s; }
+    .reveal-delay-3 { transition-delay: .3s; }
+    .reveal-delay-4 { transition-delay: .4s; }
+
+    /* ─── Nav ────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.25rem 0;
+      background: rgba(247,242,232,.97);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 rgba(15,35,24,.1);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      color: var(--green-dark);
+    }
+    .nav-logo-mark {
+      width: 36px; height: 36px;
+      background: var(--green-dark);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+    }
+    .nav-logo-mark svg { color: var(--amber); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--green-dark);
+      opacity: .75;
+      transition: opacity .2s;
+    }
+    .nav-links a:hover { opacity: 1; }
+    .nav-cta {
+      background: var(--green-dark);
+      color: var(--cream) !important;
+      opacity: 1 !important;
+      padding: .55rem 1.25rem;
+      border-radius: var(--radius-xl);
+      font-weight: 600 !important;
+      transition: background .2s, transform .2s !important;
+    }
+    .nav-cta:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
+
+    /* ─── Hero ───────────────────────────────────────────────────── */
+    #hero {
+      min-height: 100svh;
+      background: var(--green-deep);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 7rem 0 5rem;
+    }
+
+    /* Grain overlay */
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 256px;
+      opacity: .35;
+      pointer-events: none;
+    }
+
+    /* Decorative arcs */
+    .hero-arc {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(138,171,138,.15);
+      pointer-events: none;
+    }
+    .hero-arc:nth-child(1) { width: 520px; height: 520px; top: 50%; left: 58%; transform: translate(-50%,-50%); }
+    .hero-arc:nth-child(2) { width: 720px; height: 720px; top: 50%; left: 58%; transform: translate(-50%,-50%); }
+    .hero-arc:nth-child(3) { width: 940px; height: 940px; top: 50%; left: 58%; transform: translate(-50%,-50%); }
+    .hero-arc:nth-child(4) { width: 1180px; height: 1180px; top: 50%; left: 58%; transform: translate(-50%,-50%); }
+
+    /* Scanning pulse */
+    .scan-ring {
+      position: absolute;
+      top: 50%; left: 58%;
+      transform: translate(-50%, -50%);
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      border: 2px solid var(--amber);
+      animation: scanPulse 3s ease-out infinite;
+      pointer-events: none;
+    }
+    .scan-ring:nth-child(6) { animation-delay: 1s; }
+    .scan-ring:nth-child(7) { animation-delay: 2s; }
+    @keyframes scanPulse {
+      0%   { transform: translate(-50%,-50%) scale(.6); opacity: .8; }
+      100% { transform: translate(-50%,-50%) scale(1.6); opacity: 0; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 340px 1fr 260px;
+      gap: 3rem;
+      align-items: center;
+    }
+    .hero-tip-col {
+      display: flex;
+      flex-direction: column;
+    }
+    .hero-tip {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-text .section-label { color: var(--amber-light); }
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 5vw, 4.4rem);
+      font-weight: 900;
+      line-height: 1.08;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+    }
+    .hero-headline em {
+      font-style: italic;
+      color: var(--amber);
+    }
+    .hero-subhead {
+      font-size: 1.1rem;
+      color: rgba(247,242,232,.7);
+      max-width: 460px;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+    .hero-badges {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .badge-btn {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: var(--radius-md);
+      padding: .8rem 1.4rem;
+      color: var(--cream);
+      font-weight: 500;
+      transition: background .2s, transform .2s;
+      backdrop-filter: blur(8px);
+    }
+    .badge-btn:hover { background: rgba(255,255,255,.15); transform: translateY(-2px); }
+    .badge-btn svg { flex-shrink: 0; }
+    .badge-btn-label { font-size: .7rem; opacity: .65; display: block; margin-bottom: .15rem; letter-spacing: .06em; }
+    .badge-btn-store { font-size: 1rem; font-weight: 600; line-height: 1; }
+
+    /* Phone mockup */
+    .hero-phone {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .phone-shell {
+      width: 260px;
+      height: 520px;
+      background: var(--green-deep);
+      border: 2.5px solid rgba(138,171,138,.35);
+      border-radius: 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 0 8px rgba(138,171,138,.06), var(--shadow-lg);
+    }
+    .phone-notch {
+      position: absolute;
+      top: 16px; left: 50%;
+      transform: translateX(-50%);
+      width: 80px; height: 24px;
+      background: var(--green-deep);
+      border-radius: 12px;
+      z-index: 10;
+    }
+    .phone-screen {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, #1a3a2a 0%, #0f2318 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem 1.5rem;
+    }
+    .phone-scan-box {
+      width: 140px; height: 140px;
+      border: 2px solid var(--amber);
+      border-radius: 16px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .phone-scan-box::before,
+    .phone-scan-box::after {
+      content: '';
+      position: absolute;
+      width: 22px; height: 22px;
+      border-color: var(--amber-light);
+      border-style: solid;
+    }
+    .phone-scan-box::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+    .phone-scan-box::after  { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+    .phone-scan-line {
+      position: absolute;
+      left: 6px; right: 6px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--amber), transparent);
+      border-radius: 2px;
+      animation: scanLine 2s ease-in-out infinite;
+    }
+    @keyframes scanLine {
+      0%   { top: 10px; opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { top: calc(100% - 10px); opacity: 0; }
+    }
+    .phone-scan-icon { font-size: 2.8rem; }
+    .phone-result {
+      background: rgba(232,160,32,.12);
+      border: 1px solid rgba(232,160,32,.35);
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      width: 100%;
+      text-align: center;
+    }
+    .phone-result-label { font-size: .65rem; color: var(--amber-light); letter-spacing: .1em; font-family: var(--font-mono); }
+    .phone-result-items { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; justify-content: center; }
+    .phone-allergen-tag {
+      font-size: .62rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: var(--amber);
+      color: var(--green-deep);
+      padding: .2rem .5rem;
+      border-radius: 4px;
+      animation: tagPop .4s ease both;
+    }
+    .phone-allergen-tag:nth-child(2) { animation-delay: .1s; }
+    .phone-allergen-tag:nth-child(3) { animation-delay: .2s; }
+    .phone-allergen-tag:nth-child(4) { animation-delay: .3s; }
+    .phone-allergen-tag:nth-child(5) { animation-delay: .4s; }
+    @keyframes tagPop {
+      from { transform: scale(.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(247,242,232,.35);
+      font-size: .8rem;
+      letter-spacing: .12em;
+      font-family: var(--font-mono);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+    .scroll-chevron {
+      width: 20px; height: 20px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      animation: bounce 1.5s ease-in-out infinite;
+    }
+    @keyframes bounce { 0%,100% { transform: rotate(45deg) translateY(0); } 50% { transform: rotate(45deg) translateY(6px); } }
+
+    /* ─── Alert Strip ────────────────────────────────────────────── */
+    .alert-strip {
+      background: var(--amber);
+      padding: .9rem 0;
+      overflow: hidden;
+    }
+    .alert-track {
+      display: flex;
+      gap: 3rem;
+      white-space: nowrap;
+      animation: ticker 28s linear infinite;
+    }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--font-mono);
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      flex-shrink: 0;
+    }
+    .alert-dot { width: 6px; height: 6px; background: var(--green-deep); border-radius: 50%; }
+
+    /* ─── Problem ────────────────────────────────────────────────── */
+    #problem {
+      padding: 7rem 0;
+      background: var(--cream);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .problem-stat-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .stat-card {
+      background: var(--green-deep);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 150px; height: 150px;
+      background: var(--amber);
+      opacity: .07;
+      border-radius: 50%;
+    }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--amber);
+      line-height: 1;
+    }
+    .stat-desc { color: rgba(247,242,232,.7); font-size: .95rem; margin-top: .5rem; }
+
+    .problem-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--green-deep);
+      margin-bottom: 1.25rem;
+    }
+    .problem-text p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .problem-text strong { color: var(--charcoal); font-weight: 600; }
+
+    /* ─── Features ───────────────────────────────────────────────── */
+    #features {
+      padding: 7rem 0;
+      background: var(--green-dark);
+      position: relative;
+      overflow: hidden;
+    }
+    #features::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 256px;
+      opacity: .3;
+      pointer-events: none;
+    }
+    .features-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .features-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    .features-header p { color: rgba(247,242,232,.6); margin-top: .75rem; max-width: 520px; margin-inline: auto; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    .feature-card {
+      background: rgba(247,242,232,.06);
+      border: 1px solid rgba(247,242,232,.1);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: background .3s, transform .3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(232,160,32,.08) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .feature-card:hover { background: rgba(247,242,232,.1); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px;
+      background: rgba(232,160,32,.15);
+      border-radius: var(--radius-md);
+      display: grid;
+      place-items: center;
+      margin-bottom: 1.25rem;
+      font-size: 1.6rem;
+    }
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: .6rem;
+    }
+    .feature-card p { color: rgba(247,242,232,.6); font-size: .93rem; line-height: 1.7; }
+
+    /* Spanning card */
+    .feature-card.span-2 { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+    .feature-card.span-2 .feature-content {}
+
+    /* ─── How It Works ───────────────────────────────────────────── */
+    #how-it-works {
+      padding: 7rem 0;
+      background: var(--cream-dark);
+    }
+    .how-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .how-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      position: relative;
+    }
+    .steps-row::before {
+      content: '';
+      position: absolute;
+      top: 2.5rem; left: calc(100% / 6);
+      width: calc(100% - 100% / 3);
+      height: 1px;
+      background: linear-gradient(90deg, var(--amber), var(--green-light));
+      z-index: 0;
+    }
+    .step-card {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .step-num {
+      width: 52px; height: 52px;
+      background: var(--green-dark);
+      color: var(--amber);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 1.5rem;
+      border: 3px solid var(--cream-dark);
+    }
+    .step-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .step-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: .5rem;
+    }
+    .step-card p { color: var(--muted); font-size: .93rem; line-height: 1.7; }
+
+    /* ─── Videos ─────────────────────────────────────────────────── */
+    #videos {
+      padding: 7rem 0;
+      background: var(--cream);
+    }
+    .videos-header { margin-bottom: 3rem; }
+    .videos-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3vw, 2.6rem);
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    .video-card {
+      background: var(--green-deep);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16/9;
+    }
+    .demo-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .demo-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: .85rem 1.25rem;
+      background: linear-gradient(transparent, rgba(7,15,10,.82));
+      pointer-events: none;
+    }
+    .video-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--cream);
+      font-weight: 600;
+    }
+    .video-label {
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      color: rgba(247,242,232,.55);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-top: .2rem;
+    }
+
+    /* ─── Daily Tips ─────────────────────────────────────────────── */
+    #tips {
+      padding: 7rem 0;
+      background: var(--amber-pale);
+      position: relative;
+      overflow: hidden;
+    }
+    #tips::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, var(--amber-light) 0%, transparent 70%);
+      opacity: .4;
+    }
+    .tips-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .tips-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 1rem;
+    }
+    .tips-text p { color: var(--muted); line-height: 1.8; font-size: 1rem; }
+    .tip-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+    .tip-card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .tip-icon-wrap {
+      width: 48px; height: 48px;
+      background: var(--amber);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .tip-meta { display: flex; flex-direction: column; gap: .2rem; }
+    .tip-date { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); letter-spacing: .1em; }
+    .tip-type { font-size: .8rem; font-weight: 600; color: var(--green-dark); }
+    .tip-text {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--charcoal);
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+    .tip-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .tip-tag {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      color: var(--green-mid);
+      background: rgba(45,92,64,.08);
+      border: 1px solid rgba(45,92,64,.15);
+      padding: .3rem .7rem;
+      border-radius: var(--radius-xl);
+      font-weight: 600;
+    }
+    .tip-ai-badge {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(0,0,0,.08);
+    }
+    .tip-ai-dot { width: 6px; height: 6px; background: var(--green-light); border-radius: 50%; }
+
+    /* ─── Restaurant Contribution ────────────────────────────────── */
+    #contribute {
+      padding: 7rem 0;
+      background: var(--cream-dark);
+    }
+    .contribute-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .contribute-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 1rem;
+    }
+    .contribute-text p { color: var(--muted); line-height: 1.8; margin-bottom: 1.5rem; }
+    .contribute-bullets { list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+    .contribute-bullets li {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      font-size: .95rem;
+      color: var(--charcoal);
+    }
+    .bullet-check {
+      width: 20px; height: 20px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      margin-top: .15rem;
+    }
+    .bullet-check::after { content: '✓'; font-size: .65rem; color: var(--white); font-weight: 700; }
+
+    .contribute-form {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+    }
+    .form-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 1.5rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
+    .form-label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--green-dark);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .form-input, .form-select, .form-textarea {
+      font-family: var(--font-body);
+      font-size: .95rem;
+      color: var(--charcoal);
+      background: var(--cream);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      padding: .75rem 1rem;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      width: 100%;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(74,140,98,.15);
+    }
+    .form-textarea { resize: vertical; min-height: 100px; }
+    .allergen-checkboxes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    .allergen-checkbox {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .allergen-checkbox input[type="checkbox"] {
+      accent-color: var(--green-mid);
+      width: 15px; height: 15px;
+    }
+    .btn-submit {
+      width: 100%;
+      background: var(--green-dark);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: .95rem;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      letter-spacing: .02em;
+    }
+    .btn-submit:hover { background: var(--green-mid); transform: translateY(-1px); }
+    .form-status { margin-top: .85rem; font-size: .88rem; min-height: 1.2em; border-radius: var(--radius-sm); padding: 0; }
+    .form-status.success { color: var(--green-mid); font-weight: 600; }
+    .form-status.error   { color: #c0392b; font-weight: 500; }
+
+    /* ─── Testimonials ───────────────────────────────────────────── */
+    #testimonials {
+      padding: 7rem 0;
+      background: var(--green-deep);
+      position: relative;
+      overflow: hidden;
+    }
+    #testimonials::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 256px;
+      opacity: .3;
+      pointer-events: none;
+    }
+    .testimonials-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .testimonials-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      color: var(--cream);
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    .testimonial-card {
+      background: rgba(247,242,232,.07);
+      border: 1px solid rgba(247,242,232,.1);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+    .stars { display: flex; gap: .2rem; margin-bottom: 1rem; }
+    .star { color: var(--amber); font-size: 1rem; }
+    .testimonial-quote {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 1rem;
+      color: rgba(247,242,232,.85);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .testimonial-author { display: flex; align-items: center; gap: .75rem; }
+    .author-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      flex-shrink: 0;
+    }
+    .author-name { font-size: .9rem; font-weight: 600; color: var(--cream); }
+    .author-role { font-size: .78rem; color: rgba(247,242,232,.5); }
+
+    /* ─── Download CTA ───────────────────────────────────────────── */
+    #download {
+      padding: 7rem 0;
+      background: var(--cream);
+    }
+    .download-inner {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-deep) 100%);
+      border-radius: var(--radius-xl);
+      padding: 5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .download-inner::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(232,160,32,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .download-inner h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      color: var(--cream);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .download-inner h2 em { font-style: italic; color: var(--amber); }
+    .download-inner p {
+      color: rgba(247,242,232,.65);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+    }
+    .download-badges { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .download-badge {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      background: rgba(247,242,232,.1);
+      border: 1.5px solid rgba(247,242,232,.25);
+      border-radius: var(--radius-md);
+      padding: .9rem 1.8rem;
+      color: var(--cream);
+      font-weight: 500;
+      transition: background .2s, transform .2s;
+      backdrop-filter: blur(8px);
+    }
+    .download-badge:hover { background: rgba(247,242,232,.18); transform: translateY(-2px); }
+    .download-badge svg { flex-shrink: 0; }
+    .download-badge-text { text-align: left; }
+    .download-badge-sub { font-size: .72rem; opacity: .6; display: block; margin-bottom: .1rem; }
+    .download-badge-name { font-size: 1rem; font-weight: 700; }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    footer {
+      background: var(--green-deep);
+      padding: 4rem 0 2.5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+    .footer-brand {}
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--cream);
+      margin-bottom: 1rem;
+    }
+    .footer-logo-mark {
+      width: 32px; height: 32px;
+      background: var(--amber);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+    }
+    .footer-logo-mark svg { color: var(--green-deep); }
+    .footer-tagline { color: rgba(247,242,232,.5); font-size: .9rem; line-height: 1.6; max-width: 260px; }
+    .footer-col-title { font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(247,242,232,.4); margin-bottom: 1rem; }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .footer-links a { color: rgba(247,242,232,.65); font-size: .9rem; transition: color .2s; }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-bottom {
+      padding-top: 2rem;
+      border-top: 1px solid rgba(247,242,232,.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .footer-legal {
+      font-size: .78rem;
+      color: rgba(247,242,232,.35);
+      max-width: 600px;
+      line-height: 1.6;
+    }
+    .footer-copy { font-size: .8rem; color: rgba(247,242,232,.4); white-space: nowrap; }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .hero-content { grid-template-columns: 1fr 1fr; }
+      .hero-tip-col { display: none; }
+    }
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-tip-col { display: none; }
+      .hero-arc:nth-child(1),
+      .hero-arc:nth-child(2),
+      .hero-arc:nth-child(3),
+      .hero-arc:nth-child(4),
+      .scan-ring { display: none; }
+      .hero-phone { justify-content: flex-start; }
+      .problem-grid,
+      .contribute-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .feature-card.span-2 { grid-column: span 1; grid-template-columns: 1fr; }
+      .steps-row::before { display: none; }
+      .steps-row { grid-template-columns: 1fr; gap: 2rem; }
+      .videos-grid { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .download-inner { padding: 3rem 2rem; }
+    }
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .allergen-checkboxes { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-badges { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Navigation ─────────────────────────────────────────────── -->
+  <nav id="main-nav">
+    <div class="container">
+      <div class="nav-inner">
+        <a href="#hero" class="nav-logo">
+          <span class="nav-logo-mark">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+              <path d="M12 2a10 10 0 0 1 10 10"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+          AllergyBuster
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#videos">Videos</a></li>
+          <li><a href="#contribute">Contribute</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── Hero ───────────────────────────────────────────────────── -->
+  <section id="hero">
+    <div class="hero-arc"></div>
+    <div class="hero-arc"></div>
+    <div class="hero-arc"></div>
+    <div class="hero-arc"></div>
+    <div class="scan-ring"></div>
+    <div class="scan-ring"></div>
+    <div class="scan-ring"></div>
+
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-tip-col">
+          <div class="tip-card hero-tip">
+            <div class="tip-card-header">
+              <div class="tip-icon-wrap">💡</div>
+              <div class="tip-meta">
+                <span class="tip-date">TODAY'S TIP · APRIL 7</span>
+                <span class="tip-type">Hidden Allergens</span>
+              </div>
+            </div>
+            <div class="tip-text">
+              "Casein and whey are both dairy proteins found in many non-obvious foods like some margarines, deli meats, and even some 'non-dairy' creamers. Always check the full ingredient list, not just the bold allergen summary."
+            </div>
+            <div class="tip-tags">
+              <span class="tip-tag">DAIRY</span>
+              <span class="tip-tag">HIDDEN INGREDIENTS</span>
+              <span class="tip-tag">LABEL READING</span>
+            </div>
+            <div class="tip-ai-badge">
+              <div class="tip-ai-dot"></div>
+              AI-generated · Updated daily · Not medical advice
+            </div>
+          </div>
+        </div>
+        <div class="hero-text">
+          <h1 class="hero-headline">Know <em>exactly</em> what's in your food.</h1>
+          <p class="hero-subhead">
+            AllergyBuster instantly reveals every allergen in any product — via barcode scan, photo label reading, or search. One action. Complete results. No guessing.
+          </p>
+          <div class="hero-badges">
+            <a href="#download" class="badge-btn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              <span>
+                <span class="badge-btn-label">Download on the</span>
+                <span class="badge-btn-store">App Store</span>
+              </span>
+            </a>
+            <a href="#download" class="badge-btn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3.18 23.76c.3.17.64.22.97.15l12.05-6.96-2.5-2.5-10.52 9.31zm-1.37-19.6c-.16.26-.25.56-.25.89v18.74c0 .33.09.63.25.89l.09.09 10.49-10.49v-.25L1.9 4.07l-.09.09zm18.67 8.26-2.97-1.72-2.71 2.71 2.71 2.71 2.98-1.72c.85-.49.85-1.28-.01-1.98zM4.15.24c-.33-.07-.67-.02-.97.15l.09.1L13.79 10h.25L16.78 7.3 4.15.24z"/>
+              </svg>
+              <span>
+                <span class="badge-btn-label">Get it on</span>
+                <span class="badge-btn-store">Google Play</span>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-phone">
+          <div class="phone-shell">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div style="font-family:var(--font-mono);font-size:.6rem;color:rgba(247,242,232,.4);letter-spacing:.1em;text-align:center;">SCANNING BARCODE</div>
+              <div class="phone-scan-box">
+                <div class="phone-scan-line"></div>
+                <span class="phone-scan-icon">🛒</span>
+              </div>
+              <div class="phone-result">
+                <div class="phone-result-label">Allergens Detected</div>
+                <div class="phone-result-items">
+                  <span class="phone-allergen-tag">MILK</span>
+                  <span class="phone-allergen-tag">WHEAT</span>
+                  <span class="phone-allergen-tag">SOY</span>
+                  <span class="phone-allergen-tag">EGGS</span>
+                  <span class="phone-allergen-tag">TREE NUTS</span>
+                </div>
+              </div>
+              <div style="font-size:.65rem;color:rgba(247,242,232,.35);font-family:var(--font-mono);text-align:center;">Organic Granola Bar · 32g</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <span>SCROLL</span>
+      <div class="scroll-chevron"></div>
+    </div>
+  </section>
+
+  <!-- ─── Ticker ──────────────────────────────────────────────────── -->
+  <div class="alert-strip">
+    <div class="alert-track">
+      <span class="alert-item"><span class="alert-dot"></span>Peanuts</span>
+      <span class="alert-item"><span class="alert-dot"></span>Tree Nuts</span>
+      <span class="alert-item"><span class="alert-dot"></span>Milk</span>
+      <span class="alert-item"><span class="alert-dot"></span>Eggs</span>
+      <span class="alert-item"><span class="alert-dot"></span>Wheat &amp; Gluten</span>
+      <span class="alert-item"><span class="alert-dot"></span>Soy</span>
+      <span class="alert-item"><span class="alert-dot"></span>Fish</span>
+      <span class="alert-item"><span class="alert-dot"></span>Shellfish</span>
+      <span class="alert-item"><span class="alert-dot"></span>Sesame</span>
+      <span class="alert-item"><span class="alert-dot"></span>Mustard</span>
+      <span class="alert-item"><span class="alert-dot"></span>Sulfites</span>
+      <span class="alert-item"><span class="alert-dot"></span>Lupin</span>
+      <!-- duplicate for seamless loop -->
+      <span class="alert-item"><span class="alert-dot"></span>Peanuts</span>
+      <span class="alert-item"><span class="alert-dot"></span>Tree Nuts</span>
+      <span class="alert-item"><span class="alert-dot"></span>Milk</span>
+      <span class="alert-item"><span class="alert-dot"></span>Eggs</span>
+      <span class="alert-item"><span class="alert-dot"></span>Wheat &amp; Gluten</span>
+      <span class="alert-item"><span class="alert-dot"></span>Soy</span>
+      <span class="alert-item"><span class="alert-dot"></span>Fish</span>
+      <span class="alert-item"><span class="alert-dot"></span>Shellfish</span>
+      <span class="alert-item"><span class="alert-dot"></span>Sesame</span>
+      <span class="alert-item"><span class="alert-dot"></span>Mustard</span>
+      <span class="alert-item"><span class="alert-dot"></span>Sulfites</span>
+      <span class="alert-item"><span class="alert-dot"></span>Lupin</span>
+    </div>
+  </div>
+
+  <!-- ─── Problem ────────────────────────────────────────────────── -->
+  <section id="problem">
+    <div class="container">
+      <div class="problem-grid">
+        <div class="problem-stat-block">
+          <div class="stat-card reveal">
+            <div class="stat-number">32M+</div>
+            <div class="stat-desc">Americans live with food allergies — including 5.6 million children under 18.</div>
+          </div>
+          <div class="stat-card reveal reveal-delay-1">
+            <div class="stat-number">1 in 3</div>
+            <div class="stat-desc">Allergic reactions occur outside the home, where ingredient information is hardest to access.</div>
+          </div>
+          <div class="stat-card reveal reveal-delay-2">
+            <div class="stat-number">200K</div>
+            <div class="stat-desc">Emergency room visits every year from accidental allergen exposure.</div>
+          </div>
+        </div>
+        <div class="problem-text reveal reveal-delay-1">
+          <h2>You can't always rely on others to keep you safe.</h2>
+          <p>
+            When you have a food allergy, <strong>every meal is a risk assessment</strong>. Ingredient labels are dense and confusing. Restaurant staff may not know what's in the kitchen. Friends and family mean well but don't always have the answers.
+          </p>
+          <p>
+            For millions of people, this isn't inconvenient — it's dangerous. A single hidden allergen can mean anaphylaxis, an ER visit, or worse.
+          </p>
+          <p>
+            <strong>AllergyBuster puts the information in your hands</strong>, instantly, wherever you are. Scan a product in the grocery store aisle. Photograph an ingredient label at a dinner party. Search before you order. One action. Complete allergen information. No uncertainty.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Features ──────────────────────────────────────────────── -->
+  <section id="features">
+    <div class="container">
+      <div class="features-header reveal">
+        <h2>Everything you need to keep safe while living your best life.</h2>
+      </div>
+      <div class="features-grid">
+
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">📷</div>
+          <h3>Barcode Scan</h3>
+          <p>Point your camera at any product barcode and get a complete allergen breakdown in under a second. Works with millions of products worldwide.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">🔍</div>
+          <h3>Photo Label Reading</h3>
+          <p>No barcode? Photograph the ingredient label directly. Our OCR technology reads and analyzes the text to surface every allergen present.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">🔎</div>
+          <h3>Text Search</h3>
+          <p>Search any product, ingredient, or food by name. Perfect for looking up items before you buy, or checking restaurant menu items.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">🌿</div>
+          <h3>Complete Allergen Coverage</h3>
+          <p>We display <em>all</em> detected allergens — peanuts, tree nuts, dairy, eggs, wheat, soy, fish, shellfish, sesame, and more — every time.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">💡</div>
+          <h3>Daily Allergy Tips</h3>
+          <p>Wake up to a fresh AI-generated allergy tip. Practical advice, seasonal awareness, hidden allergen alerts, and lifestyle guidance — every day.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">🏪</div>
+          <h3>Restaurant Data</h3>
+          <p>Access allergen information for chain restaurants. Help the community by contributing allergen data for the places you eat at most.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── How It Works ──────────────────────────────────────────── -->
+  <section id="how-it-works">
+    <div class="container">
+      <div class="how-header reveal">
+        <h2>Three steps to complete allergen clarity.</h2>
+      </div>
+      <div class="steps-row">
+        <div class="step-card reveal reveal-delay-1">
+          <div class="step-num">01</div>
+          <div class="step-icon">📱</div>
+          <h3>Open the App</h3>
+          <p>Launch AllergyBuster on iOS or Android. No account required — instant access, every time.</p>
+        </div>
+        <div class="step-card reveal reveal-delay-2">
+          <div class="step-num">02</div>
+          <div class="step-icon">🎯</div>
+          <h3>Scan, Photograph, or Search</h3>
+          <p>Choose your method: scan a barcode, photograph an ingredient label, or type the product name.</p>
+        </div>
+        <div class="step-card reveal reveal-delay-3">
+          <div class="step-num">03</div>
+          <div class="step-icon">✅</div>
+          <h3>See Every Allergen</h3>
+          <p>Instantly view the complete allergen profile for that product. Make an informed, confident decision.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Videos ────────────────────────────────────────────────── -->
+  <section id="videos">
+    <div class="container">
+      <div class="videos-header reveal">
+        <h2>How-to videos</h2>
+      </div>
+      <div class="videos-grid">
+        <div class="video-card reveal reveal-delay-1">
+          <canvas id="demo1" class="demo-canvas"></canvas>
+          <div class="demo-overlay">
+            <div class="video-title">Scanning Product Barcodes</div>
+            <div class="video-label">Auto-playing demo</div>
+          </div>
+        </div>
+        <div class="video-card reveal reveal-delay-2">
+          <canvas id="demo2" class="demo-canvas"></canvas>
+          <div class="demo-overlay">
+            <div class="video-title">Reading Ingredient Labels with Photos</div>
+            <div class="video-label">Auto-playing demo</div>
+          </div>
+        </div>
+        <div class="video-card reveal reveal-delay-3">
+          <canvas id="demo3" class="demo-canvas"></canvas>
+          <div class="demo-overlay">
+            <div class="video-title">Product &amp; Ingredient Search</div>
+            <div class="video-label">Auto-playing demo</div>
+          </div>
+        </div>
+        <div class="video-card reveal reveal-delay-4">
+          <canvas id="demo4" class="demo-canvas"></canvas>
+          <div class="demo-overlay">
+            <div class="video-title">Searching by Ingredient Name</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Restaurant Contribution ───────────────────────────────── -->
+  <section id="contribute">
+    <div class="container">
+      <div class="contribute-grid">
+        <div class="contribute-text reveal">
+          <h2>Help others eat safely at restaurants.</h2>
+          <p>
+            Restaurant allergen information is often missing, outdated, or buried in PDFs. You can help by submitting allergen data for restaurants you visit — making the app more useful for every allergy sufferer in your community.
+          </p>
+          <ul class="contribute-bullets">
+            <li>
+              <span class="bullet-check"></span>
+              Submit allergen data for any restaurant — chains or local spots
+            </li>
+            <li>
+              <span class="bullet-check"></span>
+              Specify allergens by menu item or by dish category
+            </li>
+            <li>
+              <span class="bullet-check"></span>
+              Flag cross-contamination risks and preparation notes
+            </li>
+            <li>
+              <span class="bullet-check"></span>
+              Data is reviewed and published to benefit all users
+            </li>
+            <li>
+              <span class="bullet-check"></span>
+              Anonymous submission — no account required
+            </li>
+          </ul>
+        </div>
+        <div class="contribute-form reveal reveal-delay-2">
+          <div class="form-title">Submit Restaurant Allergen Data</div>
+          <form id="contribution-form" onsubmit="handleSubmit(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Restaurant Name *</label>
+                <input class="form-input" type="text" name="restaurant" placeholder="e.g. Olive Garden" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Location / City</label>
+                <input class="form-input" type="text" name="location" placeholder="e.g. Chicago, IL" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Menu Item or Dish</label>
+              <input class="form-input" type="text" name="menuItem" placeholder="e.g. Chicken Parmesan, or leave blank for general" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Allergens Present *</label>
+              <div class="allergen-checkboxes">
+                <label class="allergen-checkbox"><input type="checkbox" /> Peanuts</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Tree Nuts</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Milk/Dairy</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Eggs</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Wheat/Gluten</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Soy</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Fish</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Shellfish</label>
+                <label class="allergen-checkbox"><input type="checkbox" /> Sesame</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Additional Notes</label>
+              <textarea class="form-textarea" name="notes" placeholder="Cross-contamination risks, preparation methods, 'may contain' warnings, etc."></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Submit Allergen Data</button>
+            <div id="form-status" class="form-status" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Testimonials ──────────────────────────────────────────── -->
+  <section id="testimonials">
+    <div class="container">
+      <div class="testimonials-header reveal">
+        <span class="section-label" style="color:var(--amber-light);">Real Stories</span>
+        <h2>What our users say.</h2>
+      </div>
+      <div class="testimonials-grid">
+
+        <div class="testimonial-card reveal reveal-delay-1">
+          <div class="stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <div class="testimonial-quote">
+            "My daughter has a severe peanut allergy. AllergyBuster has completely changed how we grocery shop. I scan everything before it goes in the cart. We finally feel safe."
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:var(--amber-light);">SK</div>
+            <div>
+              <div class="author-name">Sarah K.</div>
+              <div class="author-role">Parent of a child with peanut allergy</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal reveal-delay-2">
+          <div class="stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <div class="testimonial-quote">
+            "I was diagnosed with celiac disease two years ago. Reading labels used to take me 10 minutes per product. Now I scan and I know immediately. It's genuinely life-changing."
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:var(--green-pale);">MR</div>
+            <div>
+              <div class="author-name">Marcus R.</div>
+              <div class="author-role">Celiac disease, diagnosed 2023</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal reveal-delay-3">
+          <div class="stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <div class="testimonial-quote">
+            "As a restaurant manager, I use AllergyBuster to double-check our own menu items. The photo label feature is incredible — I point it at our ingredient containers and know instantly."
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:var(--amber);">JL</div>
+            <div>
+              <div class="author-name">Jamie L.</div>
+              <div class="author-role">Restaurant Manager, Seattle</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ────────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <span class="footer-logo-mark">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+                <path d="M12 2a10 10 0 0 1 10 10"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </span>
+            AllergyBuster
+          </div>
+          <p class="footer-tagline">Instant allergen clarity for everyone managing food allergies. Available on iOS and Android.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">App</div>
+          <ul class="footer-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#videos">How-To Videos</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Community</div>
+          <ul class="footer-links">
+            <li><a href="#contribute">Contribute Data</a></li>
+            <li><a href="#testimonials">User Stories</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal</div>
+          <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Use</a></li>
+            <li><a href="disclaimer.html">Medical Disclaimer</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-legal">
+          <strong style="color:rgba(247,242,232,.5);">Medical Disclaimer:</strong> AllergyBuster is an informational tool and is not a substitute for professional medical advice, diagnosis, or treatment. Product and ingredient data may be incomplete or out of date. Always consult a qualified healthcare provider regarding your allergy management. In the event of a medical emergency, call 911 or your local emergency number immediately.
+        </p>
+        <div class="footer-copy">© 2026 AllergyBuster. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── JavaScript ────────────────────────────────────────────── -->
+  <script>
+    // Nav is always light — no scroll toggle needed
+
+    // Reveal on scroll
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => observer.observe(el));
+
+    // Phone allergen tag cycling animation
+    const tags = document.querySelectorAll('.phone-allergen-tag');
+    const allergenSets = [
+      ['MILK', 'WHEAT', 'SOY', 'EGGS', 'TREE NUTS'],
+      ['PEANUTS', 'SESAME', 'FISH', 'GLUTEN'],
+      ['SHELLFISH', 'MUSTARD', 'LUPIN', 'SULFITES'],
+      ['MILK', 'PEANUTS', 'WHEAT', 'EGGS'],
+    ];
+    let setIndex = 0;
+    function cycleTags() {
+      setIndex = (setIndex + 1) % allergenSets.length;
+      const set = allergenSets[setIndex];
+      tags.forEach((tag, i) => {
+        tag.style.animation = 'none';
+        tag.offsetHeight; // reflow
+        tag.textContent = set[i] || set[i % set.length] || '';
+        tag.style.display = i < set.length ? '' : 'none';
+        tag.style.animation = `tagPop .4s ease both`;
+        tag.style.animationDelay = `${i * 0.1}s`;
+      });
+    }
+    setInterval(cycleTags, 3500);
+
+    // ── Worker API ───────────────────────────────────────────────────
+    // Replace with your deployed workers.dev URL once published:
+    //   wrangler deploy  →  https://allergybuster-tips.<subdomain>.workers.dev
+    const WORKER_URL = 'https://allergybuster-tips.allergybuster-tips.workers.dev';
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn  = form.querySelector('.btn-submit');
+      const statusEl = document.getElementById('form-status');
+
+      // Collect checked allergens
+      const allergens = [...form.querySelectorAll('.allergen-checkbox input:checked')]
+        .map(cb => cb.parentElement.textContent.trim());
+
+      const payload = {
+        restaurant: form.querySelector('[name="restaurant"]').value.trim(),
+        location:   form.querySelector('[name="location"]').value.trim(),
+        menuItem:   form.querySelector('[name="menuItem"]').value.trim(),
+        allergens,
+        notes:      form.querySelector('[name="notes"]').value.trim(),
+      };
+
+      btn.textContent = 'Submitting…';
+      btn.disabled = true;
+      statusEl.textContent = '';
+      statusEl.className = 'form-status';
+
+      try {
+        const res = await fetch(`${WORKER_URL}/contributions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.statusText);
+
+        statusEl.textContent = 'Thank you! Your submission is queued for review.';
+        statusEl.className = 'form-status success';
+        form.reset();
+      } catch (err) {
+        statusEl.textContent = `Submission failed: ${err.message}. Please try again.`;
+        statusEl.className = 'form-status error';
+      } finally {
+        btn.textContent = 'Submit Allergen Data';
+        btn.disabled = false;
+      }
+    }
+
+    // Smooth anchor scroll with offset for fixed nav
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (!el) return;
+        e.preventDefault();
+        const top = el.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
+  </script>
+
+  <script src="src/demos.js"></script>
+</body>
+</html>

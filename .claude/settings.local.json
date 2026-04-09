@@ -26,7 +26,13 @@
       "Bash(powershell.exe -Command \"& 'C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe' shell getprop sys.boot_completed\")",
       "Bash(powershell.exe -Command \"& 'C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe' devices\")",
       "Bash(powershell.exe -Command \"npx react-native run-android 2>&1\")",
-      "Bash(cmd.exe /c \"npx react-native run-android\")"
+      "Bash(cmd.exe /c \"npx react-native run-android\")",
+      "Bash(curl -s \"https://world.openfoodfacts.org/api/v2/product/737628064502.json?fields=product_name,brands,allergens_tags,traces_tags\")",
+      "Bash(curl -s -A \"AllergyBuster/1.0 \\(test\\)\" \"https://world.openfoodfacts.org/api/v2/product/737628064502.json?fields=product_name,brands,allergens_tags,traces_tags\")",
+      "Bash(curl -s -A \"AllergyBuster/1.0 \\(test\\)\" \"https://world.openfoodfacts.org/cgi/search.pl?search_terms=peanut+butter&search_simple=1&action=process&json=1&page_size=3&fields=product_name,brands,allergens_tags\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(npx wrangler:*)"
     ]
   }
 }

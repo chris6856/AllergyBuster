@@ -32,6 +32,7 @@ export interface Env {
   CHAINS_DB: KVNamespace;
   ANTHROPIC_API_KEY: string;
   ADMIN_KEY: string;
+  SENDGRID_API_KEY: string;
 }
 
 const CORS_HEADERS = {
@@ -40,6 +41,17 @@ const CORS_HEADERS = {
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ContributionRecord {
+  id: string;
+  submittedAt: string;        // ISO timestamp
+  status: 'pending';
+  restaurant: string;
+  location: string;
+  menuItem: string;
+  allergens: string[];
+  notes: string;
+}
 
 interface ChainMenuItemAllergens {
   declared: string[];
@@ -164,6 +176,88 @@ async function handleTip(request: Request, env: Env): Promise<Response> {
   return new Response(payload, {headers: CORS_HEADERS});
 }
 
+// ─── Contact handler ──────────────────────────────────────────────────────────
+
+async function handlePostContact(request: Request, env: Env): Promise<Response> {
+  let body: { firstName?: string; lastName?: string; email?: string; topic?: string; message?: string };
+  try {
+    body = await request.json() as typeof body;
+  } catch {
+    return json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  const { firstName, email, topic, message } = body;
+  if (!firstName?.trim() || !email?.trim() || !topic?.trim() || !message?.trim()) {
+    return json({ error: 'firstName, email, topic, and message are required' }, 400);
+  }
+
+  const fullName = `${firstName.trim()} ${(body.lastName ?? '').trim()}`.trim();
+  const subjectMap: Record<string, string> = {
+    'app-support':  'App Support / Bug Report',
+    'data-error':   'Allergen Data Error',
+    'feedback':     'General Feedback',
+    'privacy':      'Privacy or Legal',
+    'partnership':  'Partnership / Press',
+    'other':        'Other',
+  };
+  const topicLabel = subjectMap[topic] ?? topic;
+
+  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.SENDGRID_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: { email: 'noreply@allergybuster.com', name: 'AllergyBuster Contact' },
+      reply_to: { email: email.trim(), name: fullName },
+      personalizations: [{ to: [{ email: 'info@allergybusted.com' }] }],
+      subject: `[AllergyBuster] ${topicLabel} — ${fullName}`,
+      content: [
+        { type: 'text/plain', value: `From: ${fullName} <${email.trim()}>\nTopic: ${topicLabel}\n\n${message.trim()}` },
+        { type: 'text/html',  value: `<p><strong>From:</strong> ${fullName} &lt;${email.trim()}&gt;</p><p><strong>Topic:</strong> ${topicLabel}</p><hr/><p style="white-space:pre-wrap">${message.trim()}</p>` },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text();
+    return json({ error: 'Failed to send email', detail }, 502);
+  }
+
+  return json({ success: true });
+}
+
+// ─── Contributions handler ────────────────────────────────────────────────────
+
+async function handlePostContribution(request: Request, env: Env): Promise<Response> {
+  let body: Partial<ContributionRecord>;
+  try {
+    body = await request.json() as Partial<ContributionRecord>;
+  } catch {
+    return json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  if (!body.restaurant?.trim()) {
+    return json({ error: 'restaurant is required' }, 400);
+  }
+
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const record: ContributionRecord = {
+    id,
+    submittedAt: new Date().toISOString(),
+    status: 'pending',
+    restaurant: body.restaurant.trim(),
+    location: body.location?.trim() ?? '',
+    menuItem: body.menuItem?.trim() ?? '',
+    allergens: Array.isArray(body.allergens) ? body.allergens : [],
+    notes: body.notes?.trim() ?? '',
+  };
+
+  await env.CHAINS_DB.put(`contribution:${id}`, JSON.stringify(record));
+  return json({ success: true, id });
+}
+
 // ─── Chains handlers ──────────────────────────────────────────────────────────
 
 async function handleGetChains(request: Request, env: Env): Promise<Response> {
@@ -271,6 +365,16 @@ export default {
     // /tip
     if (path === '/tip' && request.method === 'GET') {
       return handleTip(request, env);
+    }
+
+    // /contact  (contact form email)
+    if (path === '/contact' && request.method === 'POST') {
+      return handlePostContact(request, env);
+    }
+
+    // /contributions  (public community submissions)
+    if (path === '/contributions' && request.method === 'POST') {
+      return handlePostContribution(request, env);
     }
 
     // /chains  (search)

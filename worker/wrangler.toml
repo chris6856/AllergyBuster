@@ -14,7 +14,7 @@ id = "8aa10f18e2fd4fa7aa25bf69ba08ab38"
 # Then replace the id below with the output ID.
 [[kv_namespaces]]
 binding = "CHAINS_DB"
-id = "REPLACE_WITH_CHAINS_DB_NAMESPACE_ID"
+id = "c155b56bacb8495092fffa9afa9a357b"
 
 # Secrets — set with:
 #   wrangler secret put ANTHROPIC_API_KEY
