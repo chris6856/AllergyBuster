@@ -1095,18 +1095,14 @@
             <div class="tip-card-header">
               <div class="tip-icon-wrap">💡</div>
               <div class="tip-meta">
-                <span class="tip-date">TODAY'S TIP · APRIL 7</span>
-                <span class="tip-type">Hidden Allergens</span>
+                <span class="tip-date" id="tip-date">TODAY'S TIP · LOADING…</span>
+                <span class="tip-type" id="tip-type">Daily Tip</span>
               </div>
             </div>
-            <div class="tip-text">
-              "Casein and whey are both dairy proteins found in many non-obvious foods like some margarines, deli meats, and even some 'non-dairy' creamers. Always check the full ingredient list, not just the bold allergen summary."
+            <div class="tip-text" id="tip-text">
+              Fetching today's tip…
             </div>
-            <div class="tip-tags">
-              <span class="tip-tag">DAIRY</span>
-              <span class="tip-tag">HIDDEN INGREDIENTS</span>
-              <span class="tip-tag">LABEL READING</span>
-            </div>
+            <div class="tip-tags" id="tip-tags"></div>
             <div class="tip-ai-badge">
               <div class="tip-ai-dot"></div>
               AI-generated · Updated daily · Not medical advice
@@ -1542,6 +1538,26 @@
 
   <!-- ─── JavaScript ────────────────────────────────────────────── -->
   <script>
+    const WORKER_URL = 'https://allergybuster-tips.allergybuster-tips.workers.dev';
+
+    // Fetch today's allergy tip from the worker
+    (async function loadTip() {
+      const today = new Date().toISOString().slice(0, 10);
+      const monthDay = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }).toUpperCase();
+      try {
+        const res = await fetch(`${WORKER_URL}/tip?date=${today}`);
+        if (!res.ok) throw new Error('fetch failed');
+        const data = await res.json();
+        document.getElementById('tip-date').textContent = `TODAY'S TIP · ${monthDay}`;
+        document.getElementById('tip-text').textContent = `"${data.text}"`;
+        document.getElementById('tip-type').textContent = 'Daily Tip';
+        document.getElementById('tip-tags').innerHTML = '';
+      } catch {
+        document.getElementById('tip-date').textContent = `TODAY'S TIP · ${monthDay}`;
+        document.getElementById('tip-text').textContent = '"Check ingredient labels carefully — allergen information can change when manufacturers update their recipes."';
+      }
+    })();
+
     // Nav is always light — no scroll toggle needed
 
     // Reveal on scroll
@@ -1582,8 +1598,6 @@
     // ── Worker API ───────────────────────────────────────────────────
     // Replace with your deployed workers.dev URL once published:
     //   wrangler deploy  →  https://allergybuster-tips.<subdomain>.workers.dev
-    const WORKER_URL = 'https://allergybuster-tips.allergybuster-tips.workers.dev';
-
     async function handleSubmit(e) {
       e.preventDefault();
       const form = e.target;
