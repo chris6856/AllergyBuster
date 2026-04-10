@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — AllergyBuster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-deep:  #0f2318;
+      --green-dark:  #1a3a2a;
+      --green-mid:   #2d5c40;
+      --green-light: #4a8c62;
+      --amber:       #e8a020;
+      --amber-pale:  #fdf0d0;
+      --cream:       #f7f2e8;
+      --cream-dark:  #ede7d9;
+      --charcoal:    #1a1a1a;
+      --muted:       #6b6b5a;
+      --white:       #ffffff;
+      --red:         #c0392b;
+      --font-display:'Playfair Display', Georgia, serif;
+      --font-body:   'DM Sans', sans-serif;
+      --font-mono:   'Courier Prime', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--cream); color: var(--charcoal); min-height: 100vh; }
+
+    /* ── Login screen ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--green-deep);
+    }
+    .login-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.4);
+    }
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--green-dark);
+      margin-bottom: 1.75rem;
+    }
+    .login-logo-mark {
+      width: 34px; height: 34px;
+      background: var(--green-dark);
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+    }
+    .login-logo-mark svg { color: var(--amber); }
+    .login-card h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: .4rem;
+    }
+    .login-card p { color: var(--muted); font-size: .9rem; margin-bottom: 1.5rem; }
+    .login-label { font-size: .78rem; font-weight: 600; color: var(--green-dark); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: .4rem; }
+    .login-input {
+      width: 100%;
+      font-family: var(--font-mono);
+      font-size: .9rem;
+      background: var(--cream);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      outline: none;
+      margin-bottom: 1rem;
+      transition: border-color .2s;
+    }
+    .login-input:focus { border-color: var(--green-light); }
+    .login-btn {
+      width: 100%;
+      background: var(--green-dark);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: .85rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .login-btn:hover { background: var(--green-mid); }
+    .login-error { color: var(--red); font-size: .85rem; margin-top: .75rem; display: none; }
+
+    /* ── Main layout ── */
+    #admin-screen { display: none; }
+    header {
+      background: var(--green-deep);
+      padding: 1.1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--cream);
+      font-size: 1.1rem;
+    }
+    .header-logo-mark {
+      width: 30px; height: 30px;
+      background: var(--amber);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+    }
+    .header-logo-mark svg { color: var(--green-deep); }
+    .header-right { display: flex; align-items: center; gap: 1.25rem; }
+    .header-badge {
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      color: var(--amber);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .btn-signout {
+      background: rgba(247,242,232,.1);
+      border: 1px solid rgba(247,242,232,.2);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: .85rem;
+      padding: .4rem .9rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-signout:hover { background: rgba(247,242,232,.2); }
+
+    .admin-body { max-width: 960px; margin: 2.5rem auto; padding: 0 1.5rem 4rem; }
+    .admin-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: .4rem;
+    }
+    .admin-subtitle { color: var(--muted); font-size: .95rem; margin-bottom: 2rem; }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-pill {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: 12px;
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .stat-pill-num { font-size: 1.4rem; font-weight: 700; color: var(--green-dark); font-family: var(--font-display); }
+    .stat-pill-label { font-size: .8rem; color: var(--muted); }
+
+    /* Submission cards */
+    #submissions-list { display: flex; flex-direction: column; gap: 1.25rem; }
+    .sub-card {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .sub-card-header {
+      background: var(--green-deep);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sub-restaurant {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--cream);
+    }
+    .sub-date {
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      color: rgba(247,242,232,.5);
+      letter-spacing: .08em;
+    }
+    .sub-body { padding: 1.25rem 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .sub-field label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      display: block;
+      margin-bottom: .3rem;
+    }
+    .sub-field p { font-size: .92rem; color: var(--charcoal); }
+    .sub-field.full { grid-column: span 2; }
+    .allergen-list { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .35rem; }
+    .allergen-chip {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      font-weight: 700;
+      background: var(--amber);
+      color: var(--green-deep);
+      padding: .25rem .6rem;
+      border-radius: 4px;
+    }
+    .sub-actions {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--cream-dark);
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+    }
+    .btn-approve {
+      background: var(--green-dark);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: .9rem;
+      font-weight: 600;
+      padding: .6rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-approve:hover { background: var(--green-mid); }
+    .btn-reject {
+      background: transparent;
+      color: var(--red);
+      font-family: var(--font-body);
+      font-size: .9rem;
+      font-weight: 600;
+      padding: .6rem 1.4rem;
+      border: 1.5px solid var(--red);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .btn-reject:hover { background: var(--red); color: var(--white); }
+    .sub-action-status { font-size: .85rem; color: var(--muted); margin-left: auto; }
+    .sub-action-status.ok  { color: var(--green-light); font-weight: 600; }
+    .sub-action-status.err { color: var(--red); }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+    .empty-state h3 { font-family: var(--font-display); font-size: 1.3rem; color: var(--green-dark); margin-bottom: .5rem; }
+
+    .loading { text-align: center; padding: 3rem; color: var(--muted); font-size: .95rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Login ── -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <span class="login-logo-mark">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+            <path d="M12 2a10 10 0 0 1 10 10"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </span>
+        AllergyBuster
+      </div>
+      <h2>Admin Login</h2>
+      <p>Enter your admin key to access the review dashboard.</p>
+      <label class="login-label">Admin Key</label>
+      <input class="login-input" id="admin-key-input" type="password" placeholder="Enter admin key…" />
+      <button class="login-btn" onclick="login()">Sign In</button>
+      <p class="login-error" id="login-error">Invalid admin key. Please try again.</p>
+    </div>
+  </div>
+
+  <!-- ── Admin Dashboard ── -->
+  <div id="admin-screen">
+    <header>
+      <div class="header-logo">
+        <span class="header-logo-mark">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+            <path d="M12 2a10 10 0 0 1 10 10"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </span>
+        AllergyBuster
+      </div>
+      <div class="header-right">
+        <span class="header-badge">Admin Dashboard</span>
+        <button class="btn-signout" onclick="signOut()">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="admin-body">
+      <div class="admin-title">Restaurant Submissions</div>
+      <p class="admin-subtitle">Review community-submitted allergen data. Approve to publish to the app, or reject to discard.</p>
+
+      <div class="stats-bar">
+        <div class="stat-pill">
+          <span class="stat-pill-num" id="stat-pending">—</span>
+          <span class="stat-pill-label">Pending Review</span>
+        </div>
+      </div>
+
+      <div id="submissions-list">
+        <div class="loading">Loading submissions…</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://allergybuster-tips.allergybuster-tips.workers.dev';
+    let adminKey = '';
+
+    // ── Auth ──────────────────────────────────────────────────────────────────
+    async function login() {
+      const key = document.getElementById('admin-key-input').value.trim();
+      if (!key) return;
+
+      // Verify key by calling a protected endpoint
+      const res = await fetch(`${WORKER_URL}/admin/contributions`, {
+        headers: { 'Authorization': `Bearer ${key}` }
+      });
+
+      if (res.status === 401) {
+        document.getElementById('login-error').style.display = 'block';
+        return;
+      }
+
+      adminKey = key;
+      sessionStorage.setItem('ab_admin_key', key);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      renderSubmissions(await res.json());
+    }
+
+    function signOut() {
+      sessionStorage.removeItem('ab_admin_key');
+      adminKey = '';
+      document.getElementById('admin-key-input').value = '';
+      document.getElementById('login-error').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+
+    // Auto-login if key is in sessionStorage
+    window.addEventListener('DOMContentLoaded', async () => {
+      const saved = sessionStorage.getItem('ab_admin_key');
+      if (saved) {
+        document.getElementById('admin-key-input').value = saved;
+        await login();
+      }
+      document.getElementById('admin-key-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') login();
+      });
+    });
+
+    // ── Load submissions ──────────────────────────────────────────────────────
+    async function loadSubmissions() {
+      const res = await fetch(`${WORKER_URL}/admin/contributions`, {
+        headers: { 'Authorization': `Bearer ${adminKey}` }
+      });
+      renderSubmissions(await res.json());
+    }
+
+    function renderSubmissions(data) {
+      const list = document.getElementById('submissions-list');
+      document.getElementById('stat-pending').textContent = data.length;
+
+      if (!data.length) {
+        list.innerHTML = `<div class="empty-state"><h3>All caught up!</h3><p>No pending submissions to review.</p></div>`;
+        return;
+      }
+
+      // Sort newest first
+      data.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+      list.innerHTML = data.map(sub => {
+        const date = new Date(sub.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const allergenChips = (sub.allergens || []).map(a => `<span class="allergen-chip">${a}</span>`).join('');
+        return `
+          <div class="sub-card" id="card-${sub.id}">
+            <div class="sub-card-header">
+              <span class="sub-restaurant">${esc(sub.restaurant)}</span>
+              <span class="sub-date">${date}</span>
+            </div>
+            <div class="sub-body">
+              <div class="sub-field">
+                <label>Location</label>
+                <p>${esc(sub.location) || '—'}</p>
+              </div>
+              <div class="sub-field">
+                <label>Menu Item</label>
+                <p>${esc(sub.menuItem) || 'General (whole restaurant)'}</p>
+              </div>
+              <div class="sub-field full">
+                <label>Allergens</label>
+                <div class="allergen-list">${allergenChips || '<span style="color:var(--muted);font-size:.85rem">None selected</span>'}</div>
+              </div>
+              <div class="sub-field full">
+                <label>Notes</label>
+                <p>${esc(sub.notes) || '—'}</p>
+              </div>
+            </div>
+            <div class="sub-actions">
+              <button class="btn-approve" onclick="approve('${sub.id}', this)">✓ Approve & Publish</button>
+              <button class="btn-reject"  onclick="reject('${sub.id}', this)">✕ Reject</button>
+              <span class="sub-action-status" id="status-${sub.id}"></span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Approve ───────────────────────────────────────────────────────────────
+    async function approve(id, btn) {
+      const card = document.getElementById(`card-${id}`);
+      const statusEl = document.getElementById(`status-${id}`);
+      const raw = await fetch(`${WORKER_URL}/admin/contributions`, {
+        headers: { 'Authorization': `Bearer ${adminKey}` }
+      });
+      const all = await raw.json();
+      const sub = all.find(s => s.id === id);
+      if (!sub) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Publishing…';
+
+      // Build a ChainRecord from the submission
+      const chainId = sub.restaurant.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + id.split('-')[0];
+      const menuItem = {
+        name: sub.menuItem || 'General Menu',
+        description: sub.notes || '',
+        allergens: {
+          declared: sub.allergens || [],
+          mayContain: [],
+          dataAvailable: true,
+        }
+      };
+      const record = {
+        id: chainId,
+        name: sub.restaurant,
+        aliases: [sub.restaurant.toLowerCase(), (sub.location || '').toLowerCase()].filter(Boolean),
+        cuisineType: 'Unknown',
+        sourceUrl: '',
+        lastUpdated: new Date().toISOString().slice(0, 10),
+        menuItems: [menuItem],
+      };
+
+      try {
+        const res = await fetch(`${WORKER_URL}/chains/${chainId}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${adminKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(record),
+        });
+        if (!res.ok) throw new Error(await res.text());
+
+        // Delete the contribution now that it's published
+        await fetch(`${WORKER_URL}/contributions/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminKey}` },
+        });
+
+        statusEl.textContent = 'Published!';
+        statusEl.className = 'sub-action-status ok';
+        setTimeout(() => card.remove(), 1500);
+        document.getElementById('stat-pending').textContent =
+          Math.max(0, parseInt(document.getElementById('stat-pending').textContent) - 1);
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+        statusEl.className = 'sub-action-status err';
+        btn.disabled = false;
+        btn.textContent = '✓ Approve & Publish';
+      }
+    }
+
+    // ── Reject ────────────────────────────────────────────────────────────────
+    async function reject(id, btn) {
+      if (!confirm('Reject and permanently delete this submission?')) return;
+      const card = document.getElementById(`card-${id}`);
+      const statusEl = document.getElementById(`status-${id}`);
+      btn.disabled = true;
+      btn.textContent = 'Rejecting…';
+
+      try {
+        const res = await fetch(`${WORKER_URL}/contributions/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminKey}` },
+        });
+        if (!res.ok) throw new Error(await res.text());
+        statusEl.textContent = 'Rejected.';
+        statusEl.className = 'sub-action-status';
+        setTimeout(() => card.remove(), 1000);
+        document.getElementById('stat-pending').textContent =
+          Math.max(0, parseInt(document.getElementById('stat-pending').textContent) - 1);
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+        statusEl.className = 'sub-action-status err';
+        btn.disabled = false;
+        btn.textContent = '✕ Reject';
+      }
+    }
+
+    function esc(str) {
+      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+
+</body>
+</html>

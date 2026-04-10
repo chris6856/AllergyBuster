@@ -209,7 +209,7 @@
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || res.statusText);
+        if (!res.ok) throw new Error((data.error || res.statusText) + (data.detail ? ': ' + data.detail : ''));
 
         statusEl.textContent = 'Message sent! We\'ll get back to you soon.';
         statusEl.className = 'form-status success';

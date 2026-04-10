@@ -293,6 +293,28 @@ async function handlePostContribution(request: Request, env: Env): Promise<Respo
   return json({ success: true, id });
 }
 
+// ─── Admin: list & delete contributions ──────────────────────────────────────
+
+async function handleGetContributions(request: Request, env: Env): Promise<Response> {
+  if (!isAdmin(request, env)) return unauthorized();
+
+  const listed = await env.CHAINS_DB.list({ prefix: 'contribution:' });
+  const records = await Promise.all(
+    listed.keys.map(async k => {
+      const raw = await env.CHAINS_DB.get(k.name);
+      return raw ? JSON.parse(raw) : null;
+    })
+  );
+
+  return json(records.filter(Boolean));
+}
+
+async function handleDeleteContribution(id: string, request: Request, env: Env): Promise<Response> {
+  if (!isAdmin(request, env)) return unauthorized();
+  await env.CHAINS_DB.delete(`contribution:${id}`);
+  return json({ success: true, id });
+}
+
 // ─── Chains handlers ──────────────────────────────────────────────────────────
 
 async function handleGetChains(request: Request, env: Env): Promise<Response> {
@@ -410,6 +432,17 @@ export default {
     // /contributions  (public community submissions)
     if (path === '/contributions' && request.method === 'POST') {
       return handlePostContribution(request, env);
+    }
+
+    // /admin/contributions  (list pending — admin only)
+    if (path === '/admin/contributions' && request.method === 'GET') {
+      return handleGetContributions(request, env);
+    }
+
+    // /contributions/:id  (reject/delete — admin only)
+    const contribMatch = path.match(/^\/contributions\/([a-z0-9_-]+)$/);
+    if (contribMatch && request.method === 'DELETE') {
+      return handleDeleteContribution(contribMatch[1], request, env);
     }
 
     // /chains  (search)
