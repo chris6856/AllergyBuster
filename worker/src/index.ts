@@ -244,7 +244,7 @@ async function handlePostContact(request: Request, env: Env): Promise<Response> 
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: { email: 'noreply@allergybuster.com', name: 'AllergyBuster Contact' },
+      from: { email: 'noreply@allergybusted.com', name: 'AllergyBuster Contact' },
       reply_to: { email: email.trim(), name: fullName },
       personalizations: [{ to: [{ email: 'info@allergybusted.com' }] }],
       subject: `[AllergyBuster] ${topicLabel} — ${fullName}`,
