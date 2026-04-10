@@ -86,6 +86,39 @@ interface ChainIndexEntry {
 
 const INDEX_KEY = 'index:chains';
 
+const PRIVACY_POLICY_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllergyBuster Privacy Policy</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;line-height:1.6;color:#333}h1{color:#2E7D32}h2{margin-top:2em}</style>
+</head>
+<body>
+<h1>AllergyBuster Privacy Policy</h1>
+<p><em>Last updated: ${new Date().toISOString().slice(0,10)}</em></p>
+
+<h2>Camera</h2>
+<p>AllergyBuster uses your device camera solely to photograph food ingredient labels. Photos are processed on-device using on-device text recognition (Google ML Kit). No images are uploaded to our servers or stored beyond the current session.</p>
+
+<h2>Information We Collect</h2>
+<p>We do not collect, store, or share any personally identifiable information. The app does not require account creation or login.</p>
+
+<h2>Contact Form</h2>
+<p>If you submit the in-app contact form, we collect the name, email address, and message you provide solely to respond to your inquiry. This information is not sold or shared with third parties.</p>
+
+<h2>Third-Party Services</h2>
+<ul>
+  <li><strong>Anthropic Claude API</strong> — used to generate daily allergy tips. No user data is sent.</li>
+  <li><strong>Yelp Fusion API</strong> — used to search nearby restaurants by name. Only the search query is transmitted; no location or personal data is sent.</li>
+</ul>
+
+<h2>Children</h2>
+<p>AllergyBuster is not directed at children under 13 and does not knowingly collect data from children.</p>
+
+<h2>Contact</h2>
+<p>Questions? Email us at <a href="mailto:info@allergybusted.com">info@allergybusted.com</a>.</p>
+</body>
+</html>`;
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function json(data: unknown, status = 200): Response {
@@ -391,6 +424,14 @@ export default {
       if (request.method === 'GET')    {return handleGetChain(id, env);}
       if (request.method === 'PUT')    {return handlePutChain(id, request, env);}
       if (request.method === 'DELETE') {return handleDeleteChain(id, request, env);}
+    }
+
+    // /privacy
+    if (path === '/privacy') {
+      return new Response(PRIVACY_POLICY_HTML, {
+        status: 200,
+        headers: {'Content-Type': 'text/html; charset=utf-8'},
+      });
     }
 
     return json({error: 'Not found'}, 404);
