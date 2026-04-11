@@ -26,6 +26,14 @@ workflows:
           cd AllergyBusterApp/ios
           pod install
 
+      - name: Set up keychain
+        script: |
+          keychain initialize
+
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+
       - name: Set up code signing
         script: |
           xcode-project use-profiles
@@ -35,6 +43,10 @@ workflows:
           xcode-project build-ipa \
             --workspace AllergyBusterApp/ios/AllergyBusterApp.xcworkspace \
             --config Release
+
+      - name: Clean up keychain
+        script: |
+          keychain cleanup
 
     artifacts:
       - build/ios/ipa/*.ipa
