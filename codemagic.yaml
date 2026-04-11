@@ -86,7 +86,7 @@ workflows:
 
       - name: Clean up keychain
         script: |
-          keychain cleanup
+          keychain delete
 
     artifacts:
       - $CM_BUILD_DIR/ipa/*.ipa
