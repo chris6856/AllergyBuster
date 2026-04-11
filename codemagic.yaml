@@ -18,6 +18,7 @@ workflows:
       - name: Install dependencies
         script: |
           cd AllergyBusterApp
+          rm -f package-lock.json
           npm install
 
       - name: Install CocoaPods
