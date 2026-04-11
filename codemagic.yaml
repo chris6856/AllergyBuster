@@ -30,19 +30,7 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      - name: Build iOS release
-        script: |
-          cd AllergyBusterApp
-          xcodebuild \
-            -workspace ios/AllergyBusterApp.xcworkspace \
-            -scheme AllergyBusterApp \
-            -configuration Release \
-            -archivePath $CM_BUILD_DIR/AllergyBusterApp.xcarchive \
-            archive \
-            CODE_SIGN_STYLE=Manual \
-            | xcpretty
-
-      - name: Export IPA
+      - name: Build and export IPA
         script: |
           xcode-project build-ipa \
             --workspace AllergyBusterApp/ios/AllergyBusterApp.xcworkspace \
