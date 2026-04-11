@@ -8,6 +8,8 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, '16.0'
 prepare_react_native_project!
 
+require_relative '../node_modules/react-native-permissions/scripts/setup'
+
 setup_permissions([
   'Camera',
   'LocationWhenInUse',
