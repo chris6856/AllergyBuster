@@ -11,7 +11,6 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.allergybusterapp
       vars:
-        XCODE_PROJECT: "AllergyBusterApp/ios/AllergyBusterApp.xcworkspace"
         BUNDLE_ID: "com.allergybusterapp"
       node: 18.20.4
 
@@ -26,29 +25,30 @@ workflows:
           cd AllergyBusterApp/ios
           pod install
 
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+
       - name: Build iOS release
         script: |
           cd AllergyBusterApp
-          xcode-project use-profiles
           xcodebuild \
             -workspace ios/AllergyBusterApp.xcworkspace \
             -scheme AllergyBusterApp \
             -configuration Release \
-            -archivePath build/AllergyBusterApp.xcarchive \
+            -archivePath $CM_BUILD_DIR/AllergyBusterApp.xcarchive \
             archive \
             CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=$(echo $CM_CERTIFICATE | openssl x509 -noout -subject 2>/dev/null | grep -o 'OU=[^/]*' | cut -d= -f2 || echo "") \
             | xcpretty
 
       - name: Export IPA
         script: |
-          cd AllergyBusterApp
           xcode-project build-ipa \
-            --workspace ios/AllergyBusterApp.xcworkspace \
+            --workspace AllergyBusterApp/ios/AllergyBusterApp.xcworkspace \
             --config Release
 
     artifacts:
-      - AllergyBusterApp/build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
 
     publishing:
