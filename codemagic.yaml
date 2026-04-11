@@ -34,6 +34,7 @@ workflows:
         script: |
           app-store-connect fetch-signing-files com.allergybusterapp \
             --type IOS_APP_STORE \
+            --certificate-key "$CERTIFICATE_PRIVATE_KEY" \
             --create
 
       - name: Add certificates to keychain
