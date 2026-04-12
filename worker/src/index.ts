@@ -146,7 +146,7 @@ async function saveIndex(env: Env, index: ChainIndexEntry[]): Promise<void> {
 // ─── Tips handler ─────────────────────────────────────────────────────────────
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-3-haiku-20240307';
+const MODEL = 'claude-haiku-4-5-20251001';
 
 const PROMPT = `You are a helpful food allergy information assistant.
 Write a single practical tip for people managing food allergies or intolerances.
