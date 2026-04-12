@@ -28,6 +28,7 @@ export type MainTabParamList = {
   ScanTab: NavigatorScreenParams<ScanStackParamList>;
   PhotoTab: NavigatorScreenParams<PhotoStackParamList>;
   SearchTab: NavigatorScreenParams<SearchStackParamList>;
+  JeevesTab: undefined;
 };
 
 // --- Root stack ---

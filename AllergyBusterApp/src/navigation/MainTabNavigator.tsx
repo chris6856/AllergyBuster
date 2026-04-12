@@ -6,6 +6,7 @@ import {HomeScreen} from '../screens/HomeScreen';
 import {ScanStack} from './ScanStack';
 import {PhotoStack} from './PhotoStack';
 import {SearchStack} from './SearchStack';
+import {AskJeevesScreen} from '../screens/AskJeevesScreen';
 import {colors, fontSizes} from '../constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -16,6 +17,7 @@ function TabIcon({label, focused}: {label: string; focused: boolean}) {
     Scan: '📷',
     Photo: '🖼️',
     Search: '🔍',
+    Jeeves: '🎩',
   };
   return (
     <Text style={{fontSize: focused ? 22 : 20, opacity: focused ? 1 : 0.6}}>
@@ -71,6 +73,15 @@ export function MainTabNavigator() {
           title: 'Search',
           headerShown: false,
           tabBarIcon: ({focused}) => <TabIcon label="Search" focused={focused} />,
+        }}
+      />
+      <Tab.Screen
+        name="JeevesTab"
+        component={AskJeevesScreen}
+        options={{
+          title: 'Ask Jeeves',
+          headerShown: false,
+          tabBarIcon: ({focused}) => <TabIcon label="Jeeves" focused={focused} />,
         }}
       />
     </Tab.Navigator>

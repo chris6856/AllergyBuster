@@ -408,6 +408,92 @@ async function handleDeleteChain(
   return json({success: true, id});
 }
 
+// ─── Ask Jeeves chat handler ──────────────────────────────────────────────────
+
+const JEEVES_SYSTEM_PROMPT = `You are Jeeves, a friendly and knowledgeable assistant built into the AllergyBuster app. Your job is to help users manage food allergies and get the most out of the app.
+
+## About AllergyBuster
+AllergyBuster helps people identify allergens in food before they eat. It has four main features:
+
+1. **Barcode Scanner** — Point the camera at any product barcode (UPC, EAN-13, EAN-8, Code-128, etc.) for an instant allergen lookup from the Open Food Facts database.
+
+2. **Label Scanner** — Photograph an ingredient label and the app uses on-device text recognition to extract and highlight allergens automatically. Great for when the print is too small to read.
+
+3. **Product & Restaurant Search** — Search by product name, brand, ingredient, or restaurant chain. For restaurants, the app shows menu items and their declared allergens and may-contain warnings.
+
+4. **Daily Tips** — A fresh food allergy tip appears on the home screen every day.
+
+## How to use each feature
+- **To scan a barcode**: Tap "Scan Barcode" on the home screen or the Scan tab. Hold the camera steady over the barcode — it scans automatically, no button needed.
+- **To scan a label**: Tap "Scan Label" or the Photo tab. Point the camera at the ingredient list and tap the capture button. The app will extract the text and highlight any allergens.
+- **To search**: Tap "Search Products & Restaurants" or the Search tab. Type a product name, brand, or restaurant. Toggle between Products and Restaurants at the top.
+- **For restaurant details**: After searching, tap a restaurant to see its menu items and allergen information.
+
+## More information
+For more information, users can visit the website at allergybusted.com.
+
+## Important disclaimer
+Always remind users that AllergyBuster provides general information only and is NOT a substitute for medical advice. Users should always verify allergen information on product packaging and consult a healthcare professional about their specific dietary needs. Never tell a user that a product is definitively safe for them — you can share what the data says, but always recommend they verify.
+
+## Tone and style
+- Friendly, warm, and concise
+- Use plain language — no medical jargon
+- If asked about something unrelated to food allergies or the app, politely redirect
+- Keep responses short enough to read comfortably on a phone screen`;
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+async function handleChat(request: Request, env: Env): Promise<Response> {
+  let body: {messages?: ChatMessage[]};
+  try {
+    body = await request.json() as {messages?: ChatMessage[]};
+  } catch {
+    return json({error: 'Invalid JSON body'}, 400);
+  }
+
+  const messages = body.messages;
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return json({error: 'messages array is required'}, 400);
+  }
+
+  // Limit conversation history to last 20 messages to control token usage
+  const trimmed = messages.slice(-20);
+
+  const response = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: {
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 512,
+      system: JEEVES_SYSTEM_PROMPT,
+      messages: trimmed,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    return json({error: 'AI service error', detail}, 502);
+  }
+
+  const data = (await response.json()) as {
+    content: Array<{type: string; text: string}>;
+  };
+
+  const reply = data.content.find(c => c.type === 'text')?.text?.trim();
+  if (!reply) {
+    return json({error: 'Empty response from AI'}, 502);
+  }
+
+  return json({reply});
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 
 export default {
@@ -457,6 +543,11 @@ export default {
       if (request.method === 'GET')    {return handleGetChain(id, env);}
       if (request.method === 'PUT')    {return handlePutChain(id, request, env);}
       if (request.method === 'DELETE') {return handleDeleteChain(id, request, env);}
+    }
+
+    // /chat  (Ask Jeeves chatbot)
+    if (path === '/chat' && request.method === 'POST') {
+      return handleChat(request, env);
     }
 
     // /privacy
