@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {CHAT_PROXY_URL} from '../constants/config';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 
@@ -27,6 +28,7 @@ const INITIAL_MESSAGE: Message = {
 };
 
 export function AskJeevesScreen() {
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -113,7 +115,7 @@ export function AskJeevesScreen() {
       keyboardVerticalOffset={90}>
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: insets.top + spacing.md}]}>
         <Text style={styles.headerTitle}>🎩 Ask Jeeves</Text>
         <Text style={styles.headerSubtitle}>Your AllergyBuster Assistant</Text>
       </View>
@@ -184,7 +186,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
   headerTitle: {
