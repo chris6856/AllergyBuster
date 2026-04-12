@@ -18,7 +18,7 @@ export function DisclaimerScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.replace('MainTabs', undefined);
-    }, 10000);
+    }, 7000);
     return () => clearTimeout(timer);
   }, [navigation]);
 
@@ -41,8 +41,7 @@ export function DisclaimerScreen() {
       {/* Welcome message + disclaimer */}
       <View style={styles.bottom}>
         <Text style={styles.welcome}>
-          Welcome to AllergyBuster, your personal assistant keeping you safe
-          and your EpiPen in your pocket.
+          Welcome to AllergyBuster — here to help keep you safe.
         </Text>
 
         <Text style={styles.disclaimer}>
@@ -98,9 +97,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   disclaimer: {
-    fontSize: 9,
-    color: 'rgba(255,255,255,0.55)',
-    lineHeight: 13,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.65)',
+    lineHeight: 18,
     textAlign: 'center',
   },
 });
