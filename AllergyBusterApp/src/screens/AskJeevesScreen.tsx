@@ -2,6 +2,7 @@ import React, {useCallback, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -134,6 +135,7 @@ export function AskJeevesScreen() {
         keyExtractor={item => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        keyboardDismissMode="on-drag"
         onContentSizeChange={() =>
           listRef.current?.scrollToEnd({animated: false})
         }
@@ -153,6 +155,9 @@ export function AskJeevesScreen() {
 
       {/* Input bar */}
       <View style={styles.inputBar}>
+        <TouchableOpacity onPress={Keyboard.dismiss} style={styles.doneButton}>
+          <Text style={styles.doneButtonText}>Done</Text>
+        </TouchableOpacity>
         <TextInput
           style={styles.input}
           value={input}
@@ -284,6 +289,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+  },
+  doneButton: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    marginRight: spacing.xs,
+  },
+  doneButtonText: {
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    fontWeight: '600',
   },
   input: {
     flex: 1,
