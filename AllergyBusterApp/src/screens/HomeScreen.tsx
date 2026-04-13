@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {TipCard} from '../components/TipCard';
-import {TestimonialsCarousel} from '../components/TestimonialsCarousel';
 import {useDailyTip} from '../hooks/useDailyTip';
 import {useNetworkStatus} from '../hooks/useNetworkStatus';
 import {NoNetworkBanner} from '../components/NoNetworkBanner';
@@ -102,9 +101,6 @@ export function HomeScreen() {
           </TouchableOpacity>
         ))}
       </View>
-
-      {/* Testimonials */}
-      <TestimonialsCarousel />
 
       {/* Disclaimer footer */}
       <Text

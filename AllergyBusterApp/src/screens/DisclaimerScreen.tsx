@@ -18,7 +18,7 @@ export function DisclaimerScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.replace('MainTabs', undefined);
-    }, 7000);
+    }, 6000);
     return () => clearTimeout(timer);
   }, [navigation]);
 

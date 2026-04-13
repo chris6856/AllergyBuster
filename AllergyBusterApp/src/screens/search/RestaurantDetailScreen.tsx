@@ -54,6 +54,21 @@ export function RestaurantDetailScreen({route}: Props) {
                 {source === 'openmenu' ? 'OpenMenu' : 'Yelp'}
               </Text>
             )}
+            {name ? (
+              <TouchableOpacity
+                style={styles.googleButton}
+                onPress={() =>
+                  Linking.openURL(
+                    `https://www.google.com/search?q=${encodeURIComponent(name + ' allergen menu')}`,
+                  )
+                }
+                accessibilityRole="button"
+                accessibilityLabel={`Search online for ${name} allergen menu`}>
+                <Text style={styles.googleButtonText}>
+                  🔍  Search "{name}" allergen menu online
+                </Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         </View>
       }
@@ -212,6 +227,21 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.xs,
     color: colors.textDisabled,
     marginTop: spacing.xs,
+  },
+  googleButton: {
+    marginTop: spacing.sm,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    alignSelf: 'flex-start',
+  },
+  googleButtonText: {
+    color: colors.primary,
+    fontSize: fontSizes.xs,
+    fontWeight: '600',
   },
   sourceLinkLabel: {
     fontSize: fontSizes.xs,
