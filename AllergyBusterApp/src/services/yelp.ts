@@ -25,6 +25,7 @@ function normalize(business: YelpBusiness): Restaurant {
     cuisineType: business.categories?.[0]?.title,
     menuItems: [],
     source: 'yelp',
+    sourceUrl: `https://www.yelp.com/biz/${business.id}`,
   };
 }
 

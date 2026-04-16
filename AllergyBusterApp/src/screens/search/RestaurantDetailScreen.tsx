@@ -49,11 +49,17 @@ export function RestaurantDetailScreen({route}: Props) {
                   📋  View official allergen guide (opens browser) ›
                 </Text>
               </TouchableOpacity>
-            ) : (
-              <Text style={styles.sourceLabel}>
-                {source === 'openmenu' ? 'OpenMenu' : 'Yelp'}
-              </Text>
-            )}
+            ) : restaurant.sourceUrl ? (
+              <TouchableOpacity
+                style={styles.googleButton}
+                onPress={() => Linking.openURL(restaurant.sourceUrl!)}
+                accessibilityRole="button"
+                accessibilityLabel={`View ${name} on ${source === 'openmenu' ? 'OpenMenu' : 'Yelp'}`}>
+                <Text style={styles.googleButtonText}>
+                  🔗  View on {source === 'openmenu' ? 'OpenMenu' : 'Yelp'} (opens browser)
+                </Text>
+              </TouchableOpacity>
+            ) : null}
             {name ? (
               <TouchableOpacity
                 style={styles.googleButton}
