@@ -57,7 +57,7 @@ export function BarcodeScanScreen(_props: Props) {
           style={styles.permissionButton}
           onPress={requestPermission}
           accessibilityRole="button">
-          <Text style={styles.permissionButtonText}>Allow Camera</Text>
+          <Text style={styles.permissionButtonText}>Continue</Text>
         </TouchableOpacity>
       </View>
     );

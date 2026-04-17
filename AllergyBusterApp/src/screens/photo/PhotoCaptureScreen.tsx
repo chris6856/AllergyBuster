@@ -77,7 +77,7 @@ export function PhotoCaptureScreen(_props: Props) {
           AllergyBuster needs camera access to photograph product labels.
         </Text>
         <TouchableOpacity style={styles.button} onPress={requestPermission} accessibilityRole="button">
-          <Text style={styles.buttonText}>Allow Camera</Text>
+          <Text style={styles.buttonText}>Continue</Text>
         </TouchableOpacity>
       </View>
     );
