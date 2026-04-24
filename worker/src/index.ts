@@ -148,17 +148,38 @@ async function saveIndex(env: Env, index: ChainIndexEntry[]): Promise<void> {
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
 
-const PROMPT = `You are a helpful food allergy information assistant.
-Write a single practical tip for people managing food allergies or intolerances.
-The tip should be:
-- 1-3 sentences long
-- Actionable and specific (not generic advice like "read labels")
-- Accurate and safety-conscious
-- Written in plain, friendly language suitable for a mobile app notification
+const TIP_CATEGORIES = [
+  'hidden allergen sources in unexpected foods (e.g. sauces, medications, stamps)',
+  'dining out at restaurants safely — what to ask and who to ask',
+  'cross-contact prevention in shared kitchens at home',
+  'how to read allergen labels — "may contain", advisory warnings, precautionary statements',
+  'travelling with food allergies — planes, hotels, foreign countries',
+  'grocery shopping strategies — store brands, seasonal items, reformulated products',
+  'emergency preparedness — epinephrine, action plans, wearing medical ID',
+  'social situations — parties, potlucks, school events, work lunches',
+  'cooking and baking allergen-free substitutions at home',
+  'seasonal allergy risks — holiday foods, Halloween candy, Easter chocolate',
+  'cosmetics, skincare and non-food allergen sources',
+  'understanding the difference between allergy, intolerance and sensitivity',
+  'children with food allergies — school, sleepovers, sports',
+  'how to talk to restaurant staff and chefs effectively',
+];
+
+async function generateTip(apiKey: string, date: string): Promise<string> {
+  const seed = parseInt(date.replace(/-/g, '').slice(-4), 10);
+  const category = TIP_CATEGORIES[seed % TIP_CATEGORIES.length];
+
+  const prompt = `Today is ${date}. Write one specific, practical tip for people managing food allergies. Focus ONLY on this topic: ${category}.
+
+Rules:
+- 1–3 sentences
+- Concrete and actionable — name specific foods, situations, or steps
+- Do NOT give generic label-reading advice unless the topic is specifically about labels
+- Plain, friendly language for a mobile app
+- Must be clearly different from yesterday's tip
 
 Respond with ONLY the tip text — no preamble, no quotes, no bullet points.`;
 
-async function generateTip(apiKey: string): Promise<string> {
   const response = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: {
@@ -169,7 +190,7 @@ async function generateTip(apiKey: string): Promise<string> {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 200,
-      messages: [{role: 'user', content: PROMPT}],
+      messages: [{role: 'user', content: prompt}],
     }),
   });
 
@@ -201,7 +222,7 @@ async function handleTip(request: Request, env: Env): Promise<Response> {
 
   let tipText: string;
   try {
-    tipText = await generateTip(env.ANTHROPIC_API_KEY);
+    tipText = await generateTip(env.ANTHROPIC_API_KEY, date);
   } catch (err) {
     return json({error: 'Failed to generate tip', detail: String(err)}, 502);
   }
