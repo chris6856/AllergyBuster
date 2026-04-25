@@ -30,9 +30,11 @@
 export interface Env {
   TIPS_CACHE: KVNamespace;
   CHAINS_DB: KVNamespace;
+  ESTABLISHMENTS_DB: D1Database;
   ANTHROPIC_API_KEY: string;
   ADMIN_KEY: string;
   SENDGRID_API_KEY: string;
+  GOOGLE_PLACES_API_KEY: string;
 }
 
 const CORS_HEADERS = {
@@ -515,6 +517,183 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   return json({reply});
 }
 
+// ─── Establishments handlers ──────────────────────────────────────────────────
+
+const GOOGLE_PLACES_URL = 'https://places.googleapis.com/v1/places';
+const PLACES_FIELD_MASK = [
+  'places.id',
+  'places.displayName',
+  'places.formattedAddress',
+  'places.location',
+  'places.rating',
+  'places.userRatingCount',
+  'places.types',
+  'places.websiteUri',
+  'places.currentOpeningHours.openNow',
+].join(',');
+
+const FOOD_TYPES: Record<string, string[]> = {
+  all:        ['restaurant', 'bakery', 'cafe', 'coffee_shop', 'fast_food_restaurant', 'pizza_restaurant', 'ice_cream_shop'],
+  restaurant: ['restaurant', 'american_restaurant', 'fine_dining_restaurant', 'seafood_restaurant', 'steak_house', 'mexican_restaurant', 'italian_restaurant', 'french_restaurant', 'greek_restaurant', 'mediterranean_restaurant', 'buffet_restaurant', 'family_restaurant', 'vegan_restaurant', 'vegetarian_restaurant', 'bar_and_grill', 'breakfast_restaurant', 'brunch_restaurant'],
+  fastfood:   ['fast_food_restaurant', 'sandwich_shop'],
+  cafe:       ['cafe', 'coffee_shop'],
+  bakery:     ['bakery'],
+  pizza:      ['pizza_restaurant'],
+  asian:      ['chinese_restaurant', 'japanese_restaurant', 'korean_restaurant', 'thai_restaurant', 'vietnamese_restaurant', 'sushi_restaurant', 'ramen_restaurant', 'indian_restaurant', 'indonesian_restaurant'],
+  icecream:   ['ice_cream_shop'],
+};
+
+const VALID_ALLERGENS = new Set([
+  'peanuts', 'tree-nuts', 'milk', 'eggs', 'wheat', 'soy',
+  'fish', 'shellfish', 'sesame', 'mustard', 'sulfites', 'lupin',
+]);
+
+interface PlaceResult {
+  id: string;
+  displayName?: { text: string };
+  formattedAddress?: string;
+  location?: { latitude: number; longitude: number };
+  rating?: number;
+  userRatingCount?: number;
+  types?: string[];
+  websiteUri?: string;
+  currentOpeningHours?: { openNow?: boolean };
+}
+
+interface RatingRow {
+  place_id: string;
+  allergen: string;
+  avg_safety: number;
+  count: number;
+}
+
+function inferCategory(types: string[]): string {
+  if (types.some(t => t === 'ice_cream_shop')) return 'icecream';
+  if (types.some(t => t === 'pizza_restaurant')) return 'pizza';
+  if (types.some(t => t === 'bakery')) return 'bakery';
+  if (types.some(t => ['cafe', 'coffee_shop'].includes(t))) return 'cafe';
+  if (types.some(t => t === 'fast_food_restaurant' || t === 'sandwich_shop')) return 'fastfood';
+  if (types.some(t => ['chinese_restaurant','japanese_restaurant','korean_restaurant','thai_restaurant','vietnamese_restaurant','sushi_restaurant','ramen_restaurant','indian_restaurant','indonesian_restaurant'].includes(t))) return 'asian';
+  return 'restaurant';
+}
+
+async function fetchNearby(apiKey: string, lat: number, lng: number, radius: number, category: string): Promise<PlaceResult[]> {
+  const types = FOOD_TYPES[category] ?? FOOD_TYPES.all;
+  const res = await fetch(`${GOOGLE_PLACES_URL}:searchNearby`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': PLACES_FIELD_MASK },
+    body: JSON.stringify({ includedTypes: types, maxResultCount: 20, locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius } } }),
+  });
+  if (!res.ok) throw new Error(`Google Places nearby error: ${res.status} — ${await res.text()}`);
+  return ((await res.json() as { places?: PlaceResult[] }).places) ?? [];
+}
+
+async function fetchByText(apiKey: string, q: string, category: string): Promise<PlaceResult[]> {
+  const body: Record<string, unknown> = { textQuery: q, maxResultCount: 20 };
+  const types = FOOD_TYPES[category];
+  if (types && category !== 'all') body.includedType = types[0];
+  const res = await fetch(`${GOOGLE_PLACES_URL}:searchText`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': PLACES_FIELD_MASK },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Google Places text error: ${res.status} — ${await res.text()}`);
+  return ((await res.json() as { places?: PlaceResult[] }).places) ?? [];
+}
+
+async function getRatings(db: D1Database, ids: string[]): Promise<Map<string, Record<string, { avg: number; count: number }>>> {
+  if (ids.length === 0) return new Map();
+  const ph = ids.map(() => '?').join(',');
+  const rows = await db.prepare(
+    `SELECT place_id, allergen, ROUND(AVG(CAST(safety AS REAL)), 1) as avg_safety, COUNT(*) as count FROM ratings WHERE place_id IN (${ph}) GROUP BY place_id, allergen`
+  ).bind(...ids).all<RatingRow>();
+  const map = new Map<string, Record<string, { avg: number; count: number }>>();
+  for (const r of rows.results ?? []) {
+    if (!map.has(r.place_id)) map.set(r.place_id, {});
+    map.get(r.place_id)![r.allergen] = { avg: r.avg_safety, count: r.count };
+  }
+  return map;
+}
+
+function shapePlaces(places: PlaceResult[], ratings: Map<string, Record<string, { avg: number; count: number }>>) {
+  return {
+    results: places.map(p => ({
+      id: p.id,
+      name: p.displayName?.text ?? 'Unknown',
+      address: p.formattedAddress ?? '',
+      category: inferCategory(p.types ?? []),
+      googleRating: p.rating ?? null,
+      googleRatingCount: p.userRatingCount ?? 0,
+      isOpen: p.currentOpeningHours?.openNow ?? null,
+      website: p.websiteUri ?? null,
+      allergenRatings: ratings.get(p.id) ?? {},
+    })),
+  };
+}
+
+async function handleGetEstablishments(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const category = url.searchParams.get('category') ?? 'all';
+  const q        = url.searchParams.get('q') ?? '';
+  const latStr   = url.searchParams.get('lat') ?? '';
+  const lngStr   = url.searchParams.get('lng') ?? '';
+  const radius   = Math.min(50000, Math.max(500, parseInt(url.searchParams.get('radius') ?? '5000', 10) || 5000));
+
+  let cacheKey: string;
+  let places: PlaceResult[];
+
+  try {
+    if (latStr && lngStr) {
+      const lat = parseFloat(latStr);
+      const lng = parseFloat(lngStr);
+      if (isNaN(lat) || isNaN(lng)) return json({ error: 'Invalid lat/lng' }, 400);
+      cacheKey = `places:${lat.toFixed(3)},${lng.toFixed(3)}:${radius}:${category}`;
+      const cached = await env.TIPS_CACHE.get(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached) as PlaceResult[];
+        return json(shapePlaces(parsed, await getRatings(env.ESTABLISHMENTS_DB, parsed.map(p => p.id))));
+      }
+      places = await fetchNearby(env.GOOGLE_PLACES_API_KEY, lat, lng, radius, category);
+    } else if (q) {
+      cacheKey = `places:text:${category}:${q.slice(0, 80)}`;
+      const cached = await env.TIPS_CACHE.get(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached) as PlaceResult[];
+        return json(shapePlaces(parsed, await getRatings(env.ESTABLISHMENTS_DB, parsed.map(p => p.id))));
+      }
+      places = await fetchByText(env.GOOGLE_PLACES_API_KEY, q, category);
+    } else {
+      return json({ error: 'Provide lat/lng or q' }, 400);
+    }
+  } catch (err) {
+    return json({ error: 'Places API error', detail: String(err) }, 502);
+  }
+
+  await env.TIPS_CACHE.put(cacheKey!, JSON.stringify(places), { expirationTtl: 3600 });
+  return json(shapePlaces(places, await getRatings(env.ESTABLISHMENTS_DB, places.map(p => p.id))));
+}
+
+async function handlePostRating(request: Request, env: Env): Promise<Response> {
+  let body: { place_id?: string; place_name?: string; place_addr?: string; allergen?: string; safety?: number; notes?: string };
+  try { body = await request.json() as typeof body; }
+  catch { return json({ error: 'Invalid JSON body' }, 400); }
+
+  const { place_id, place_name, allergen, safety } = body;
+  if (!place_id?.trim() || !place_name?.trim() || !allergen?.trim())
+    return json({ error: 'place_id, place_name, allergen required' }, 400);
+  if (typeof safety !== 'number' || safety < 1 || safety > 5)
+    return json({ error: 'safety must be 1–5' }, 400);
+  if (!VALID_ALLERGENS.has(allergen))
+    return json({ error: 'Invalid allergen' }, 400);
+
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  await env.ESTABLISHMENTS_DB.prepare(
+    'INSERT INTO ratings (id, place_id, place_name, place_addr, allergen, safety, notes) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).bind(id, place_id.trim(), place_name.trim(), body.place_addr?.trim() ?? '', allergen, Math.round(safety), body.notes?.trim() ?? '').run();
+
+  return json({ success: true, id });
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 
 export default {
@@ -569,6 +748,16 @@ export default {
     // /chat  (Ask Jeeves chatbot)
     if (path === '/chat' && request.method === 'POST') {
       return handleChat(request, env);
+    }
+
+    // /establishments  (nearby allergy-friendly places)
+    if (path === '/establishments' && request.method === 'GET') {
+      return handleGetEstablishments(request, env);
+    }
+
+    // /establishments/rate  (community allergen rating)
+    if (path === '/establishments/rate' && request.method === 'POST') {
+      return handlePostRating(request, env);
     }
 
     // /privacy

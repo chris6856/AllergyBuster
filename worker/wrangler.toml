@@ -16,6 +16,12 @@ id = "8aa10f18e2fd4fa7aa25bf69ba08ab38"
 binding = "CHAINS_DB"
 id = "c155b56bacb8495092fffa9afa9a357b"
 
+[[d1_databases]]
+binding = "ESTABLISHMENTS_DB"
+database_name = "allergybuster-establishments"
+database_id = "71fc5057-d827-467b-a17b-4d093393400d"
+
 # Secrets — set with:
 #   wrangler secret put ANTHROPIC_API_KEY
 #   wrangler secret put ADMIN_KEY   (used to protect PUT/DELETE /chains endpoints)
+#   wrangler secret put GOOGLE_PLACES_API_KEY

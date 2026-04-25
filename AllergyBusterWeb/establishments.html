@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18116393800"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-18116393800');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Allergy-Friendly Places Near You — AllergyBuster</title>
+  <meta name="description" content="Find allergy-friendly restaurants, bakeries and cafés near you. Community allergen ratings for peanuts, dairy, gluten, eggs, soy, fish, shellfish, sesame and more." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --green-deep:  #0f2318;
+      --green-dark:  #1a3a2a;
+      --green-mid:   #2d5c40;
+      --green-light: #4a8c62;
+      --green-pale:  #8aab8a;
+      --amber:       #e8a020;
+      --amber-light: #f5c060;
+      --amber-pale:  #fdf0d0;
+      --cream:       #f7f2e8;
+      --cream-dark:  #ede7d9;
+      --charcoal:    #1a1a1a;
+      --muted:       #6b6b5a;
+      --white:       #ffffff;
+      --red:         #c0392b;
+      --font-display:'Playfair Display', Georgia, serif;
+      --font-body:   'DM Sans', sans-serif;
+      --font-mono:   'Courier Prime', 'Courier New', monospace;
+      --radius-sm:   6px;
+      --radius-md:   12px;
+      --radius-lg:   24px;
+      --radius-xl:   40px;
+      --shadow-sm:   0 2px 8px rgba(15,35,24,.12);
+      --shadow-md:   0 8px 32px rgba(15,35,24,.18);
+      --shadow-lg:   0 24px 64px rgba(15,35,24,.24);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: var(--font-body); background: var(--cream); color: var(--charcoal); line-height: 1.6; overflow-x: hidden; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--font-body); cursor: pointer; }
+    .container { max-width: 1140px; margin-inline: auto; padding-inline: 2rem; }
+
+    /* ─── Nav ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.25rem 0;
+      background: rgba(247,242,232,.97); backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 rgba(15,35,24,.1);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: .6rem; font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; color: var(--green-dark); }
+    .nav-logo-mark { width: 36px; height: 36px; background: var(--green-dark); border-radius: 10px; display: grid; place-items: center; }
+    .nav-logo-mark svg { color: var(--amber); }
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-links a { font-size: .9rem; font-weight: 500; color: var(--green-dark); opacity: .75; transition: opacity .2s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active { opacity: 1; font-weight: 600; }
+
+    /* ─── Hero ─── */
+    .page-hero {
+      background: var(--green-deep); padding: 8rem 0 5rem; position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 256px; opacity: .35; pointer-events: none;
+    }
+    .page-hero::after {
+      content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 56px;
+      background: var(--cream); clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    .hero-inner { position: relative; z-index: 2; text-align: center; }
+    .section-label { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .18em; text-transform: uppercase; color: var(--amber-light); display: block; margin-bottom: .75rem; }
+    .hero-inner h1 { font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 900; color: var(--cream); line-height: 1.1; margin-bottom: 1rem; }
+    .hero-inner h1 em { font-style: italic; color: var(--amber); }
+    .hero-inner p { font-size: 1rem; color: rgba(247,242,232,.65); max-width: 520px; margin-inline: auto; line-height: 1.75; }
+
+    /* ─── Disclaimer ─── */
+    .disclaimer { background: var(--amber-pale); border-top: 2px solid var(--amber); padding: .85rem 0; }
+    .disclaimer p { font-size: .84rem; color: var(--green-dark); text-align: center; display: flex; align-items: center; justify-content: center; gap: .5rem; flex-wrap: wrap; }
+
+    /* ─── Filter / Location Bar ─── */
+    .filter-section {
+      background: var(--cream); padding: 1.5rem 0 1.25rem;
+      position: sticky; top: 72px; z-index: 50;
+      border-bottom: 1px solid var(--cream-dark);
+      box-shadow: 0 4px 16px rgba(15,35,24,.05);
+    }
+    .location-row { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .geo-btn {
+      display: flex; align-items: center; gap: .5rem;
+      background: var(--green-dark); color: var(--cream);
+      border: none; border-radius: var(--radius-md);
+      padding: .65rem 1.1rem; font-size: .88rem; font-weight: 600;
+      transition: background .2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .geo-btn:hover { background: var(--green-mid); }
+    .loc-divider { font-size: .8rem; color: var(--muted); flex-shrink: 0; }
+    .city-wrap { flex: 1; min-width: 180px; display: flex; gap: .5rem; }
+    .city-input {
+      flex: 1; font-family: var(--font-body); font-size: .9rem; color: var(--charcoal);
+      background: var(--white); border: 1.5px solid var(--cream-dark); border-radius: var(--radius-md);
+      padding: .6rem .9rem; outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .city-input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(74,140,98,.15); }
+    .city-input::placeholder { color: var(--muted); }
+    .city-search-btn {
+      background: var(--cream-dark); color: var(--green-dark); border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md); padding: .6rem 1rem; font-size: .88rem; font-weight: 600;
+      transition: background .2s;
+    }
+    .city-search-btn:hover { background: var(--green-pale); color: var(--white); border-color: var(--green-pale); }
+
+    .radius-wrap { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+    .radius-label { font-size: .75rem; color: var(--muted); white-space: nowrap; }
+    .radius-select {
+      font-family: var(--font-body); font-size: .82rem; color: var(--charcoal);
+      background: var(--white); border: 1.5px solid var(--cream-dark); border-radius: var(--radius-md);
+      padding: .45rem .7rem; outline: none; cursor: pointer;
+    }
+
+    .filter-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .55rem; }
+    .filter-row:last-child { margin-bottom: 0; }
+    .filter-label { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; flex-shrink: 0; margin-right: .15rem; }
+    .pill {
+      font-size: .82rem; font-weight: 500; padding: .35rem .9rem;
+      border-radius: var(--radius-xl); border: 1.5px solid var(--cream-dark);
+      background: var(--white); color: var(--charcoal); cursor: pointer;
+      transition: all .2s; white-space: nowrap; user-select: none;
+    }
+    .pill:hover { border-color: var(--green-light); color: var(--green-dark); }
+    .pill.active { background: var(--green-dark); border-color: var(--green-dark); color: var(--cream); }
+    .acc-pill {
+      font-size: .78rem; font-weight: 500; padding: .3rem .8rem;
+      border-radius: var(--radius-xl); border: 1.5px solid rgba(45,92,64,.22);
+      background: transparent; color: var(--green-mid); cursor: pointer;
+      transition: all .2s; white-space: nowrap; user-select: none;
+    }
+    .acc-pill:hover { background: rgba(45,92,64,.07); }
+    .acc-pill.active { background: var(--green-mid); border-color: var(--green-mid); color: var(--white); }
+
+    .result-meta { font-family: var(--font-mono); font-size: .75rem; color: var(--muted); margin-top: .65rem; }
+    .result-meta strong { color: var(--green-dark); }
+
+    /* ─── Results Section ─── */
+    .results-section { padding: 2.5rem 0 6rem; min-height: 50vh; }
+    .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+
+    /* ─── State Screens ─── */
+    .state-screen {
+      grid-column: 1 / -1; text-align: center; padding: 5rem 2rem;
+    }
+    .state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .state-screen h3 { font-family: var(--font-display); font-size: 1.4rem; color: var(--green-deep); margin-bottom: .5rem; }
+    .state-screen p { color: var(--muted); font-size: .95rem; max-width: 380px; margin-inline: auto; line-height: 1.65; }
+    .state-action {
+      display: inline-flex; margin-top: 1.5rem;
+      background: var(--green-dark); color: var(--cream);
+      padding: .75rem 1.75rem; border-radius: var(--radius-xl); font-weight: 600; font-size: .9rem;
+      border: none; transition: background .2s, transform .2s;
+    }
+    .state-action:hover { background: var(--green-mid); transform: translateY(-1px); }
+
+    /* Spinner */
+    .spinner-wrap { grid-column: 1 / -1; display: flex; justify-content: center; padding: 5rem; }
+    .spinner {
+      width: 44px; height: 44px; border: 3px solid var(--cream-dark);
+      border-top-color: var(--green-dark); border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Card ─── */
+    .est-card {
+      background: var(--white); border-radius: var(--radius-lg); padding: 1.6rem;
+      box-shadow: var(--shadow-sm); border: 1px solid rgba(15,35,24,.06);
+      transition: transform .25s, box-shadow .25s;
+      display: flex; flex-direction: column; gap: .85rem;
+    }
+    .est-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+    .card-avatar { width: 52px; height: 52px; border-radius: var(--radius-md); display: grid; place-items: center; font-size: 1.6rem; flex-shrink: 0; }
+    .card-badges { display: flex; flex-direction: column; align-items: flex-end; gap: .35rem; }
+    .cat-badge {
+      font-family: var(--font-mono); font-size: .63rem; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; padding: .25rem .65rem; border-radius: var(--radius-xl);
+      background: var(--amber-pale); color: var(--green-dark); white-space: nowrap;
+    }
+    .open-badge {
+      font-size: .68rem; font-weight: 600; padding: .2rem .55rem; border-radius: var(--radius-xl);
+    }
+    .open-badge.open { background: rgba(45,92,64,.1); color: var(--green-mid); }
+    .open-badge.closed { background: rgba(192,57,43,.08); color: var(--red); }
+    .card-name { font-family: var(--font-display); font-size: 1.08rem; font-weight: 700; color: var(--green-deep); line-height: 1.25; }
+    .card-address { font-size: .78rem; color: var(--muted); margin-top: .2rem; display: flex; align-items: flex-start; gap: .3rem; }
+    .card-google-rating {
+      display: flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--muted);
+    }
+    .g-stars { color: var(--amber); font-size: .82rem; }
+    .g-rating-val { font-weight: 600; color: var(--charcoal); }
+    .g-rating-count { color: var(--muted); font-size: .75rem; }
+
+    /* Allergen community scores */
+    .allergen-scores { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .allergen-score-tag {
+      font-size: .7rem; font-weight: 600; padding: .22rem .6rem; border-radius: var(--radius-xl);
+      display: flex; align-items: center; gap: .3rem; white-space: nowrap;
+    }
+    .allergen-score-tag.great  { background: rgba(45,92,64,.10); color: var(--green-mid); border: 1px solid rgba(45,92,64,.2); }
+    .allergen-score-tag.ok     { background: rgba(232,160,32,.10); color: #92600a; border: 1px solid rgba(232,160,32,.25); }
+    .allergen-score-tag.poor   { background: rgba(192,57,43,.08); color: var(--red); border: 1px solid rgba(192,57,43,.18); }
+    .allergen-score-tag.highlighted { box-shadow: 0 0 0 2px var(--green-light); }
+
+    .no-community { font-size: .78rem; color: var(--muted); font-style: italic; }
+
+    /* Card footer */
+    .card-footer { padding-top: .85rem; border-top: 1px solid var(--cream-dark); display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+    .card-website-btn {
+      font-size: .78rem; font-weight: 600; color: var(--muted);
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .35rem .75rem; border: 1.5px solid var(--cream-dark); border-radius: var(--radius-md);
+      transition: all .2s;
+    }
+    .card-website-btn:hover { color: var(--green-dark); border-color: var(--green-light); }
+    .rate-btn {
+      font-size: .82rem; font-weight: 600;
+      background: var(--green-dark); color: var(--cream);
+      border: none; border-radius: var(--radius-md);
+      padding: .4rem .95rem; transition: background .2s;
+    }
+    .rate-btn:hover { background: var(--green-mid); }
+
+    /* ─── Rating Modal ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15,35,24,.6); backdrop-filter: blur(4px);
+      z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--white); border-radius: var(--radius-xl);
+      padding: 2.25rem; width: 100%; max-width: 520px;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(24px); transition: transform .25s;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
+    .modal-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--green-deep); }
+    .modal-place { font-size: .82rem; color: var(--muted); margin-top: .2rem; }
+    .modal-close {
+      background: none; border: none; color: var(--muted); font-size: 1.4rem;
+      line-height: 1; flex-shrink: 0; padding: .2rem; transition: color .2s;
+    }
+    .modal-close:hover { color: var(--charcoal); }
+
+    .modal-field { margin-bottom: 1.25rem; }
+    .modal-label { font-size: .78rem; font-weight: 700; color: var(--green-dark); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; display: block; }
+    .modal-select {
+      font-family: var(--font-body); font-size: .93rem; color: var(--charcoal);
+      background: var(--cream); border: 1.5px solid var(--cream-dark); border-radius: var(--radius-md);
+      padding: .65rem .9rem; outline: none; width: 100%; transition: border-color .2s, box-shadow .2s;
+    }
+    .modal-select:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(74,140,98,.15); }
+
+    .safety-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; }
+    .safety-btn {
+      display: flex; flex-direction: column; align-items: center; gap: .3rem;
+      padding: .7rem .3rem; border-radius: var(--radius-md);
+      border: 2px solid var(--cream-dark); background: var(--cream);
+      font-size: .85rem; font-weight: 700; color: var(--muted);
+      transition: all .2s;
+    }
+    .safety-btn span { font-size: .62rem; font-weight: 500; line-height: 1.2; text-align: center; }
+    .safety-btn:hover { border-color: var(--green-light); }
+    .safety-btn.selected { background: var(--green-dark); border-color: var(--green-dark); color: var(--cream); }
+    .safety-btn[data-val="1"].selected { background: #c0392b; border-color: #c0392b; }
+    .safety-btn[data-val="2"].selected { background: #e67e22; border-color: #e67e22; }
+    .safety-btn[data-val="3"].selected { background: #d4a017; border-color: #d4a017; }
+    .safety-btn[data-val="4"].selected { background: var(--green-mid); border-color: var(--green-mid); }
+    .safety-btn[data-val="5"].selected { background: var(--green-dark); border-color: var(--green-dark); }
+
+    .modal-textarea {
+      font-family: var(--font-body); font-size: .9rem; color: var(--charcoal);
+      background: var(--cream); border: 1.5px solid var(--cream-dark); border-radius: var(--radius-md);
+      padding: .65rem .9rem; outline: none; width: 100%; resize: vertical; min-height: 80px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .modal-textarea:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(74,140,98,.15); }
+    .modal-submit {
+      width: 100%; background: var(--green-dark); color: var(--cream);
+      border: none; border-radius: var(--radius-md); padding: .9rem;
+      font-size: 1rem; font-weight: 700; transition: background .2s, transform .2s;
+    }
+    .modal-submit:hover { background: var(--green-mid); transform: translateY(-1px); }
+    .modal-status { margin-top: .75rem; font-size: .87rem; min-height: 1.2em; text-align: center; }
+    .modal-status.success { color: var(--green-mid); font-weight: 600; }
+    .modal-status.error   { color: var(--red); }
+
+    /* ─── Submit CTA ─── */
+    .submit-cta { background: var(--green-dark); padding: 5rem 0; position: relative; overflow: hidden; }
+    .submit-cta::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 256px; opacity: .3; pointer-events: none;
+    }
+    .cta-inner { position: relative; z-index: 1; text-align: center; max-width: 600px; margin-inline: auto; }
+    .cta-inner .section-label { color: var(--amber-light); }
+    .cta-inner h2 { font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 700; color: var(--cream); margin-bottom: .75rem; }
+    .cta-inner h2 em { color: var(--amber); font-style: italic; }
+    .cta-inner p { color: rgba(247,242,232,.62); font-size: .95rem; line-height: 1.75; margin-bottom: 2rem; }
+    .cta-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; text-align: left; }
+    .cta-step { background: rgba(247,242,232,.07); border: 1px solid rgba(247,242,232,.12); border-radius: var(--radius-lg); padding: 1.5rem; }
+    .cta-step-num { font-family: var(--font-mono); font-size: .75rem; color: var(--amber-light); font-weight: 700; margin-bottom: .5rem; }
+    .cta-step h4 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--cream); margin-bottom: .35rem; }
+    .cta-step p { font-size: .82rem; color: rgba(247,242,232,.55); line-height: 1.6; margin: 0; }
+
+    /* ─── Footer ─── */
+    footer { background: var(--green-deep); padding: 4rem 0 2.5rem; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-logo { display: flex; align-items: center; gap: .6rem; font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; color: var(--cream); margin-bottom: 1rem; }
+    .footer-logo-mark { width: 32px; height: 32px; background: var(--amber); border-radius: 8px; display: grid; place-items: center; }
+    .footer-logo-mark svg { color: var(--green-deep); }
+    .footer-tagline { color: rgba(247,242,232,.5); font-size: .9rem; line-height: 1.6; max-width: 260px; }
+    .footer-col-title { font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(247,242,232,.4); margin-bottom: 1rem; }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .footer-links a { color: rgba(247,242,232,.65); font-size: .9rem; transition: color .2s; }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-bottom { padding-top: 2rem; border-top: 1px solid rgba(247,242,232,.1); display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; flex-wrap: wrap; }
+    .footer-legal { font-size: .78rem; color: rgba(247,242,232,.35); max-width: 600px; line-height: 1.6; }
+    .footer-copy { font-size: .8rem; color: rgba(247,242,232,.4); white-space: nowrap; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 1000px) { .results-grid { grid-template-columns: 1fr 1fr; } .cta-steps { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } .nav-links { display: none; } }
+    @media (max-width: 640px) { .results-grid { grid-template-columns: 1fr; } .footer-grid { grid-template-columns: 1fr; } .filter-section { position: static; } .safety-grid { grid-template-columns: repeat(5, 1fr); } }
+  </style>
+</head>
+<body>
+
+<!-- ─── Nav ─────────────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="nav-logo-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10"/><circle cx="12" cy="12" r="3"/></svg>
+        </span>
+        AllergyBuster
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="index.html#videos">Videos</a></li>
+        <li><a href="establishments.html" class="active">Safe Places</a></li>
+        <li><a href="index.html#contribute">Contribute</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── Hero ─────────────────────────────────────────────────────────────────── -->
+<section class="page-hero">
+  <div class="container">
+    <div class="hero-inner">
+      <span class="section-label">Community Allergy Directory</span>
+      <h1>Find places that keep you <em>safe</em>.</h1>
+      <p>Search nearby restaurants, bakeries, and cafés. See real community ratings for peanuts, dairy, gluten, eggs, soy, shellfish, sesame, and more.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Disclaimer ───────────────────────────────────────────────────────────── -->
+<div class="disclaimer">
+  <div class="container">
+    <p>⚠️ <strong>Always verify allergen information directly with the establishment before dining.</strong> Community ratings reflect individual experiences and may not reflect current menu or kitchen practices.</p>
+  </div>
+</div>
+
+<!-- ─── Filter Section ───────────────────────────────────────────────────────── -->
+<div class="filter-section">
+  <div class="container">
+    <!-- Location row -->
+    <div class="location-row">
+      <button class="geo-btn" id="geo-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        Use My Location
+      </button>
+      <span class="loc-divider">or</span>
+      <div class="city-wrap">
+        <input class="city-input" id="city-input" type="text" placeholder="Enter a city, e.g. Chicago IL" />
+        <button class="city-search-btn" id="city-search-btn">Search</button>
+      </div>
+      <div class="radius-wrap">
+        <span class="radius-label">Within</span>
+        <select class="radius-select" id="radius-select">
+          <option value="1000">1 km</option>
+          <option value="2000">2 km</option>
+          <option value="5000" selected>5 km</option>
+          <option value="10000">10 km</option>
+          <option value="25000">25 km</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Category pills -->
+    <div class="filter-row" id="category-pills">
+      <span class="filter-label">Type:</span>
+      <button class="pill active" data-cat="all">🍽 All</button>
+      <button class="pill" data-cat="restaurant">🍴 Restaurant</button>
+      <button class="pill" data-cat="fastfood">🍔 Fast Food</button>
+      <button class="pill" data-cat="cafe">☕ Café</button>
+      <button class="pill" data-cat="bakery">🧁 Bakery</button>
+      <button class="pill" data-cat="pizza">🍕 Pizza</button>
+      <button class="pill" data-cat="asian">🥡 Asian</button>
+      <button class="pill" data-cat="icecream">🍨 Ice Cream</button>
+    </div>
+
+    <!-- Allergen highlight pills -->
+    <div class="filter-row" id="allergen-pills">
+      <span class="filter-label">Highlight:</span>
+      <button class="acc-pill" data-allergen="peanuts">🥜 Peanuts</button>
+      <button class="acc-pill" data-allergen="tree-nuts">🌰 Tree Nuts</button>
+      <button class="acc-pill" data-allergen="milk">🥛 Dairy</button>
+      <button class="acc-pill" data-allergen="eggs">🥚 Eggs</button>
+      <button class="acc-pill" data-allergen="wheat">🌾 Wheat/Gluten</button>
+      <button class="acc-pill" data-allergen="soy">🫘 Soy</button>
+      <button class="acc-pill" data-allergen="fish">🐟 Fish</button>
+      <button class="acc-pill" data-allergen="shellfish">🦐 Shellfish</button>
+      <button class="acc-pill" data-allergen="sesame">🫙 Sesame</button>
+      <button class="acc-pill" data-allergen="mustard">🌿 Mustard</button>
+      <button class="acc-pill" data-allergen="sulfites">🍷 Sulfites</button>
+      <button class="acc-pill" data-allergen="lupin">🌱 Lupin</button>
+    </div>
+
+    <div class="result-meta" id="result-meta"></div>
+  </div>
+</div>
+
+<!-- ─── Results ───────────────────────────────────────────────────────────────── -->
+<section class="results-section">
+  <div class="container">
+    <div class="results-grid" id="results-grid">
+      <!-- Initial prompt -->
+      <div class="state-screen" id="initial-state">
+        <div class="state-icon">📍</div>
+        <h3>Find allergy-friendly places near you</h3>
+        <p>Use your location or search a city to discover restaurants with community allergen ratings.</p>
+        <button class="state-action" onclick="document.getElementById('geo-btn').click()">Use My Location</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Rating Modal ──────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Rate Allergen Accommodation</div>
+        <div class="modal-place" id="modal-place-name"></div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-field">
+      <label class="modal-label" for="modal-allergen">Which allergen are you rating?</label>
+      <select class="modal-select" id="modal-allergen">
+        <option value="">Select an allergen…</option>
+        <option value="peanuts">🥜 Peanuts</option>
+        <option value="tree-nuts">🌰 Tree Nuts</option>
+        <option value="milk">🥛 Milk / Dairy</option>
+        <option value="eggs">🥚 Eggs</option>
+        <option value="wheat">🌾 Wheat / Gluten</option>
+        <option value="soy">🫘 Soy</option>
+        <option value="fish">🐟 Fish</option>
+        <option value="shellfish">🦐 Shellfish</option>
+        <option value="sesame">🫙 Sesame</option>
+        <option value="mustard">🌿 Mustard</option>
+        <option value="sulfites">🍷 Sulfites</option>
+        <option value="lupin">🌱 Lupin</option>
+      </select>
+    </div>
+
+    <div class="modal-field">
+      <label class="modal-label">How well did they accommodate this allergy?</label>
+      <div class="safety-grid">
+        <button class="safety-btn" data-val="1">1<span>Could not accommodate</span></button>
+        <button class="safety-btn" data-val="2">2<span>Limited, felt unsafe</span></button>
+        <button class="safety-btn" data-val="3">3<span>Tried, but uncertain</span></button>
+        <button class="safety-btn" data-val="4">4<span>Good, felt safe</span></button>
+        <button class="safety-btn" data-val="5">5<span>Excellent, dedicated menu</span></button>
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <label class="modal-label" for="modal-notes">Notes (optional)</label>
+      <textarea class="modal-textarea" id="modal-notes" placeholder="e.g. Chef was knowledgeable, used separate pans, asked about allergies…"></textarea>
+    </div>
+
+    <button class="modal-submit" id="modal-submit">Submit Rating</button>
+    <div class="modal-status" id="modal-status" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- ─── CTA ───────────────────────────────────────────────────────────────────── -->
+<section class="submit-cta">
+  <div class="container">
+    <div class="cta-inner">
+      <span class="section-label">How it works</span>
+      <h2>Help build the <em>safest</em> food directory.</h2>
+      <p>Every rating you submit helps other allergy sufferers find places where they can eat confidently. The more people rate, the better the data gets.</p>
+      <div class="cta-steps">
+        <div class="cta-step">
+          <div class="cta-step-num">01</div>
+          <h4>Search nearby</h4>
+          <p>Find restaurants, cafés and bakeries near your location or any city.</p>
+        </div>
+        <div class="cta-step">
+          <div class="cta-step-num">02</div>
+          <h4>Rate your experience</h4>
+          <p>Tap "Rate This Place" and score how well they handled your specific allergy.</p>
+        </div>
+        <div class="cta-step">
+          <div class="cta-step-num">03</div>
+          <h4>Community learns</h4>
+          <p>Your rating immediately helps others with the same allergy know where to go.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ───────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">
+          <span class="footer-logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+          AllergyBuster
+        </div>
+        <p class="footer-tagline">Instant allergen clarity for everyone managing food allergies. Available on iOS and Android.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">App</div>
+        <ul class="footer-links">
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="index.html#how-it-works">How It Works</a></li>
+          <li><a href="index.html#videos">How-To Videos</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Community</div>
+        <ul class="footer-links">
+          <li><a href="establishments.html">Safe Places</a></li>
+          <li><a href="index.html#contribute">Contribute Data</a></li>
+          <li><a href="index.html#testimonials">User Stories</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <ul class="footer-links">
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Use</a></li>
+          <li><a href="disclaimer.html">Medical Disclaimer</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">
+        <strong style="color:rgba(247,242,232,.5);">Disclaimer:</strong> Establishment and allergen accommodation data is community-sourced. AllergyBuster does not guarantee accuracy. Always verify with the establishment directly. Not a substitute for medical advice. Call 911 in emergencies.
+      </p>
+      <div class="footer-copy">© 2026 AllergyBuster. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── JavaScript ────────────────────────────────────────────────────────────── -->
+<script>
+  const WORKER = 'https://allergybuster-tips.allergybuster-tips.workers.dev';
+
+  const ALLERGEN_LABELS = {
+    'peanuts':   '🥜 Peanuts',
+    'tree-nuts': '🌰 Tree Nuts',
+    'milk':      '🥛 Dairy',
+    'eggs':      '🥚 Eggs',
+    'wheat':     '🌾 Wheat/Gluten',
+    'soy':       '🫘 Soy',
+    'fish':      '🐟 Fish',
+    'shellfish': '🦐 Shellfish',
+    'sesame':    '🫙 Sesame',
+    'mustard':   '🌿 Mustard',
+    'sulfites':  '🍷 Sulfites',
+    'lupin':     '🌱 Lupin',
+  };
+
+  const CAT_LABELS = {
+    restaurant: 'Restaurant', fastfood: 'Fast Food', cafe: 'Café',
+    bakery: 'Bakery', pizza: 'Pizza', asian: 'Asian', icecream: 'Ice Cream',
+  };
+  const CAT_EMOJI = {
+    restaurant: '🍴', fastfood: '🍔', cafe: '☕',
+    bakery: '🧁', pizza: '🍕', asian: '🥡', icecream: '🍨',
+  };
+  const CAT_COLOR = {
+    restaurant: '#4a8c62', fastfood: '#c0392b', cafe: '#8b4513',
+    bakery: '#9b59b6', pizza: '#e74c3c', asian: '#e8a020', icecream: '#3498db',
+  };
+
+  let activeCategory = 'all';
+  let highlightedAllergens = new Set();
+  let currentGeo = null; // { lat, lng }
+  let currentCity = '';
+  let currentResults = [];
+
+  // ── State rendering ──────────────────────────────────────────────────────────
+  function showLoading() {
+    const grid = document.getElementById('results-grid');
+    grid.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+    document.getElementById('result-meta').textContent = '';
+  }
+
+  function showError(msg) {
+    const grid = document.getElementById('results-grid');
+    grid.innerHTML = `<div class="state-screen"><div class="state-icon">⚠️</div><h3>Something went wrong</h3><p>${msg}</p></div>`;
+  }
+
+  function showEmpty() {
+    const grid = document.getElementById('results-grid');
+    grid.innerHTML = `<div class="state-screen"><div class="state-icon">🔍</div><h3>No results found</h3><p>Try a different category, location, or wider radius.</p></div>`;
+  }
+
+  // ── Score helpers ────────────────────────────────────────────────────────────
+  function scoreClass(avg) {
+    if (avg >= 4) return 'great';
+    if (avg >= 3) return 'ok';
+    return 'poor';
+  }
+
+  function stars(rating) {
+    if (!rating) return '';
+    const full = Math.round(rating);
+    return '★'.repeat(full) + '☆'.repeat(5 - full);
+  }
+
+  // ── Card rendering ───────────────────────────────────────────────────────────
+  function renderCard(place) {
+    const cat = CAT_LABELS[place.category] || 'Restaurant';
+    const emoji = CAT_EMOJI[place.category] || '🍴';
+    const color = CAT_COLOR[place.category] || '#4a8c62';
+    const ratings = place.allergenRatings || {};
+
+    // Allergen score tags
+    let allergenHtml = '';
+    const ratedAllergens = Object.keys(ratings);
+    if (ratedAllergens.length > 0) {
+      allergenHtml = ratedAllergens.map(key => {
+        const r = ratings[key];
+        const cls = scoreClass(r.avg);
+        const highlighted = highlightedAllergens.has(key) ? ' highlighted' : '';
+        const label = ALLERGEN_LABELS[key] || key;
+        return `<span class="allergen-score-tag ${cls}${highlighted}" title="${r.count} rating${r.count !== 1 ? 's' : ''}">
+          ${label} ★${r.avg} <span style="opacity:.6">·${r.count}</span>
+        </span>`;
+      }).join('');
+    } else {
+      allergenHtml = '<span class="no-community">No community ratings yet — be the first!</span>';
+    }
+
+    const openBadge = place.isOpen === true
+      ? '<span class="open-badge open">Open</span>'
+      : place.isOpen === false
+        ? '<span class="open-badge closed">Closed</span>'
+        : '';
+
+    const googleRating = place.googleRating
+      ? `<div class="card-google-rating">
+          <span class="g-stars">${stars(place.googleRating)}</span>
+          <span class="g-rating-val">${place.googleRating}</span>
+          <span class="g-rating-count">(${place.googleRatingCount.toLocaleString()})</span>
+         </div>`
+      : '';
+
+    const websiteBtn = place.website
+      ? `<a href="${place.website}" target="_blank" rel="noopener" class="card-website-btn">
+          Website
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+         </a>`
+      : '<span></span>';
+
+    return `
+      <div class="est-card">
+        <div class="card-top">
+          <div class="card-avatar" style="background:${color}20;">${emoji}</div>
+          <div class="card-badges">
+            <span class="cat-badge">${cat}</span>
+            ${openBadge}
+          </div>
+        </div>
+        <div>
+          <div class="card-name">${escHtml(place.name)}</div>
+          ${place.address ? `<div class="card-address"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>${escHtml(place.address)}</div>` : ''}
+          ${googleRating}
+        </div>
+        <div class="allergen-scores">${allergenHtml}</div>
+        <div class="card-footer">
+          ${websiteBtn}
+          <button class="rate-btn" onclick="openModal(${JSON.stringify({id: place.id, name: place.name, addr: place.address || ''}).replace(/'/g, '&#39;')})">
+            Rate This Place
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ── Render results ───────────────────────────────────────────────────────────
+  function renderResults(results) {
+    currentResults = results;
+    const grid = document.getElementById('results-grid');
+    const meta = document.getElementById('result-meta');
+
+    if (!results || results.length === 0) { showEmpty(); return; }
+
+    grid.innerHTML = results.map(renderCard).join('');
+    meta.innerHTML = `Showing <strong>${results.length}</strong> place${results.length !== 1 ? 's' : ''}`;
+  }
+
+  // ── Re-render cards (when highlight pills change) ─────────────────────────────
+  function reRender() {
+    if (currentResults.length > 0) renderResults(currentResults);
+  }
+
+  // ── Fetch from worker ─────────────────────────────────────────────────────────
+  async function fetchEstablishments(params) {
+    showLoading();
+    const qs = new URLSearchParams(params).toString();
+    try {
+      const res = await fetch(`${WORKER}/establishments?${qs}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      renderResults(data.results || []);
+    } catch (err) {
+      showError(`Could not load results: ${err.message}. Please try again.`);
+    }
+  }
+
+  // ── Load by geolocation ───────────────────────────────────────────────────────
+  document.getElementById('geo-btn').addEventListener('click', () => {
+    if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
+    const btn = document.getElementById('geo-btn');
+    btn.textContent = '…Locating';
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        currentGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        currentCity = '';
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> My Location`;
+        fetchEstablishments({ lat: currentGeo.lat, lng: currentGeo.lng, radius: document.getElementById('radius-select').value, category: activeCategory });
+      },
+      err => {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Use My Location`;
+        alert('Could not get your location. Please enter a city instead.');
+      },
+      { timeout: 10000 }
+    );
+  });
+
+  // ── Load by city ─────────────────────────────────────────────────────────────
+  function doSearch() {
+    const city = document.getElementById('city-input').value.trim();
+    if (!city) return;
+    currentCity = city;
+    currentGeo = null;
+    const catLabel = { all: 'restaurants', restaurant: 'restaurants', fastfood: 'fast food restaurants', cafe: 'cafes', bakery: 'bakeries', pizza: 'pizza restaurants', asian: 'Asian restaurants', icecream: 'ice cream shops' };
+    const q = `${catLabel[activeCategory] || 'restaurants'} in ${city}`;
+    fetchEstablishments({ q, category: activeCategory });
+  }
+  document.getElementById('city-search-btn').addEventListener('click', doSearch);
+  document.getElementById('city-input').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+  // ── Radius change ─────────────────────────────────────────────────────────────
+  document.getElementById('radius-select').addEventListener('change', () => {
+    if (currentGeo) fetchEstablishments({ lat: currentGeo.lat, lng: currentGeo.lng, radius: document.getElementById('radius-select').value, category: activeCategory });
+  });
+
+  // ── Category pills ────────────────────────────────────────────────────────────
+  document.getElementById('category-pills').addEventListener('click', e => {
+    const btn = e.target.closest('[data-cat]');
+    if (!btn) return;
+    document.querySelectorAll('[data-cat]').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    activeCategory = btn.dataset.cat;
+    if (currentGeo) {
+      fetchEstablishments({ lat: currentGeo.lat, lng: currentGeo.lng, radius: document.getElementById('radius-select').value, category: activeCategory });
+    } else if (currentCity) {
+      doSearch();
+    }
+  });
+
+  // ── Allergen highlight pills ──────────────────────────────────────────────────
+  document.getElementById('allergen-pills').addEventListener('click', e => {
+    const btn = e.target.closest('[data-allergen]');
+    if (!btn) return;
+    const a = btn.dataset.allergen;
+    if (highlightedAllergens.has(a)) { highlightedAllergens.delete(a); btn.classList.remove('active'); }
+    else { highlightedAllergens.add(a); btn.classList.add('active'); }
+    reRender();
+  });
+
+  // ── Modal ─────────────────────────────────────────────────────────────────────
+  let modalPlace = null;
+  let selectedSafety = null;
+
+  function openModal(place) {
+    modalPlace = place;
+    selectedSafety = null;
+    document.getElementById('modal-place-name').textContent = place.name + (place.addr ? ` · ${place.addr}` : '');
+    document.getElementById('modal-allergen').value = '';
+    document.getElementById('modal-notes').value = '';
+    document.getElementById('modal-status').textContent = '';
+    document.getElementById('modal-status').className = 'modal-status';
+    document.querySelectorAll('.safety-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    modalPlace = null;
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+  document.querySelectorAll('.safety-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.safety-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedSafety = parseInt(btn.dataset.val, 10);
+    });
+  });
+
+  document.getElementById('modal-submit').addEventListener('click', async () => {
+    const allergen = document.getElementById('modal-allergen').value;
+    const notes    = document.getElementById('modal-notes').value.trim();
+    const statusEl = document.getElementById('modal-status');
+    const submitBtn = document.getElementById('modal-submit');
+
+    if (!allergen) { statusEl.textContent = 'Please select an allergen.'; statusEl.className = 'modal-status error'; return; }
+    if (!selectedSafety) { statusEl.textContent = 'Please select a safety rating.'; statusEl.className = 'modal-status error'; return; }
+
+    submitBtn.textContent = 'Submitting…';
+    submitBtn.disabled = true;
+    statusEl.textContent = '';
+
+    try {
+      const res = await fetch(`${WORKER}/establishments/rate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          place_id:   modalPlace.id,
+          place_name: modalPlace.name,
+          place_addr: modalPlace.addr || '',
+          allergen,
+          safety: selectedSafety,
+          notes,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      statusEl.textContent = '✓ Rating submitted — thank you!';
+      statusEl.className = 'modal-status success';
+      // Refresh results after a moment to show new rating
+      setTimeout(() => {
+        closeModal();
+        if (currentGeo) fetchEstablishments({ lat: currentGeo.lat, lng: currentGeo.lng, radius: document.getElementById('radius-select').value, category: activeCategory });
+        else if (currentCity) doSearch();
+      }, 1500);
+    } catch (err) {
+      statusEl.textContent = `Error: ${err.message}`;
+      statusEl.className = 'modal-status error';
+    } finally {
+      submitBtn.textContent = 'Submit Rating';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
