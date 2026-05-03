@@ -110,7 +110,7 @@ const PRIVACY_POLICY_HTML = `<!DOCTYPE html>
 <h2>Third-Party Services</h2>
 <ul>
   <li><strong>Anthropic Claude API</strong> — used to generate daily allergy tips. No user data is sent.</li>
-  <li><strong>Yelp Fusion API</strong> — used to search nearby restaurants by name. Only the search query is transmitted; no location or personal data is sent.</li>
+  <li><strong>Google Places API</strong> — used to search nearby restaurants by name and location. Only the search query and approximate location are transmitted; no personal data is sent.</li>
 </ul>
 
 <h2>Children</h2>

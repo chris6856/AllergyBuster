@@ -8,9 +8,9 @@ export const EDAMAM_BASE_URL = 'https://api.edamam.com/api/food-database/v2';
 export const EDAMAM_APP_ID = '3b70631c';
 export const EDAMAM_APP_KEY = 'cd8c4c586974ba5b44d3156dff670ade';
 
-// Yelp Fusion — fill in when setting up data layer
+// Yelp Fusion — disabled (subscription not active)
 export const YELP_BASE_URL = 'https://api.yelp.com/v3';
-export const YELP_API_KEY = 'ydruld5lSgXyqSieb8WZ7ogbkgclqNwobGiGV0R2GwypWuYQe6fOwpJ5FYb2fwlt47d5jRwj88G_xO6Vd5Fd4jWnF5XRk0guJ8PX7H_JoFvPjUDKaYuTssrZoHHQaXYx';
+export const YELP_API_KEY = '';
 
 // OpenMenu
 export const OPENMENU_BASE_URL = 'https://api.openmenu.com/v2';
