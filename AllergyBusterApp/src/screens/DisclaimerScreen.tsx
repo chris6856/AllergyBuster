@@ -1,15 +1,15 @@
 import React, {useEffect} from 'react';
 import {
+  BackHandler,
   ImageBackground,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {spacing} from '../constants/theme';
 import {RootNavigationProp} from '../navigation/navigationTypes';
 
-// Save the hero image to src/assets/splash-hero.png
 const splashHero = require('../assets/splash-hero.png');
 
 export function DisclaimerScreen() {
@@ -21,6 +21,14 @@ export function DisclaimerScreen() {
     }, 6000);
     return () => clearTimeout(timer);
   }, [navigation]);
+
+  // Prevent Android back button from closing the app during splash
+  useFocusEffect(
+    React.useCallback(() => {
+      const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+      return () => sub.remove();
+    }, []),
+  );
 
   return (
     <View style={styles.container}>

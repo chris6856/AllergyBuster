@@ -1,6 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -59,6 +61,7 @@ export function TextSearchScreen({route}: Props) {
   const [query, setQuery] = useState(route.params?.initialQuery ?? '');
   const [location, setLocation] = useState('');
   const inputRef = useRef<TextInput>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Clear query when returning from results so the field is ready for next search
   const isFirstFocus = useRef(true);
@@ -81,11 +84,10 @@ export function TextSearchScreen({route}: Props) {
     }
   }, [route.params?.initialQuery]);
 
-  const handleSubmit = () => {
-    const trimmed = query.trim();
-    if (!trimmed) {
-      return;
-    }
+  const handleSubmit = (overrideQuery?: string) => {
+    const trimmed = (overrideQuery ?? query).trim();
+    if (!trimmed) {return;}
+    if (debounceRef.current) {clearTimeout(debounceRef.current);}
     Keyboard.dismiss();
     navigation.navigate('SearchResult', {
       query: trimmed,
@@ -94,8 +96,18 @@ export function TextSearchScreen({route}: Props) {
     });
   };
 
+  const handleQueryChange = (text: string) => {
+    setQuery(text);
+    if (debounceRef.current) {clearTimeout(debounceRef.current);}
+    if (text.trim().length >= 3) {
+      debounceRef.current = setTimeout(() => handleSubmit(text), 600);
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {!isConnected && <NoNetworkBanner />}
 
       <SearchSegmentedControl mode={mode} onChange={setMode} />
@@ -123,7 +135,7 @@ export function TextSearchScreen({route}: Props) {
           ref={inputRef}
           style={styles.input}
           value={query}
-          onChangeText={setQuery}
+          onChangeText={handleQueryChange}
           placeholder={
             mode === 'products'
               ? 'Product name, brand or ingredient…'
@@ -131,14 +143,14 @@ export function TextSearchScreen({route}: Props) {
           }
           placeholderTextColor={colors.textDisabled}
           returnKeyType="search"
-          onSubmitEditing={handleSubmit}
+          onSubmitEditing={() => handleSubmit()}
           autoCapitalize="none"
           autoCorrect={false}
           accessibilityLabel="Search input"
         />
         <TouchableOpacity
           style={[styles.searchButton, !query.trim() && styles.searchButtonDisabled]}
-          onPress={handleSubmit}
+          onPress={() => handleSubmit()}
           disabled={!query.trim()}
           accessibilityLabel="Search"
           accessibilityRole="button">
@@ -146,41 +158,41 @@ export function TextSearchScreen({route}: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Guidance cards — shown when input is empty */}
-      {!query.trim() && (
-        <ScrollView
-          style={styles.guidance}
-          contentContainerStyle={styles.guidanceContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
-          <Text style={styles.guidanceHeading}>What can we look up?</Text>
-          {GUIDANCE.filter(c => c.mode === mode).map(card => (
-            <TouchableOpacity
-              key={card.title}
-              style={styles.card}
-              onPress={() => {
-                setQuery('');
-                inputRef.current?.focus();
-              }}
-              activeOpacity={0.8}>
-              <Text style={styles.cardIcon}>{card.icon}</Text>
-              <View style={styles.cardBody}>
-                <Text style={styles.cardTitle}>{card.title}</Text>
-                <Text style={styles.cardDescription}>{card.description}</Text>
-                <Text style={styles.cardExample}>{card.example}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-
-          {/* Cross-mode tip */}
-          <Text style={styles.modeTip}>
-            {mode === 'products'
-              ? '🍽️  Looking for a restaurant? Switch to Restaurants above.'
-              : '🛒  Looking for a product? Switch to Products above.'}
-          </Text>
-        </ScrollView>
-      )}
-    </View>
+      {/* Guidance cards — always rendered to prevent layout gap when keyboard closes */}
+      <ScrollView
+        style={styles.guidance}
+        contentContainerStyle={styles.guidanceContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
+        {!query.trim() && (
+          <>
+            <Text style={styles.guidanceHeading}>What can we look up?</Text>
+            {GUIDANCE.filter(c => c.mode === mode).map(card => (
+              <TouchableOpacity
+                key={card.title}
+                style={styles.card}
+                onPress={() => {
+                  setQuery('');
+                  inputRef.current?.focus();
+                }}
+                activeOpacity={0.8}>
+                <Text style={styles.cardIcon}>{card.icon}</Text>
+                <View style={styles.cardBody}>
+                  <Text style={styles.cardTitle}>{card.title}</Text>
+                  <Text style={styles.cardDescription}>{card.description}</Text>
+                  <Text style={styles.cardExample}>{card.example}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+            <Text style={styles.modeTip}>
+              {mode === 'products'
+                ? '🍽️  Looking for a restaurant? Switch to Restaurants above.'
+                : '🛒  Looking for a product? Switch to Products above.'}
+            </Text>
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

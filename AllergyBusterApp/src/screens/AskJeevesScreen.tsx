@@ -155,7 +155,7 @@ export function AskJeevesScreen() {
 
       {/* Input bar */}
       <View style={styles.inputBar}>
-        <TouchableOpacity onPress={Keyboard.dismiss} style={styles.doneButton}>
+        <TouchableOpacity onPress={() => Keyboard.dismiss()} style={styles.doneButton}>
           <Text style={styles.doneButtonText}>Done</Text>
         </TouchableOpacity>
         <TextInput
