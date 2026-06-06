@@ -139,121 +139,131 @@ export function TextSearchScreen({route}: Props) {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
       {!isConnected && <NoNetworkBanner />}
 
       <SearchSegmentedControl mode={mode} onChange={setMode} />
 
-      {/* Location input — restaurants only */}
-      {mode === 'restaurants' && (
-        <>
-          {coords && !location ? (
-            <View style={[styles.inputRow, styles.locationActiveRow]}>
-              <Text style={styles.locationActiveText}>📍 Using current location</Text>
-              <TouchableOpacity onPress={() => setCoords(null)}>
-                <Text style={styles.locationClearText}>Clear</Text>
-              </TouchableOpacity>
-            </View>
-          ) : Platform.OS === 'ios' ? (
-            /* iOS: ZIP input and location button side by side */
-            <View style={styles.inputRow}>
-              <TextInput
-                style={styles.input}
-                value={location}
-                onChangeText={text => {
-                  setLocation(text);
-                  if (coords) {setCoords(null);}
-                }}
-                placeholder="City or ZIP code…"
-                placeholderTextColor={colors.textDisabled}
-                returnKeyType="next"
-                autoCapitalize="words"
-                autoCorrect={false}
-                accessibilityLabel="Location input"
-              />
-              <TouchableOpacity
-                style={[styles.useLocationBtn, locating && styles.useLocationBtnDisabled]}
-                onPress={handleUseLocation}
-                disabled={locating}
-                accessibilityLabel="Use current location"
-                accessibilityRole="button">
-                {locating
-                  ? <ActivityIndicator size="small" color={colors.white} />
-                  : <Text style={styles.useLocationBtnText}>📍 My Location</Text>
-                }
-              </TouchableOpacity>
-            </View>
-          ) : (
-            /* Android: ZIP input above, full-width location button below */
-            <>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={styles.input}
-                  value={location}
-                  onChangeText={text => {
-                    setLocation(text);
-                    if (coords) {setCoords(null);}
-                  }}
-                  placeholder="City or ZIP code…"
-                  placeholderTextColor={colors.textDisabled}
-                  returnKeyType="next"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  accessibilityLabel="Location input"
-                />
-              </View>
-              <TouchableOpacity
-                style={[styles.useLocationBtnFull, locating && styles.useLocationBtnDisabled]}
-                onPress={handleUseLocation}
-                disabled={locating}
-                accessibilityLabel="Use current location"
-                accessibilityRole="button">
-                {locating
-                  ? <ActivityIndicator size="small" color={colors.white} />
-                  : <Text style={styles.useLocationBtnText}>📍 Use My Current Location</Text>
-                }
-              </TouchableOpacity>
-            </>
-          )}
-        </>
-      )}
-
-      {/* Search input row */}
-      <View style={styles.inputRow}>
-        <TextInput
-          ref={inputRef}
-          style={styles.input}
-          value={query}
-          onChangeText={setQuery}
-          onSubmitEditing={handleSubmit}
-          placeholder={
-            mode === 'products'
-              ? 'Product name, brand or ingredient…'
-              : 'Restaurant name…'
-          }
-          placeholderTextColor={colors.textDisabled}
-          returnKeyType="search"
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete="off"
-          accessibilityLabel="Search input"
-        />
-        <TouchableOpacity
-          style={[styles.searchButton, !query.trim() && styles.searchButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={!query.trim()}
-          accessibilityLabel="Search"
-          accessibilityRole="button">
-          <Text style={styles.searchButtonText}>Search</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Guidance cards — always rendered to prevent layout gap when keyboard closes */}
+      {/*
+       * Everything below (location inputs, search input, guidance) lives inside
+       * one ScrollView with keyboardShouldPersistTaps="handled". This ensures
+       * that tapping the Search button while the keyboard is open registers the
+       * tap immediately on Android without requiring a double-tap.
+       */}
       <ScrollView
-        style={styles.guidance}
-        contentContainerStyle={styles.guidanceContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+
+        {/* ── Location section (restaurants only) ── */}
+        {mode === 'restaurants' && (
+          <View style={styles.locationSection}>
+            {coords && !location ? (
+              /* GPS active — show active state spanning full width */
+              <View style={styles.locationActiveRow}>
+                <Text style={styles.locationActiveText}>📍 Using current location</Text>
+                <TouchableOpacity onPress={() => setCoords(null)}>
+                  <Text style={styles.locationClearText}>Clear</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                {/* ZIP input + location button side-by-side (iOS) or stacked (Android) */}
+                {Platform.OS === 'ios' ? (
+                  <View style={styles.row}>
+                    <TextInput
+                      style={styles.input}
+                      value={location}
+                      onChangeText={text => {
+                        setLocation(text);
+                        if (coords) {setCoords(null);}
+                      }}
+                      placeholder="City or ZIP code…"
+                      placeholderTextColor={colors.textDisabled}
+                      returnKeyType="next"
+                      autoCapitalize="words"
+                      autoCorrect={false}
+                      accessibilityLabel="Location input"
+                    />
+                    <TouchableOpacity
+                      style={[styles.locationBtnInline, locating && styles.btnDisabled]}
+                      onPress={handleUseLocation}
+                      disabled={locating}
+                      accessibilityLabel="Use current location"
+                      accessibilityRole="button">
+                      {locating
+                        ? <ActivityIndicator size="small" color={colors.white} />
+                        : <Text style={styles.btnText}>📍 My Location</Text>
+                      }
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  /* Android: ZIP on top, full-width location button below */
+                  <>
+                    <TextInput
+                      style={[styles.input, styles.inputFull]}
+                      value={location}
+                      onChangeText={text => {
+                        setLocation(text);
+                        if (coords) {setCoords(null);}
+                      }}
+                      placeholder="City or ZIP code (optional)…"
+                      placeholderTextColor={colors.textDisabled}
+                      returnKeyType="next"
+                      autoCapitalize="words"
+                      autoCorrect={false}
+                      accessibilityLabel="Location input"
+                    />
+                    <TouchableOpacity
+                      style={[styles.locationBtnFull, locating && styles.btnDisabled]}
+                      onPress={handleUseLocation}
+                      disabled={locating}
+                      accessibilityLabel="Use current location"
+                      accessibilityRole="button">
+                      {locating
+                        ? <ActivityIndicator size="small" color={colors.white} />
+                        : <Text style={styles.btnText}>📍 Use My Current Location</Text>
+                      }
+                    </TouchableOpacity>
+                  </>
+                )}
+              </>
+            )}
+          </View>
+        )}
+
+        {/* ── Search input + button ── */}
+        <View style={styles.row}>
+          <TextInput
+            ref={inputRef}
+            style={styles.input}
+            value={query}
+            onChangeText={setQuery}
+            onSubmitEditing={handleSubmit}
+            placeholder={
+              mode === 'products'
+                ? 'Product name, brand or ingredient…'
+                : 'Restaurant name…'
+            }
+            placeholderTextColor={colors.textDisabled}
+            returnKeyType="done"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="off"
+            accessibilityLabel="Search input"
+          />
+          <TouchableOpacity
+            style={[styles.searchBtn, !query.trim() && styles.btnDisabled]}
+            onPress={handleSubmit}
+            disabled={!query.trim()}
+            accessibilityLabel="Search"
+            accessibilityRole="button">
+            <Text style={styles.btnText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Guidance cards ── */}
         {!query.trim() && (
           <>
             <Text style={styles.guidanceHeading}>What can we look up?</Text>
@@ -291,10 +301,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  inputRow: {
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  locationSection: {
+    marginBottom: spacing.sm,
+  },
+  locationActiveRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.md,
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    minHeight: 44,
+  },
+  locationActiveText: {
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  locationClearText: {
+    fontSize: fontSizes.sm,
+    color: colors.textSecondary,
+    fontWeight: '600',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: spacing.sm,
     gap: spacing.sm,
   },
@@ -308,79 +349,54 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     fontSize: fontSizes.md,
     color: colors.textPrimary,
+    minHeight: 44,
   },
-  locationActiveRow: {
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
+  inputFull: {
+    marginBottom: spacing.sm,
   },
-  locationActiveText: {
-    fontSize: fontSizes.sm,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  locationClearText: {
-    fontSize: fontSizes.sm,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  useLocationBtn: {
+  locationBtnInline: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 44,
     flexShrink: 0,
   },
-  useLocationBtnFull: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
+  locationBtnFull: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 44,
   },
-  useLocationBtnDisabled: {
-    backgroundColor: colors.textDisabled,
-  },
-  useLocationBtnText: {
-    color: colors.white,
-    fontWeight: '700',
-    fontSize: fontSizes.sm,
-  },
-  searchButton: {
+  searchBtn: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    flexShrink: 0,
   },
-  searchButtonDisabled: {
+  btnDisabled: {
     backgroundColor: colors.textDisabled,
   },
-  searchButtonText: {
+  btnText: {
     color: colors.white,
     fontWeight: '700',
     fontSize: fontSizes.sm,
-  },
-  guidance: {
-    flex: 1,
-  },
-  guidanceContent: {
-    padding: spacing.md,
-    paddingBottom: spacing.xxl,
   },
   guidanceHeading: {
     fontSize: fontSizes.lg,
     fontWeight: '700',
     color: colors.textPrimary,
     marginBottom: spacing.md,
+    marginTop: spacing.sm,
   },
   card: {
     flexDirection: 'row',
