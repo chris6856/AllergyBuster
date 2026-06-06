@@ -1,4 +1,6 @@
 import {CHAINS_PROXY_URL} from '../constants/config';
+import {ChainRestaurant} from '../data/chainAllergenData';
+import {matchChain, getAllergenUrl} from '../utils/chainMatcher';
 
 export interface Establishment {
   id: string;
@@ -10,6 +12,8 @@ export interface Establishment {
   isOpen: boolean | null;
   website: string | null;
   allergenRatings: Record<string, {avg: number; count: number}>;
+  matchedChain?: ChainRestaurant;
+  allergenUrl?: string;
 }
 
 export async function searchEstablishments(
@@ -27,5 +31,11 @@ export async function searchEstablishments(
   const res = await fetch(`${CHAINS_PROXY_URL}/establishments?${params}`);
   if (!res.ok) {throw new Error(`Establishments search failed: ${res.status}`);}
   const data = (await res.json()) as {results: Establishment[]};
-  return data.results ?? [];
+  const results = data.results ?? [];
+
+  return results.map(e => ({
+    ...e,
+    matchedChain: matchChain(e.name),
+    allergenUrl: getAllergenUrl(e.name),
+  }));
 }
