@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import Geolocation from '@react-native-community/geolocation';
 import {SearchSegmentedControl, SearchMode} from '../../components/SearchSegmentedControl';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
@@ -98,7 +99,7 @@ export function TextSearchScreen({route}: Props) {
 
     setLocating(true);
     try {
-      navigator.geolocation.getCurrentPosition(
+      Geolocation.getCurrentPosition(
         position => {
           setCoords({lat: position.coords.latitude, lng: position.coords.longitude});
           setLocation('');
