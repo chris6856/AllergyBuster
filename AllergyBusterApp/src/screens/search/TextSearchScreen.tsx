@@ -1,5 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import {SearchSegmentedControl, SearchMode} from '../../components/SearchSegmentedControl';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
@@ -60,10 +63,12 @@ export function TextSearchScreen({route}: Props) {
   );
   const [query, setQuery] = useState(route.params?.initialQuery ?? '');
   const [location, setLocation] = useState('');
+  const [coords, setCoords] = useState<{lat: number; lng: number} | null>(null);
+  const [locating, setLocating] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Clear query when returning from results so the field is ready for next search
+  // Clear query and location when returning from results
   const isFirstFocus = useRef(true);
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -73,9 +78,39 @@ export function TextSearchScreen({route}: Props) {
       }
       setQuery('');
       setLocation('');
+      setCoords(null);
     });
     return unsubscribe;
   }, [navigation]);
+
+  const handleUseLocation = async () => {
+    const permission = Platform.OS === 'ios'
+      ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
+      : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
+
+    const result = await request(permission);
+    if (result !== RESULTS.GRANTED) {
+      Alert.alert(
+        'Location access needed',
+        'Please allow location access in Settings to use this feature.',
+      );
+      return;
+    }
+
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        setCoords({lat: position.coords.latitude, lng: position.coords.longitude});
+        setLocation('');
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+        Alert.alert('Could not get location', 'Please enter a ZIP code or city instead.');
+      },
+      {enableHighAccuracy: false, timeout: 10000, maximumAge: 60000},
+    );
+  };
 
   // Auto-focus if we arrive with an initial query (e.g. from scan fallback)
   useEffect(() => {
@@ -93,6 +128,7 @@ export function TextSearchScreen({route}: Props) {
       query: trimmed,
       mode,
       location: mode === 'restaurants' ? location.trim() || undefined : undefined,
+      coords: mode === 'restaurants' ? coords ?? undefined : undefined,
     });
   };
 
@@ -115,17 +151,37 @@ export function TextSearchScreen({route}: Props) {
       {/* Location input — restaurants only */}
       {mode === 'restaurants' && (
         <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            value={location}
-            onChangeText={setLocation}
-            placeholder="City or ZIP code…"
-            placeholderTextColor={colors.textDisabled}
-            returnKeyType="next"
-            autoCapitalize="words"
-            autoCorrect={false}
-            accessibilityLabel="Location input"
-          />
+          {coords && !location ? (
+            <View style={[styles.input, styles.locationActive]}>
+              <Text style={styles.locationActiveText}>📍 Using current location</Text>
+            </View>
+          ) : (
+            <TextInput
+              style={[styles.input, styles.locationInput]}
+              value={location}
+              onChangeText={text => {
+                setLocation(text);
+                if (coords) {setCoords(null);}
+              }}
+              placeholder="City or ZIP code…"
+              placeholderTextColor={colors.textDisabled}
+              returnKeyType="next"
+              autoCapitalize="words"
+              autoCorrect={false}
+              accessibilityLabel="Location input"
+            />
+          )}
+          <TouchableOpacity
+            style={[styles.useLocationBtn, locating && styles.useLocationBtnDisabled]}
+            onPress={handleUseLocation}
+            disabled={locating}
+            accessibilityLabel="Use current location"
+            accessibilityRole="button">
+            {locating
+              ? <ActivityIndicator size="small" color={colors.white} />
+              : <Text style={styles.useLocationBtnText}>📍 Use Location</Text>
+            }
+          </TouchableOpacity>
         </View>
       )}
 
@@ -218,6 +274,35 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     fontSize: fontSizes.md,
     color: colors.textPrimary,
+  },
+  locationInput: {
+    flex: 1,
+  },
+  locationActive: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  locationActiveText: {
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  useLocationBtn: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm + 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  useLocationBtnDisabled: {
+    backgroundColor: colors.textDisabled,
+  },
+  useLocationBtnText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: fontSizes.sm,
   },
   searchButton: {
     backgroundColor: colors.primary,

@@ -17,7 +17,7 @@ export type PhotoStackParamList = {
 
 export type SearchStackParamList = {
   TextSearch: {initialQuery?: string; initialMode?: 'products' | 'restaurants'};
-  SearchResult: {query: string; mode: 'products' | 'restaurants'; location?: string};
+  SearchResult: {query: string; mode: 'products' | 'restaurants'; location?: string; coords?: {lat: number; lng: number}};
   RestaurantDetail: {restaurant: Restaurant};
 };
 
