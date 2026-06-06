@@ -19,7 +19,7 @@ type QuickAction = {
   label: string;
   description: string;
   hint: string;
-  tab: 'ScanTab' | 'PhotoTab' | 'SearchTab';
+  onPress: (nav: MainTabNavigationProp) => void;
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -28,21 +28,28 @@ const QUICK_ACTIONS: QuickAction[] = [
     label: 'Scan Barcode',
     description: 'Instant allergen lookup from a product barcode',
     hint: 'Opens the barcode scanner',
-    tab: 'ScanTab',
+    onPress: nav => nav.navigate('ScanTab'),
   },
   {
     icon: '🔍',
     label: 'Scan Label',
     description: 'Photograph an ingredient list and extract allergens',
     hint: 'Opens the camera to photograph a product label',
-    tab: 'PhotoTab',
+    onPress: nav => nav.navigate('PhotoTab'),
+  },
+  {
+    icon: '🍽️',
+    label: 'Find Restaurants Near Me',
+    description: 'Search for restaurants and see allergen safety ratings',
+    hint: 'Opens restaurant search with location',
+    onPress: nav => nav.navigate('SearchTab', {screen: 'TextSearch', params: {initialMode: 'restaurants'}}),
   },
   {
     icon: '🛒',
-    label: 'Search Products & Restaurants',
-    description: 'Look up packaged foods, brands, ingredients or restaurants',
-    hint: 'Opens the text search screen',
-    tab: 'SearchTab',
+    label: 'Search Products',
+    description: 'Look up packaged foods, brands or ingredients',
+    hint: 'Opens product search',
+    onPress: nav => nav.navigate('SearchTab', {screen: 'TextSearch', params: {initialMode: 'products'}}),
   },
 ];
 
@@ -83,9 +90,9 @@ export function HomeScreen() {
         <Text style={styles.sectionHeading}>Quick Actions</Text>
         {QUICK_ACTIONS.map(action => (
           <TouchableOpacity
-            key={action.tab}
+            key={action.label}
             style={styles.actionCard}
-            onPress={() => navigation.navigate(action.tab)}
+            onPress={() => action.onPress(navigation)}
             activeOpacity={0.75}
             accessibilityRole="button"
             accessibilityLabel={action.label}
@@ -112,6 +119,7 @@ export function HomeScreen() {
         packaging and consult a healthcare professional regarding your specific
         dietary needs.
       </Text>
+      <Text style={styles.buildTag}>v1.0.5 (20)</Text>
     </ScrollView>
   );
 }
@@ -210,5 +218,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 16,
     fontStyle: 'italic',
+  },
+  buildTag: {
+    textAlign: 'center',
+    fontSize: 10,
+    color: colors.textDisabled,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
   },
 });
