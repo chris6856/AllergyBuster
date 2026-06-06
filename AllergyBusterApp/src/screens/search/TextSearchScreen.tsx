@@ -225,15 +225,17 @@ export function TextSearchScreen({route}: Props) {
           style={styles.input}
           value={query}
           onChangeText={setQuery}
+          onSubmitEditing={handleSubmit}
           placeholder={
             mode === 'products'
               ? 'Product name, brand or ingredient…'
               : 'Restaurant name…'
           }
           placeholderTextColor={colors.textDisabled}
-          returnKeyType="done"
+          returnKeyType="search"
           autoCapitalize="none"
           autoCorrect={false}
+          autoComplete="off"
           accessibilityLabel="Search input"
         />
         <TouchableOpacity
