@@ -66,7 +66,6 @@ export function TextSearchScreen({route}: Props) {
   const [coords, setCoords] = useState<{lat: number; lng: number} | null>(null);
   const [locating, setLocating] = useState(false);
   const inputRef = useRef<TextInput>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Clear query and location when returning from results
   const isFirstFocus = useRef(true);
@@ -98,18 +97,23 @@ export function TextSearchScreen({route}: Props) {
     }
 
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        setCoords({lat: position.coords.latitude, lng: position.coords.longitude});
-        setLocation('');
-        setLocating(false);
-      },
-      () => {
-        setLocating(false);
-        Alert.alert('Could not get location', 'Please enter a ZIP code or city instead.');
-      },
-      {enableHighAccuracy: false, timeout: 10000, maximumAge: 60000},
-    );
+    try {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          setCoords({lat: position.coords.latitude, lng: position.coords.longitude});
+          setLocation('');
+          setLocating(false);
+        },
+        () => {
+          setLocating(false);
+          Alert.alert('Could not get location', 'Please enter a ZIP code or city instead.');
+        },
+        {enableHighAccuracy: false, timeout: 15000, maximumAge: 60000},
+      );
+    } catch {
+      setLocating(false);
+      Alert.alert('Could not get location', 'Please enter a ZIP code or city instead.');
+    }
   };
 
   // Auto-focus if we arrive with an initial query (e.g. from scan fallback)
@@ -119,10 +123,9 @@ export function TextSearchScreen({route}: Props) {
     }
   }, [route.params?.initialQuery]);
 
-  const handleSubmit = (overrideQuery?: string) => {
-    const trimmed = (overrideQuery ?? query).trim();
+  const handleSubmit = () => {
+    const trimmed = query.trim();
     if (!trimmed) {return;}
-    if (debounceRef.current) {clearTimeout(debounceRef.current);}
     Keyboard.dismiss();
     navigation.navigate('SearchResult', {
       query: trimmed,
@@ -130,14 +133,6 @@ export function TextSearchScreen({route}: Props) {
       location: mode === 'restaurants' ? location.trim() || undefined : undefined,
       coords: mode === 'restaurants' ? coords ?? undefined : undefined,
     });
-  };
-
-  const handleQueryChange = (text: string) => {
-    setQuery(text);
-    if (debounceRef.current) {clearTimeout(debounceRef.current);}
-    if (text.trim().length >= 3) {
-      debounceRef.current = setTimeout(() => handleSubmit(text), 600);
-    }
   };
 
   return (
@@ -191,7 +186,7 @@ export function TextSearchScreen({route}: Props) {
           ref={inputRef}
           style={styles.input}
           value={query}
-          onChangeText={handleQueryChange}
+          onChangeText={setQuery}
           placeholder={
             mode === 'products'
               ? 'Product name, brand or ingredient…'
@@ -199,14 +194,14 @@ export function TextSearchScreen({route}: Props) {
           }
           placeholderTextColor={colors.textDisabled}
           returnKeyType="search"
-          onSubmitEditing={() => handleSubmit()}
+          onSubmitEditing={handleSubmit}
           autoCapitalize="none"
           autoCorrect={false}
           accessibilityLabel="Search input"
         />
         <TouchableOpacity
           style={[styles.searchButton, !query.trim() && styles.searchButtonDisabled]}
-          onPress={() => handleSubmit()}
+          onPress={handleSubmit}
           disabled={!query.trim()}
           accessibilityLabel="Search"
           accessibilityRole="button">
