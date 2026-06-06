@@ -146,26 +146,31 @@ export function TextSearchScreen({route}: Props) {
 
       {/* Location input — restaurants only */}
       {mode === 'restaurants' && (
-        <View style={styles.inputRow}>
+        <>
           {coords && !location ? (
-            <View style={[styles.input, styles.locationActive]}>
+            <View style={[styles.inputRow, styles.locationActiveRow]}>
               <Text style={styles.locationActiveText}>📍 Using current location</Text>
+              <TouchableOpacity onPress={() => setCoords(null)}>
+                <Text style={styles.locationClearText}>Clear</Text>
+              </TouchableOpacity>
             </View>
           ) : (
-            <TextInput
-              style={[styles.input, styles.locationInput]}
-              value={location}
-              onChangeText={text => {
-                setLocation(text);
-                if (coords) {setCoords(null);}
-              }}
-              placeholder="City or ZIP code…"
-              placeholderTextColor={colors.textDisabled}
-              returnKeyType="next"
-              autoCapitalize="words"
-              autoCorrect={false}
-              accessibilityLabel="Location input"
-            />
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                value={location}
+                onChangeText={text => {
+                  setLocation(text);
+                  if (coords) {setCoords(null);}
+                }}
+                placeholder="City or ZIP code (optional)…"
+                placeholderTextColor={colors.textDisabled}
+                returnKeyType="next"
+                autoCapitalize="words"
+                autoCorrect={false}
+                accessibilityLabel="Location input"
+              />
+            </View>
           )}
           <TouchableOpacity
             style={[styles.useLocationBtn, locating && styles.useLocationBtnDisabled]}
@@ -175,10 +180,10 @@ export function TextSearchScreen({route}: Props) {
             accessibilityRole="button">
             {locating
               ? <ActivityIndicator size="small" color={colors.white} />
-              : <Text style={styles.useLocationBtnText}>📍 Use Location</Text>
+              : <Text style={styles.useLocationBtnText}>📍 Use My Current Location</Text>
             }
           </TouchableOpacity>
-        </View>
+        </>
       )}
 
       {/* Search input row */}
@@ -194,8 +199,7 @@ export function TextSearchScreen({route}: Props) {
               : 'Restaurant name…'
           }
           placeholderTextColor={colors.textDisabled}
-          returnKeyType="search"
-          onSubmitEditing={handleSubmit}
+          returnKeyType="done"
           autoCapitalize="none"
           autoCorrect={false}
           accessibilityLabel="Search input"
@@ -271,26 +275,33 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.md,
     color: colors.textPrimary,
   },
-  locationInput: {
-    flex: 1,
-  },
-  locationActive: {
-    flex: 1,
-    justifyContent: 'center',
+  locationActiveRow: {
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
   },
   locationActiveText: {
     fontSize: fontSizes.sm,
     color: colors.primary,
     fontWeight: '600',
   },
+  locationClearText: {
+    fontSize: fontSizes.sm,
+    color: colors.textSecondary,
+    fontWeight: '600',
+  },
   useLocationBtn: {
-    flex: 1,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm + 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 44,
   },
   useLocationBtnDisabled: {
     backgroundColor: colors.textDisabled,
