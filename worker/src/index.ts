@@ -588,10 +588,13 @@ async function fetchNearby(apiKey: string, lat: number, lng: number, radius: num
   return ((await res.json() as { places?: PlaceResult[] }).places) ?? [];
 }
 
-async function fetchByText(apiKey: string, q: string, category: string): Promise<PlaceResult[]> {
+async function fetchByText(apiKey: string, q: string, category: string, coords?: {lat: number; lng: number}): Promise<PlaceResult[]> {
   const body: Record<string, unknown> = { textQuery: q, maxResultCount: 20 };
   const types = FOOD_TYPES[category];
   if (types && category !== 'all') body.includedType = types[0];
+  if (coords) {
+    body.locationBias = { circle: { center: { latitude: coords.lat, longitude: coords.lng }, radius: 10000 } };
+  }
   const res = await fetch(`${GOOGLE_PLACES_URL}:searchText`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': PLACES_FIELD_MASK },
@@ -647,13 +650,25 @@ async function handleGetEstablishments(request: Request, env: Env): Promise<Resp
       const lat = parseFloat(latStr);
       const lng = parseFloat(lngStr);
       if (isNaN(lat) || isNaN(lng)) return json({ error: 'Invalid lat/lng' }, 400);
-      cacheKey = `places:${lat.toFixed(3)},${lng.toFixed(3)}:${radius}:${category}`;
-      const cached = await env.TIPS_CACHE.get(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached) as PlaceResult[];
-        return json(shapePlaces(parsed, await getRatings(env.ESTABLISHMENTS_DB, parsed.map(p => p.id))));
+      if (q) {
+        // Text search biased toward user's location
+        cacheKey = `places:text:${category}:${lat.toFixed(3)},${lng.toFixed(3)}:${q.slice(0, 80)}`;
+        const cached = await env.TIPS_CACHE.get(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached) as PlaceResult[];
+          return json(shapePlaces(parsed, await getRatings(env.ESTABLISHMENTS_DB, parsed.map(p => p.id))));
+        }
+        places = await fetchByText(env.GOOGLE_PLACES_API_KEY, q, category, {lat, lng});
+      } else {
+        // Nearby search with no query
+        cacheKey = `places:${lat.toFixed(3)},${lng.toFixed(3)}:${radius}:${category}`;
+        const cached = await env.TIPS_CACHE.get(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached) as PlaceResult[];
+          return json(shapePlaces(parsed, await getRatings(env.ESTABLISHMENTS_DB, parsed.map(p => p.id))));
+        }
+        places = await fetchNearby(env.GOOGLE_PLACES_API_KEY, lat, lng, radius, category);
       }
-      places = await fetchNearby(env.GOOGLE_PLACES_API_KEY, lat, lng, radius, category);
     } else if (q) {
       cacheKey = `places:text:${category}:${q.slice(0, 80)}`;
       const cached = await env.TIPS_CACHE.get(cacheKey);

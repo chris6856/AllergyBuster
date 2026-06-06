@@ -2,41 +2,40 @@ import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useQuery} from '@tanstack/react-query';
 import {useProductSearch} from '../../hooks/useProductSearch';
-import {useRestaurantSearch} from '../../hooks/useRestaurantSearch';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {AllergenCard} from '../../components/AllergenCard';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {SearchStackScreenProps} from '../../navigation/navigationTypes';
 import {NormalizedProduct} from '../../types/product';
-import {Restaurant} from '../../types/restaurant';
+import {searchEstablishments, Establishment} from '../../services/establishmentsService';
 
 type Props = SearchStackScreenProps<'SearchResult'>;
 
 export function SearchResultScreen({route}: Props) {
-  const {query, mode, location} = route.params;
-  const navigation = useNavigation<Props['navigation']>();
+  const {query, mode, location, coords} = route.params;
   const {isConnected} = useNetworkStatus();
 
   const productQuery = useProductSearch(mode === 'products' ? query : undefined);
-  const restaurantQuery = useRestaurantSearch(
-    mode === 'restaurants' ? query : undefined,
-    location,
-  );
 
-  const isLoading =
-    mode === 'products' ? productQuery.isLoading : restaurantQuery.isLoading;
-  const isError =
-    mode === 'products' ? productQuery.isError : restaurantQuery.isError;
-  const products = productQuery.data ?? [];
-  const restaurants = restaurantQuery.data ?? [];
+  const establishmentsQuery = useQuery({
+    queryKey: ['establishments', query, coords, location],
+    queryFn: () => searchEstablishments(query, coords, location),
+    enabled: mode === 'restaurants',
+  });
+
+  const isLoading = mode === 'products' ? productQuery.isLoading : establishmentsQuery.isLoading;
+  const isError   = mode === 'products' ? productQuery.isError   : establishmentsQuery.isError;
+  const products      = productQuery.data ?? [];
+  const establishments = establishmentsQuery.data ?? [];
 
   return (
     <View style={styles.container}>
@@ -87,12 +86,10 @@ export function SearchResultScreen({route}: Props) {
 
       {!isLoading && !isError && mode === 'restaurants' && (
         <FlatList
-          data={restaurants}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
+          data={establishments}
+          keyExtractor={item => item.id}
           contentContainerStyle={
-            restaurants.length === 0
-              ? styles.emptyContainer
-              : styles.listContent
+            establishments.length === 0 ? styles.emptyContainer : styles.listContent
           }
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
@@ -100,18 +97,11 @@ export function SearchResultScreen({route}: Props) {
               <Text style={styles.emptyIcon}>🍽️</Text>
               <Text style={styles.emptyTitle}>No restaurants found</Text>
               <Text style={styles.emptyBody}>
-                Try searching by chain name, e.g. "McDonald's" or "Olive Garden".
+                Try a different name, or use your location to find nearby restaurants.
               </Text>
             </View>
           }
-          renderItem={({item}) => (
-            <RestaurantRow
-              restaurant={item}
-              onPress={() =>
-                navigation.navigate('RestaurantDetail', {restaurant: item})
-              }
-            />
-          )}
+          renderItem={({item}) => <EstablishmentRow establishment={item} />}
         />
       )}
     </View>
@@ -175,48 +165,45 @@ function ProductRow({product}: {product: NormalizedProduct}) {
   );
 }
 
-// --- Restaurant row ---
+// --- Establishment row ---
 
-function RestaurantRow({
-  restaurant,
-  onPress,
-}: {
-  restaurant: Restaurant;
-  onPress: () => void;
-}) {
-  const itemCount = restaurant.menuItems.length;
+function EstablishmentRow({establishment: e}: {establishment: Establishment}) {
+  const openWebsite = () => {
+    if (e.website) {Linking.openURL(e.website);}
+  };
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onPress}
-      activeOpacity={0.75}
-      accessibilityRole="button"
-      accessibilityLabel={`View ${restaurant.name} menu`}>
+    <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.cardIcon}>
           <Text style={styles.cardIconText}>🍽️</Text>
         </View>
         <View style={styles.cardInfo}>
-          <Text style={styles.cardTitle}>{restaurant.name}</Text>
-          {restaurant.address ? (
-            <Text style={styles.cardSubtitle} numberOfLines={1}>
-              {restaurant.address}
-            </Text>
+          <Text style={styles.cardTitle}>{e.name}</Text>
+          {e.address ? (
+            <Text style={styles.cardSubtitle} numberOfLines={2}>{e.address}</Text>
           ) : null}
-          {restaurant.cuisineType ? (
-            <Text style={styles.cardMeta}>{restaurant.cuisineType}</Text>
-          ) : null}
+          <View style={styles.metaRow}>
+            {e.googleRating ? (
+              <Text style={styles.ratingText}>⭐ {e.googleRating.toFixed(1)} ({e.googleRatingCount})</Text>
+            ) : null}
+            {e.isOpen !== null ? (
+              <Text style={[styles.openText, e.isOpen ? styles.openGreen : styles.openRed]}>
+                {e.isOpen ? '● Open' : '● Closed'}
+              </Text>
+            ) : null}
+          </View>
         </View>
-        <Text style={styles.chevron}>›</Text>
       </View>
 
-      <Text style={styles.menuItemCount}>
-        {itemCount > 0
-          ? `${itemCount} menu item${itemCount !== 1 ? 's' : ''} with allergen info`
-          : 'Tap for guidance on getting allergen information'}
-      </Text>
-    </TouchableOpacity>
+      {e.website ? (
+        <TouchableOpacity onPress={openWebsite} style={styles.websiteBtn}>
+          <Text style={styles.websiteBtnText}>View Allergen Info →</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={styles.noWebsite}>No allergen info link available — ask staff directly.</Text>
+      )}
+    </View>
   );
 }
 
@@ -368,10 +355,41 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.xs,
     color: colors.textDisabled,
   },
-  menuItemCount: {
-    marginTop: spacing.sm,
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  ratingText: {
     fontSize: fontSizes.xs,
     color: colors.textSecondary,
-    fontWeight: '500',
+  },
+  openText: {
+    fontSize: fontSizes.xs,
+    fontWeight: '600',
+  },
+  openGreen: {
+    color: colors.primary,
+  },
+  openRed: {
+    color: colors.warning ?? '#B45309',
+  },
+  websiteBtn: {
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  websiteBtnText: {
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  noWebsite: {
+    marginTop: spacing.sm,
+    fontSize: fontSizes.xs,
+    color: colors.textDisabled,
+    fontStyle: 'italic',
   },
 });
