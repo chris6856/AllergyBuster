@@ -163,26 +163,26 @@ export function TextSearchScreen({route}: Props) {
                   setLocation(text);
                   if (coords) {setCoords(null);}
                 }}
-                placeholder="City or ZIP code (optional)…"
+                placeholder="City or ZIP code…"
                 placeholderTextColor={colors.textDisabled}
                 returnKeyType="next"
                 autoCapitalize="words"
                 autoCorrect={false}
                 accessibilityLabel="Location input"
               />
+              <TouchableOpacity
+                style={[styles.useLocationBtn, locating && styles.useLocationBtnDisabled]}
+                onPress={handleUseLocation}
+                disabled={locating}
+                accessibilityLabel="Use current location"
+                accessibilityRole="button">
+                {locating
+                  ? <ActivityIndicator size="small" color={colors.white} />
+                  : <Text style={styles.useLocationBtnText}>📍 My Location</Text>
+                }
+              </TouchableOpacity>
             </View>
           )}
-          <TouchableOpacity
-            style={[styles.useLocationBtn, locating && styles.useLocationBtnDisabled]}
-            onPress={handleUseLocation}
-            disabled={locating}
-            accessibilityLabel="Use current location"
-            accessibilityRole="button">
-            {locating
-              ? <ActivityIndicator size="small" color={colors.white} />
-              : <Text style={styles.useLocationBtnText}>📍 Use My Current Location</Text>
-            }
-          </TouchableOpacity>
         </>
       )}
 
@@ -293,15 +293,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   useLocationBtn: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm + 2,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 44,
+    flexShrink: 0,
   },
   useLocationBtnDisabled: {
     backgroundColor: colors.textDisabled,
