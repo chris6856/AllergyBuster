@@ -119,7 +119,7 @@ export function HomeScreen() {
         packaging and consult a healthcare professional regarding your specific
         dietary needs.
       </Text>
-      <Text style={styles.buildTag}>v1.0.5 (20)</Text>
+      <Text style={styles.buildTag}>v1.0.5 (21)</Text>
     </ScrollView>
   );
 }
