@@ -11,6 +11,7 @@ import {Camera, useCameraDevice} from 'react-native-vision-camera';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import {ScannerOverlay} from '../../components/ScannerOverlay';
 import {useCameraPermission} from '../../hooks/useCameraPermission';
+import {useAppState} from '../../hooks/useAppState';
 import {extractAllergensFromOcr} from '../../utils/ocrAllergenExtractor';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {PhotoStackScreenProps} from '../../navigation/navigationTypes';
@@ -20,6 +21,7 @@ type Props = PhotoStackScreenProps<'PhotoCapture'>;
 export function PhotoCaptureScreen(_props: Props) {
   const navigation = useNavigation<Props['navigation']>();
   const isFocused = useIsFocused();
+  const appState = useAppState();
   const {status, requestPermission, openSettings} = useCameraPermission();
   const device = useCameraDevice('back');
   const cameraRef = useRef<Camera>(null);
@@ -112,7 +114,7 @@ export function PhotoCaptureScreen(_props: Props) {
         ref={cameraRef}
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={isFocused && status === 'granted'}
+        isActive={isFocused && status === 'granted' && appState === 'active'}
         photo
         torch={torchOn ? 'on' : 'off'}
         accessibilityLabel="Camera viewfinder"

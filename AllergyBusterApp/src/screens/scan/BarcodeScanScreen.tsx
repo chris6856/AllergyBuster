@@ -4,6 +4,7 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Camera, useCameraDevice, useCodeScanner} from 'react-native-vision-camera';
 import {ScannerOverlay} from '../../components/ScannerOverlay';
 import {useCameraPermission} from '../../hooks/useCameraPermission';
+import {useAppState} from '../../hooks/useAppState';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {ScanStackScreenProps} from '../../navigation/navigationTypes';
 
@@ -12,6 +13,7 @@ type Props = ScanStackScreenProps<'BarcodeScan'>;
 export function BarcodeScanScreen(_props: Props) {
   const navigation = useNavigation<Props['navigation']>();
   const isFocused = useIsFocused();
+  const appState = useAppState();
   const {status, requestPermission, openSettings} = useCameraPermission();
   const device = useCameraDevice('back');
   const [torchOn, setTorchOn] = useState(false);
@@ -114,7 +116,7 @@ export function BarcodeScanScreen(_props: Props) {
       <Camera
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={isFocused && status === 'granted'}
+        isActive={isFocused && status === 'granted' && appState === 'active'}
         codeScanner={codeScanner}
         torch={torchOn ? 'on' : 'off'}
         accessibilityLabel="Camera viewfinder"
