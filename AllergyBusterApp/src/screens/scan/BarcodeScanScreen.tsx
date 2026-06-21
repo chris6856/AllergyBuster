@@ -16,6 +16,12 @@ export function BarcodeScanScreen(_props: Props) {
   const device = useCameraDevice('back');
   const [torchOn, setTorchOn] = useState(false);
   const isProcessing = useRef(false);
+  const pendingCode = useRef<{value: string; count: number} | null>(null);
+
+  // Require the same value across several consecutive frames before acting.
+  // A single-frame read can be a misdecode from motion blur or a partially
+  // framed barcode, which is what was causing "no product found" results.
+  const REQUIRED_CONSECUTIVE_READS = 3;
 
   const codeScanner = useCodeScanner({
     codeTypes: ['ean-13', 'ean-8', 'upc-a', 'upc-e', 'code-128', 'code-39'],
@@ -28,7 +34,19 @@ export function BarcodeScanScreen(_props: Props) {
         if (!value) {
           return;
         }
+
+        if (pendingCode.current?.value === value) {
+          pendingCode.current.count += 1;
+        } else {
+          pendingCode.current = {value, count: 1};
+        }
+
+        if (pendingCode.current.count < REQUIRED_CONSECUTIVE_READS) {
+          return;
+        }
+
         isProcessing.current = true;
+        pendingCode.current = null;
         navigation.navigate('ScanResult', {barcode: value});
         // Reset after a short delay to allow re-scanning after returning
         setTimeout(() => {
