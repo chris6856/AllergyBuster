@@ -11,6 +11,7 @@ import {TipCard} from '../components/TipCard';
 import {useDailyTip} from '../hooks/useDailyTip';
 import {useNetworkStatus} from '../hooks/useNetworkStatus';
 import {NoNetworkBanner} from '../components/NoNetworkBanner';
+import {RatingPromptModal} from '../components/RatingPromptModal';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 import {MainTabNavigationProp} from '../navigation/navigationTypes';
 
@@ -69,6 +70,7 @@ export function HomeScreen() {
       style={styles.container}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
+      <RatingPromptModal />
       {!isConnected && <NoNetworkBanner />}
 
       {/* Hero header */}
@@ -119,7 +121,7 @@ export function HomeScreen() {
         packaging and consult a healthcare professional regarding your specific
         dietary needs.
       </Text>
-      <Text style={styles.buildTag}>v1.0.9 (25)</Text>
+      <Text style={styles.buildTag}>v1.1.0 (26)</Text>
     </ScrollView>
   );
 }

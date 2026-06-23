@@ -1,7 +1,7 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {RootStackParamList} from './navigationTypes';
-import {MainTabNavigator} from './MainTabNavigator';
+import {MainGate} from './MainGate';
 import {DisclaimerScreen} from '../screens/DisclaimerScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -14,7 +14,7 @@ export function RootNavigator() {
         component={DisclaimerScreen}
         options={{animation: 'fade'}}
       />
-      <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+      <Stack.Screen name="MainTabs" component={MainGate} />
     </Stack.Navigator>
   );
 }

@@ -7,6 +7,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {queryClient} from './src/store/queryClient';
 import {RootNavigator} from './src/navigation/RootNavigator';
 import {ErrorBoundary} from './src/components/ErrorBoundary';
+import {PurchaseProvider} from './src/providers/PurchaseProvider';
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
@@ -35,9 +36,11 @@ export default function App() {
       <GestureHandlerRootView style={{flex: 1}}>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
-            <NavigationContainer ref={navigationRef}>
-              <RootNavigator />
-            </NavigationContainer>
+            <PurchaseProvider>
+              <NavigationContainer ref={navigationRef}>
+                <RootNavigator />
+              </NavigationContainer>
+            </PurchaseProvider>
           </QueryClientProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
