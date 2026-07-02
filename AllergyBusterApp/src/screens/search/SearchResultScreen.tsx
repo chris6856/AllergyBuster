@@ -227,9 +227,12 @@ function ProductRow({product}: {product: NormalizedProduct}) {
       )}
 
       {!hasDeclared && !hasTraces && (
-        <Text style={styles.noAllergenText}>
-          No major allergens detected — verify on packaging.
-        </Text>
+        <View style={styles.noAllergenRow}>
+          <View style={styles.noAllergenIcon}>
+            <Text style={styles.noAllergenCheck}>✓</Text>
+          </View>
+          <Text style={styles.noAllergenText}>No allergens detected — verify on packaging.</Text>
+        </View>
       )}
 
       <Text style={styles.sourceLabel}>
@@ -675,11 +678,32 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     flex: 1,
   },
-  noAllergenText: {
+  noAllergenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: spacing.sm,
+    gap: spacing.sm,
+  },
+  noAllergenIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  noAllergenCheck: {
+    fontSize: 12,
+    color: colors.white,
+    fontWeight: '700',
+    lineHeight: 15,
+  },
+  noAllergenText: {
     fontSize: fontSizes.xs,
-    color: colors.textDisabled,
-    fontStyle: 'italic',
+    color: colors.primary,
+    fontWeight: '600',
+    flex: 1,
   },
   sourceLabel: {
     marginTop: spacing.sm,

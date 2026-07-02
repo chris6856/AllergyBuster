@@ -15,8 +15,12 @@ export function AllergenList({allergens}: Props) {
   if (!hasDeclared && !hasTraces) {
     return (
       <View style={styles.emptyContainer}>
+        <View style={styles.safeIcon}>
+          <Text style={styles.safeCheck}>✓</Text>
+        </View>
+        <Text style={styles.safeTitle}>No Allergens Found</Text>
         <Text style={styles.emptyText}>
-          No major allergens detected. Always verify on product packaging.
+          Always verify on product packaging.
         </Text>
       </View>
     );
@@ -73,8 +77,29 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   emptyContainer: {
-    padding: spacing.md,
+    padding: spacing.xl,
     alignItems: 'center',
+  },
+  safeIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  safeCheck: {
+    fontSize: 36,
+    color: colors.white,
+    fontWeight: '700',
+    lineHeight: 42,
+  },
+  safeTitle: {
+    fontSize: fontSizes.lg,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: spacing.sm,
   },
   emptyText: {
     fontSize: fontSizes.sm,
