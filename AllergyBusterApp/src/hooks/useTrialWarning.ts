@@ -1,22 +1,18 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getScanCount} from '../utils/scanCounter';
-import {SCANS_BEFORE_RATING} from '../constants/purchases';
+import {useInstallAge} from './useInstallAge';
+import {TRIAL_DAYS, TRIAL_WARNING_DAY} from '../constants/purchases';
 
-const STORAGE_KEY = 'ratingPromptShown';
+const STORAGE_KEY = 'trialWarningShown';
 
-export function useRatingPrompt() {
+export function useTrialWarning() {
+  const {daysSinceInstall} = useInstallAge();
   const [shown, setShown] = useState<boolean | null>(null);
-  const [scanCount, setScanCount] = useState<number | null>(null);
 
   const load = useCallback(async () => {
-    const [shownValue, count] = await Promise.all([
-      AsyncStorage.getItem(STORAGE_KEY),
-      getScanCount(),
-    ]);
-    setShown(shownValue === 'true');
-    setScanCount(count);
+    const value = await AsyncStorage.getItem(STORAGE_KEY);
+    setShown(value === 'true');
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -29,8 +25,9 @@ export function useRatingPrompt() {
 
   const visible =
     shown === false &&
-    scanCount !== null &&
-    scanCount >= SCANS_BEFORE_RATING;
+    daysSinceInstall !== null &&
+    daysSinceInstall >= TRIAL_WARNING_DAY &&
+    daysSinceInstall < TRIAL_DAYS;
 
   return {visible, dismiss};
 }

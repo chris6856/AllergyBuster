@@ -36,9 +36,9 @@ export function RatingPromptModal() {
           {step === 'rate' ? (
             <>
               <Text style={styles.stars}>⭐️⭐️⭐️⭐️⭐️</Text>
-              <Text style={styles.title}>Enjoying AllergyBuster?</Text>
+              <Text style={styles.title}>Glad we could help!</Text>
               <Text style={styles.body}>
-                We'd love a 5-star rating to help other allergy sufferers find the app.
+                Every review helps another family discover AllergyBuster. Would you mind leaving us a quick rating?
               </Text>
               <TouchableOpacity
                 style={styles.primaryButton}

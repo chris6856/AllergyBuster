@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {incrementScanCount} from '../../utils/scanCounter';
 import {ProductHeader} from '../../components/ProductHeader';
 import {AllergenList} from '../../components/AllergenList';
 import {LoadingOverlay} from '../../components/LoadingOverlay';
@@ -22,6 +23,14 @@ export function ScanResultScreen({route}: Props) {
   const {data: product, isLoading, isError} = useProductByBarcode(
     barcode ?? productId,
   );
+
+  const incrementedRef = useRef(false);
+  useEffect(() => {
+    if (product && !incrementedRef.current) {
+      incrementedRef.current = true;
+      incrementScanCount();
+    }
+  }, [product]);
 
   if (!isConnected) {
     return (

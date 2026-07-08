@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -13,6 +13,7 @@ import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {PhotoStackScreenProps} from '../../navigation/navigationTypes';
 import {MainTabNavigationProp} from '../../navigation/navigationTypes';
 import {extractAllergensFromOcr} from '../../utils/ocrAllergenExtractor';
+import {incrementScanCount} from '../../utils/scanCounter';
 
 type Props = PhotoStackScreenProps<'PhotoResult'>;
 
@@ -23,6 +24,14 @@ export function PhotoResultScreen({route}: Props) {
   const [showRawText, setShowRawText] = useState(false);
 
   const {detected, rawText} = extractAllergensFromOcr(rawOcrText);
+
+  const incrementedRef = useRef(false);
+  useEffect(() => {
+    if (rawText.trim() && !incrementedRef.current) {
+      incrementedRef.current = true;
+      incrementScanCount();
+    }
+  }, [rawText]);
 
   // No usable text detected at all
   if (!rawText.trim()) {

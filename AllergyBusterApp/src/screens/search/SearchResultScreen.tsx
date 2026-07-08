@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -19,6 +19,7 @@ import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {SearchStackScreenProps} from '../../navigation/navigationTypes';
 import {NormalizedProduct} from '../../types/product';
 import {searchEstablishments, Establishment} from '../../services/establishmentsService';
+import {incrementScanCount} from '../../utils/scanCounter';
 
 type Props = SearchStackScreenProps<'SearchResult'>;
 
@@ -57,6 +58,14 @@ export function SearchResultScreen({route}: Props) {
       return next;
     });
   }, []);
+
+  const incrementedRef = useRef(false);
+  useEffect(() => {
+    if (mode === 'products' && !productQuery.isLoading && !productQuery.isError && products.length > 0 && !incrementedRef.current) {
+      incrementedRef.current = true;
+      incrementScanCount();
+    }
+  }, [mode, productQuery.isLoading, productQuery.isError, products.length]);
 
   const isLoading = mode === 'products' ? productQuery.isLoading : establishmentsQuery.isLoading;
   const isError   = mode === 'products' ? productQuery.isError   : establishmentsQuery.isError;
