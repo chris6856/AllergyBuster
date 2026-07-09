@@ -44,7 +44,7 @@ export function TextSearchScreen({route}: Props) {
   useEffect(() => {
     const unsub = navigation.addListener('focus', () => {
       if (isFirstFocus.current) { isFirstFocus.current = false; return; }
-      setQuery(''); setLocation(''); setCoords(null);
+      setQuery('');
     });
     return unsub;
   }, [navigation]);
