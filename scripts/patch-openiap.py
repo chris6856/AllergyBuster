@@ -38,6 +38,14 @@ REMOVED_BRIDGE_FUNCS = [
 # Block-scoped statements where { may appear on the NEXT line (deferred brace).
 _BLOCK_STMT_RE = re.compile(r"^\s*(if\s|guard\s|while\s|for\s|func\s|init\(|switch\s)")
 
+# Named declarations that open a block: never cascade-remove these lines because
+# their opening { would orphan the body. if/guard/while/for blocks ARE removable
+# (they'll be removed together with their body via block-tracking cascade).
+_DECL_OPEN_RE = re.compile(
+    r"^\s*(?:(?:static|class|final|open|public|internal|private|fileprivate|override)\s+)*"
+    r"(?:func|class\s+\w|struct\s+\w|enum\s+\w|extension\s+\w|init\s*[\(\<]|subscript\s*[\(\<])"
+)
+
 # Variable names too generic, or critical functions, that must not be cascade-removed.
 _SKIP_CASCADE = {
     "self", "super", "result", "error", "value", "data",
@@ -99,23 +107,21 @@ def _patch_lines(lines, removed_patterns):
 _BIND_RE = re.compile(r"^// XCODE26.*?\b(?:let|var)\s+(\w+)\s*=")
 
 
-def _patch_cascade(patched_lines):
+def _cascade_pass(patched_lines):
     """
-    Single-pass cascade: variables bound to removed-API values on // XCODE26
-    lines become undefined. Comment out every remaining live line that
-    references such a variable as a whole word.
+    One cascade pass.  Extracts cascade vars from ALL // XCODE26 lines
+    (primary, block-body, and prior CASCADE lines), then comments out every
+    live line that references any of those vars as a whole word (\bVAR\b).
 
-    Only variables from PRIMARY // XCODE26 lines are used (not from
-    // XCODE26 CASCADE lines) — this prevents transitive chains from
-    reaching critical functions like purchase/purchaseIOS.
-
-    Lines that open a block (opens > closes) are never cascade-commented:
-    removing the { would orphan the function/if body and corrupt brace depth.
+    Block-opening lines are handled as follows:
+      - Named declarations (func/class/struct/enum/extension/init): NEVER
+        cascade-removed — their opening { must stay or the body is orphaned.
+      - All other block openers (if/guard/while/closure, etc.): cascade-
+        removed WITH their entire body (block-tracking) so braces stay balanced.
     """
     cascade_vars = set()
     for line in patched_lines:
-        # Only extract from primary XCODE26 lines, not from prior CASCADE lines
-        if not line.startswith("// XCODE26 ") or line.startswith("// XCODE26 CASCADE"):
+        if not line.startswith("// XCODE26"):
             continue
         m = _BIND_RE.match(line)
         if m:
@@ -124,28 +130,73 @@ def _patch_cascade(patched_lines):
                 cascade_vars.add(v)
 
     if not cascade_vars:
-        return patched_lines
+        return patched_lines, 0
 
     patterns = [re.compile(r"\b" + re.escape(v) + r"\b") for v in cascade_vars]
 
     result = []
     n_new = 0
-    for line in patched_lines:
+    i = 0
+    lines = patched_lines
+    while i < len(lines):
+        line = lines[i]
         if line.startswith("// XCODE26"):
             result.append(line)
-        elif any(p.search(line) for p in patterns):
-            # Never cascade a block-opening line: orphaning the body corrupts braces
-            if line.count("{") > line.count("}"):
+            i += 1
+            continue
+
+        if any(p.search(line) for p in patterns):
+            opens = line.count("{")
+            closes = line.count("}")
+            net = opens - closes
+
+            if net > 0 and _DECL_OPEN_RE.match(line):
+                # Named declaration: protect it — never cascade-remove
                 result.append(line)
+                i += 1
+            elif net > 0:
+                # Block-opening non-declaration (if/guard/closure/etc.):
+                # cascade-remove this line AND its entire block body so
+                # braces remain balanced.
+                result.append("// XCODE26 CASCADE " + line.rstrip() + "\n")
+                n_new += 1
+                depth = net
+                i += 1
+                while i < len(lines) and depth > 0:
+                    body = lines[i]
+                    depth += body.count("{") - body.count("}")
+                    if body.startswith("// XCODE26"):
+                        result.append(body)
+                    else:
+                        result.append("// XCODE26 CASCADE " + body.rstrip() + "\n")
+                        n_new += 1
+                    i += 1
             else:
                 result.append("// XCODE26 CASCADE " + line.rstrip() + "\n")
                 n_new += 1
+                i += 1
         else:
             result.append(line)
+            i += 1
 
-    if n_new:
-        print(f"  cascade: {n_new} lines (vars: {sorted(cascade_vars)})")
-    return result
+    return result, n_new
+
+
+def _patch_cascade(patched_lines):
+    """
+    Up to 2 cascade passes so transitive variable dependencies are caught
+    (e.g. `terms` → `firstOffer` → line 890).  Stops early if nothing new
+    is cascade-commented.
+    """
+    total = 0
+    for _ in range(2):
+        patched_lines, n_new = _cascade_pass(patched_lines)
+        total += n_new
+        if n_new == 0:
+            break
+    if total:
+        print(f"  cascade: {total} lines across passes")
+    return patched_lines
 
 
 def patch_file(path, removed_patterns, cascade=False):
