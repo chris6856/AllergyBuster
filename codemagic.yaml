@@ -30,10 +30,12 @@ workflows:
         script: |
           python3 scripts/patch-openiap.py
           BRIDGE=AllergyBusterApp/ios/Pods/openiap/packages/apple/Sources/Helpers/StoreKitTypesBridge.swift
-          echo "=== StoreKitTypesBridge lines 630-655 ==="
-          sed -n '630,655p' "$BRIDGE"
-          echo "=== StoreKitTypesBridge lines 880-900 ==="
-          sed -n '880,900p' "$BRIDGE"
+          echo "=== bridge total lines ==="
+          wc -l "$BRIDGE"
+          echo "=== lines 625-660 (around error 641) ==="
+          sed -n '625,660p' "$BRIDGE"
+          echo "=== lines 875-905 (around error 891) ==="
+          sed -n '875,905p' "$BRIDGE"
 
       - name: Set up keychain
         script: |

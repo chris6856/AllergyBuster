@@ -33,6 +33,11 @@ REMOVED_BRIDGE_FUNCS = [
     "billingPlanTypeIOS",
     "renewalBillingPlanTypeIOS",
     "transactionCommitmentInfoIOS",
+    # makeDiscounts calls pricingTerms.introductoryOffer / pricingTerms.discounts,
+    # which are removed.  Removing by name also fixes broken multiline call sites
+    # where only the `from:` argument line (containing .pricingTerms) was removed,
+    # leaving the call with a missing required parameter.
+    "makeDiscounts",
 ]
 
 # Block-scoped statements where { may appear on the NEXT line (deferred brace).
@@ -57,6 +62,20 @@ _SKIP_CASCADE = {
     "purchase", "purchaseIOS", "purchaseOptions",
 }
 
+# Subscription-related variable names that must ALWAYS be treated as cascade
+# vars, regardless of whether _BIND_RE can extract them.  These cover guard-
+# chain bindings and function-parameter names that the regex may not reach.
+_CASCADE_SEEDS = frozenset({
+    "commitment",   # Transaction.commitmentInfo binding
+    "discounts",    # subscription discount array from pricingTerms/JSON
+    "firstOffer",   # pricingTerms introductory offer
+    "introOffer",   # introductory offer from JSON guard chain
+    "pricingTerms", # Product.SubscriptionInfo.pricingTerms
+    "billingPlan",  # billingPlanType binding
+    "renewalPlan",  # renewalBillingPlanType binding
+    "planType",     # billing plan type alias
+}) - _SKIP_CASCADE  # remove any that overlap with the skip list
+
 
 def _patch_lines(lines, removed_patterns):
     """
@@ -66,35 +85,57 @@ def _patch_lines(lines, removed_patterns):
       a) { on matched line, net > 0   → skip_depth = net
       b) { balanced on matched line   → single-line body, nothing to skip
       c) { deferred to a later line   → pending_skip (block-statement lines only)
+
+    Paren tracking: when a removed-pattern line opens an unclosed '(' (multiline
+    call), paren_depth > 0 keeps consuming continuation lines until ')' balances,
+    then resumes normal curly-brace tracking.  This prevents broken multiline
+    calls where only the `from:` argument line is removed, leaving the call site
+    with a missing required parameter.
     """
     patched = []
     skip_depth = 0
+    paren_depth = 0
     pending_skip = False
 
     for line in lines:
         stripped = line.rstrip()
-        opens = line.count("{")
-        closes = line.count("}")
-        net = opens - closes
+        opens_c = line.count("{")
+        closes_c = line.count("}")
+        opens_p = line.count("(")
+        closes_p = line.count(")")
+        net_c = opens_c - closes_c
+        net_p = opens_p - closes_p
 
         if skip_depth > 0:
-            skip_depth += net
+            skip_depth = max(0, skip_depth + net_c)
             patched.append("// XCODE26 " + stripped + "\n")
+            continue
+
+        if paren_depth > 0:
+            paren_depth += net_p
+            patched.append("// XCODE26 " + stripped + "\n")
+            if paren_depth <= 0:
+                paren_depth = 0
+                # If this closing line also opens a curly block (e.g. `) {`), track it
+                if net_c > 0:
+                    skip_depth = net_c
             continue
 
         if pending_skip:
             patched.append("// XCODE26 " + stripped + "\n")
-            if opens > 0:
+            if opens_c > 0:
                 pending_skip = False
-                skip_depth = max(0, net)
+                skip_depth = max(0, net_c)
             continue
 
         if any(r in line for r in removed_patterns):
             patched.append("// XCODE26 " + stripped + "\n")
-            if net > 0:
-                skip_depth = net                      # case a
-            elif opens == 0 and _BLOCK_STMT_RE.match(line):
-                pending_skip = True                   # case c
+            if net_c > 0:
+                skip_depth = net_c                    # case a: block opened on this line
+            elif opens_c == 0 and _BLOCK_STMT_RE.match(line):
+                pending_skip = True                   # case c: { deferred to next line
+            elif net_p > 0:
+                paren_depth = net_p                   # multiline call: track to closing )
             # else case b — balanced or bare expression
         else:
             patched.append(line)
@@ -119,7 +160,10 @@ def _cascade_pass(patched_lines):
       - All other block openers (if/guard/while/closure, etc.): cascade-
         removed WITH their entire body (block-tracking) so braces stay balanced.
     """
-    cascade_vars = set()
+    # Seed with known subscription-API variable names that may appear as guard
+    # bindings or function parameters and escape _BIND_RE extraction.
+    cascade_vars = set(_CASCADE_SEEDS)
+
     for line in patched_lines:
         if not line.startswith("// XCODE26"):
             continue
@@ -189,7 +233,7 @@ def _patch_cascade(patched_lines):
     is cascade-commented.
     """
     total = 0
-    for _ in range(2):
+    for pass_num in range(1, 3):
         patched_lines, n_new = _cascade_pass(patched_lines)
         total += n_new
         if n_new == 0:
@@ -197,6 +241,23 @@ def _patch_cascade(patched_lines):
     if total:
         print(f"  cascade: {total} lines across passes")
     return patched_lines
+
+
+def _debug_cascade_vars(patched_lines):
+    """Print cascade vars that would be extracted, for diagnostic purposes."""
+    cascade_vars = set(_CASCADE_SEEDS)
+    for line in patched_lines:
+        if not line.startswith("// XCODE26"):
+            continue
+        m = _BIND_RE.match(line)
+        if m:
+            v = m.group(1)
+            if v not in _SKIP_CASCADE and len(v) >= 5:
+                cascade_vars.add(v)
+    extracted = cascade_vars - _CASCADE_SEEDS
+    print(f"  cascade seeds : {sorted(_CASCADE_SEEDS)}")
+    print(f"  cascade extracted: {sorted(extracted)}")
+    print(f"  cascade total vars: {sorted(cascade_vars)}")
 
 
 def patch_file(path, removed_patterns, cascade=False):
@@ -256,6 +317,13 @@ def check_file(path, label):
 bridge = f"{PODS}/Helpers/StoreKitTypesBridge.swift"
 if not check_file(bridge, "StoreKitTypesBridge.swift"):
     sys.exit(1)
+
+with open(bridge) as _f:
+    _bridge_lines = _f.readlines()
+
+# Show what cascade vars will be used (before patching so the raw file is visible)
+_primary_patched = _patch_lines(_bridge_lines, REMOVED_STOREKIT + REMOVED_BRIDGE_FUNCS)
+_debug_cascade_vars(_primary_patched)
 
 n = patch_file(bridge, REMOVED_STOREKIT + REMOVED_BRIDGE_FUNCS, cascade=True)
 print(f"StoreKitTypesBridge.swift: {n} lines patched total")
