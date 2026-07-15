@@ -110,6 +110,7 @@ _CASCADE_SEEDS = frozenset({
     "advancedCommerceInfo", # result of extractAdvancedCommerceInfo (iOS 17.2+)
     "transactionReason",   # result of transactionReasonDetails (iOS 17.2+)
     "ownershipType",       # result of ownershipTypeDescription (iOS 17.2+)
+    "offerInfo",           # let offerInfo uninitialized on some paths — Swift 6 definite-init error at line 196
 }) - _SKIP_CASCADE  # drop any names that overlap with the skip list
 
 
