@@ -29,6 +29,11 @@ workflows:
       - name: Patch openiap Swift sources
         script: |
           python3 scripts/patch-openiap.py
+          BRIDGE=AllergyBusterApp/ios/Pods/openiap/packages/apple/Sources/Helpers/StoreKitTypesBridge.swift
+          echo "=== StoreKitTypesBridge lines 630-655 ==="
+          sed -n '630,655p' "$BRIDGE"
+          echo "=== StoreKitTypesBridge lines 880-900 ==="
+          sed -n '880,900p' "$BRIDGE"
 
       - name: Set up keychain
         script: |
