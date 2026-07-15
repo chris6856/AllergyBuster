@@ -12,6 +12,7 @@ workflows:
         bundle_identifier: com.allergybusterapp
       vars:
         BUNDLE_ID: "com.allergybusterapp"
+      xcode: 16.4
       node: 22.11.0
 
     scripts:
