@@ -23,19 +23,22 @@ workflows:
 
       - name: Install CocoaPods
         script: |
+          # Pin openiap apple pod to 2.2.5 (Xcode 26.4 final SDK compatible).
+          # openiap 2.2.1 (bundled with react-native-iap@15.3.2) used iOS 26 beta
+          # StoreKit APIs (.billingPlanType, .pricingTerms, etc.) that were removed
+          # from the Xcode 26.4 final SDK.  2.2.5 (released 2026-07-10) wraps those
+          # calls in #if compiler(>=6.3) / #available(iOS 26.4, *) guards.
+          node -e "
+            const fs = require('fs');
+            const p = 'AllergyBusterApp/node_modules/react-native-iap/openiap-versions.json';
+            const v = JSON.parse(fs.readFileSync(p));
+            console.log('openiap apple before:', v.apple);
+            v.apple = '2.2.5';
+            fs.writeFileSync(p, JSON.stringify(v, null, 2));
+            console.log('openiap apple after:', v.apple);
+          "
           cd AllergyBusterApp/ios
           pod install
-
-      - name: Patch openiap Swift sources
-        script: |
-          python3 scripts/patch-openiap.py
-          BRIDGE=AllergyBusterApp/ios/Pods/openiap/packages/apple/Sources/Helpers/StoreKitTypesBridge.swift
-          echo "=== bridge total lines ==="
-          wc -l "$BRIDGE"
-          echo "=== lines 625-660 (around error 641) ==="
-          sed -n '625,660p' "$BRIDGE"
-          echo "=== lines 875-905 (around error 891) ==="
-          sed -n '875,905p' "$BRIDGE"
 
       - name: Set up keychain
         script: |
