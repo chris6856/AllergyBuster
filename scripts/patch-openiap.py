@@ -58,6 +58,9 @@ REMOVED_BRIDGE_FUNCS = [
     # makePurchaseOffer: Transaction.Offer.paymentMode is now non-optional in iOS 26.4
     #   so `if let mode = offer.paymentMode` is a type error.
     "makePurchaseOffer",
+    # ownershipTypeDescription: defined @available(iOS 17.2, *) in openiap source but
+    #   called from a function with no availability guard; app targets iOS 16.0.
+    "ownershipTypeDescription",
 ]
 
 # Block-scoped statements where { may appear on the NEXT line (deferred brace).
