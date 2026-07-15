@@ -32,6 +32,10 @@ REMOVED_STOREKIT = [
     ".pricingTerms",
     "SubscriptionInfo.PricingTerms",
     "SubscriptionInfo.BillingPlanType",
+    # Transaction.Reason typealias — @available(iOS 17.2, *), app targets iOS 16.0.
+    # Removes the transactionReasonIOS bridge function (definition at line 1054 returns
+    # this type) and all return sites that construct TransactionReason values.
+    "TransactionReason",
 ]
 
 # Bridge helper functions whose definitions used the missing APIs;
