@@ -18,8 +18,7 @@ workflows:
       - name: Install dependencies
         script: |
           cd AllergyBusterApp
-          rm -f package-lock.json
-          npm install
+          npm ci
 
       - name: Install CocoaPods
         script: |
@@ -37,8 +36,15 @@ workflows:
             fs.writeFileSync(p, JSON.stringify(v, null, 2));
             console.log('openiap apple after:', v.apple);
           "
+          echo "=== openiap-versions.json after patch ==="
+          cat AllergyBusterApp/node_modules/react-native-iap/openiap-versions.json
+          # Delete Podfile.lock so pod install re-resolves rather than replaying
+          # cached version pins (stale lock would keep openiap at 2.2.1).
+          rm -f AllergyBusterApp/ios/Podfile.lock
           cd AllergyBusterApp/ios
-          pod install
+          pod install --repo-update
+          echo "=== Podfile.lock openiap pin ==="
+          grep -A1 "openiap" Podfile.lock || echo "openiap not found in Podfile.lock"
 
       - name: Set up keychain
         script: |
@@ -112,6 +118,7 @@ workflows:
     artifacts:
       - $CM_BUILD_DIR/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - AllergyBusterApp/ios/Podfile.lock
 
     publishing:
       app_store_connect:
