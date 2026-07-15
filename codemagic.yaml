@@ -48,7 +48,23 @@ workflows:
 
       - name: Patch openiap Swift sources
         script: |
+          BRIDGE=AllergyBusterApp/ios/Pods/openiap/packages/apple/Sources/Helpers/StoreKitTypesBridge.swift
+          echo "=== openiap resolved version ==="
+          grep -A1 "openiap" AllergyBusterApp/ios/Podfile.lock 2>/dev/null | head -5 || echo "(no Podfile.lock)"
+          echo "=== bridge line count ==="
+          wc -l "$BRIDGE"
+          echo "=== static func names in bridge (unpatched) ==="
+          grep -n "static func " "$BRIDGE" | grep -v "// XCODE26"
+          echo "=== running patch ==="
           python3 scripts/patch-openiap.py
+          echo "=== lines 628-650 after patch (around error 641) ==="
+          sed -n '628,650p' "$BRIDGE"
+          echo "=== lines 682-705 after patch (around error 690) ==="
+          sed -n '682,705p' "$BRIDGE"
+          echo "=== lines 880-930 after patch (around errors 888/915/921) ==="
+          sed -n '880,930p' "$BRIDGE"
+          echo "=== lines 1055-1075 after patch (around error 1068) ==="
+          sed -n '1055,1075p' "$BRIDGE"
 
       - name: Set up keychain
         script: |
