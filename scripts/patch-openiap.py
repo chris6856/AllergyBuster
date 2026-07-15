@@ -15,18 +15,20 @@ Removed APIs:
 import sys
 import os
 
-BRIDGE_REL = "AllergyBusterApp/node_modules/openiap/packages/apple/Sources/Helpers/StoreKitTypesBridge.swift"
+# After pod install, CocoaPods places (or symlinks) openiap sources here.
+# This is the path confirmed from Xcode build error messages.
+BRIDGE_REL = "AllergyBusterApp/ios/Pods/openiap/packages/apple/Sources/Helpers/StoreKitTypesBridge.swift"
 
 path = os.path.join(os.getcwd(), BRIDGE_REL)
 
 if not os.path.isfile(path):
     print(f"WARNING: not found at {path}")
-    print("Searching...")
-    for root, dirs, files in os.walk("AllergyBusterApp/node_modules"):
+    print("Searching for StoreKitTypesBridge.swift...")
+    for root, dirs, files in os.walk("AllergyBusterApp"):
         for name in files:
             if name == "StoreKitTypesBridge.swift":
                 print(f"  Found: {os.path.join(root, name)}")
-    sys.exit(0)
+    sys.exit(1)
 
 REMOVED = [
     ".billingPlanType",

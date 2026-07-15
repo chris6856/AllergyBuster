@@ -21,14 +21,14 @@ workflows:
           rm -f package-lock.json
           npm install
 
-      - name: Patch openiap Swift sources before pod install
-        script: |
-          python3 scripts/patch-openiap.py
-
       - name: Install CocoaPods
         script: |
           cd AllergyBusterApp/ios
           pod install
+
+      - name: Patch openiap Swift sources
+        script: |
+          python3 scripts/patch-openiap.py
 
       - name: Set up keychain
         script: |
