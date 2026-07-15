@@ -65,6 +65,13 @@ REMOVED_BRIDGE_FUNCS = [
     # ownershipTypeDescription: defined @available(iOS 17.2, *) in openiap source but
     #   called from a function with no availability guard; app targets iOS 16.0.
     "ownershipTypeDescription",
+    # transactionReasonDetails: its definition (line ~1054) is already removed via the
+    #   "TransactionReason" REMOVED_STOREKIT pattern (return type), but the call site
+    #   at line ~172 has no "TransactionReason" in it — must target by name.
+    "transactionReasonDetails",
+    # extractAdvancedCommerceInfo: @available(iOS 17.2, *), called at line ~173 with
+    #   no availability guard.
+    "extractAdvancedCommerceInfo",
 ]
 
 # Block-scoped statements where { may appear on the NEXT line (deferred brace).
