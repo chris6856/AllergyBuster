@@ -26,6 +26,23 @@ workflows:
           cd AllergyBusterApp/ios
           pod install
 
+      - name: Patch openiap for Xcode 26 Swift 6
+        script: |
+          XCCONFIG_DIR="AllergyBusterApp/ios/Pods/Target Support Files/openiap"
+          if [ -d "$XCCONFIG_DIR" ]; then
+            for f in "$XCCONFIG_DIR"/*.xcconfig; do
+              echo "" >> "$f"
+              echo "// Xcode 26 / Swift 6 compatibility patch" >> "$f"
+              echo "SWIFT_VERSION = 5.0" >> "$f"
+              echo "OTHER_SWIFT_FLAGS = \$(inherited) -Xfrontend -disable-reflection-metadata" >> "$f"
+            done
+            echo "Patched openiap xcconfig files:"
+            ls "$XCCONFIG_DIR"
+          else
+            echo "openiap xcconfig directory not found, listing Pods/Target Support Files:"
+            ls "AllergyBusterApp/ios/Pods/Target Support Files/"
+          fi
+
       - name: Set up keychain
         script: |
           keychain initialize
