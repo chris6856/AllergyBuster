@@ -45,6 +45,19 @@ REMOVED_BRIDGE_FUNCS = [
     # and so multiline call sites are removed via paren tracking.
     "makeDiscounts",
     "makeDiscount",
+    # Functions that fail on Xcode 26.4 final in openiap 2.3.0+ (1289-line source):
+    # renewalCommitmentInfoIOS: uses .commitmentInfo + .renewalBillingPlanType inside
+    #   #if compiler(>=6.3) guard — those properties are still absent from iOS 26.4 SDK.
+    "renewalCommitmentInfoIOS",
+    # makeSubscriptionOffer: offer.paymentMode (SubscriptionOffer) removed/changed in
+    #   iOS 26.4; substring also matches makeSubscriptionOffers which calls it.
+    "makeSubscriptionOffer",
+    # parseIntroductoryOfferFromJSON: Swift 6.3 rejects try?+as? in multi-binding
+    #   guard let chain; cascades into missing-arg errors at lines 915 and 921.
+    "parseIntroductoryOfferFromJSON",
+    # makePurchaseOffer: Transaction.Offer.paymentMode is now non-optional in iOS 26.4
+    #   so `if let mode = offer.paymentMode` is a type error.
+    "makePurchaseOffer",
 ]
 
 # Block-scoped statements where { may appear on the NEXT line (deferred brace).

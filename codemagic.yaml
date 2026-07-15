@@ -46,6 +46,10 @@ workflows:
           echo "=== Podfile.lock openiap pin ==="
           grep -A1 "openiap" Podfile.lock || echo "openiap not found in Podfile.lock"
 
+      - name: Patch openiap Swift sources
+        script: |
+          python3 scripts/patch-openiap.py
+
       - name: Set up keychain
         script: |
           keychain initialize
