@@ -99,14 +99,17 @@ _SKIP_CASCADE = {
 # regardless of whether _BIND_RE can extract them (guard-chain bindings, function
 # parameters, and variables in BODY-prefixed blocks all escape extraction).
 _CASCADE_SEEDS = frozenset({
-    "commitment",   # Transaction.commitmentInfo binding
-    "discounts",    # subscription discount array
-    "firstOffer",   # pricingTerms introductory offer
-    "introOffer",   # introductory offer from JSON guard chain
-    "pricingTerms", # Product.SubscriptionInfo.pricingTerms
-    "billingPlan",  # billingPlanType binding
-    "renewalPlan",  # renewalBillingPlanType binding
-    "planType",     # billing plan type alias
+    "commitment",          # Transaction.commitmentInfo binding
+    "discounts",           # subscription discount array
+    "firstOffer",          # pricingTerms introductory offer
+    "introOffer",          # introductory offer from JSON guard chain
+    "pricingTerms",        # Product.SubscriptionInfo.pricingTerms
+    "billingPlan",         # billingPlanType binding
+    "renewalPlan",         # renewalBillingPlanType binding
+    "planType",            # billing plan type alias
+    "advancedCommerceInfo", # result of extractAdvancedCommerceInfo (iOS 17.2+)
+    "transactionReason",   # result of transactionReasonDetails (iOS 17.2+)
+    "ownershipType",       # result of ownershipTypeDescription (iOS 17.2+)
 }) - _SKIP_CASCADE  # drop any names that overlap with the skip list
 
 
