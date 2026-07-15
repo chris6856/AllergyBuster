@@ -38,14 +38,15 @@ REMOVED_BRIDGE_FUNCS = [
 # Block-scoped statements where { may appear on the NEXT line (deferred brace).
 _BLOCK_STMT_RE = re.compile(r"^\s*(if\s|guard\s|while\s|for\s|func\s|init\(|switch\s)")
 
-# Variable names too generic or too important for non-subscription code
-# to safely cascade-comment everywhere.
+# Variable names too generic, or critical functions, that must not be cascade-removed.
 _SKIP_CASCADE = {
     "self", "super", "result", "error", "value", "data",
     "response", "config", "state", "options", "context",
     "type", "key", "info", "item", "name", "text",
     "price", "date", "status", "count", "index", "total",
     "product", "transaction", "subscription",
+    # Core purchase functions — essential for non-consumable IAP:
+    "purchase", "purchaseIOS", "purchaseOptions",
 }
 
 
@@ -100,55 +101,51 @@ _BIND_RE = re.compile(r"^// XCODE26.*?\b(?:let|var)\s+(\w+)\s*=")
 
 def _patch_cascade(patched_lines):
     """
-    Multi-pass cascade: any variable bound to a removed-API value on a
-    // XCODE26 line becomes undefined.  Comment out every remaining live line
-    that references that variable as a whole word (\bVAR\b), then repeat until
-    stable (handles transitive dependencies).
+    Single-pass cascade: variables bound to removed-API values on // XCODE26
+    lines become undefined. Comment out every remaining live line that
+    references such a variable as a whole word.
 
-    Unlike the previous [.?!] suffix approach this also catches:
-      - bare arguments:  someFunc(firstOffer)
-      - from: labels:    makeInfo(from: commitment)
-      - conditional use: if firstOffer != nil { ... }
+    Only variables from PRIMARY // XCODE26 lines are used (not from
+    // XCODE26 CASCADE lines) — this prevents transitive chains from
+    reaching critical functions like purchase/purchaseIOS.
+
+    Lines that open a block (opens > closes) are never cascade-commented:
+    removing the { would orphan the function/if body and corrupt brace depth.
     """
-    max_passes = 6
-    total = 0
+    cascade_vars = set()
+    for line in patched_lines:
+        # Only extract from primary XCODE26 lines, not from prior CASCADE lines
+        if not line.startswith("// XCODE26 ") or line.startswith("// XCODE26 CASCADE"):
+            continue
+        m = _BIND_RE.match(line)
+        if m:
+            v = m.group(1)
+            if v not in _SKIP_CASCADE and len(v) >= 5:
+                cascade_vars.add(v)
 
-    for pass_num in range(max_passes):
-        # Re-extract cascade vars from ALL XCODE26-prefixed lines each pass
-        # (includes lines produced by previous cascade passes).
-        cascade_vars = set()
-        for line in patched_lines:
-            m = _BIND_RE.match(line)
-            if m:
-                v = m.group(1)
-                if v not in _SKIP_CASCADE and len(v) >= 5:
-                    cascade_vars.add(v)
+    if not cascade_vars:
+        return patched_lines
 
-        if not cascade_vars:
-            break
+    patterns = [re.compile(r"\b" + re.escape(v) + r"\b") for v in cascade_vars]
 
-        patterns = [re.compile(r"\b" + re.escape(v) + r"\b") for v in cascade_vars]
-
-        result = []
-        n_new = 0
-        for line in patched_lines:
-            if line.startswith("// XCODE26"):
+    result = []
+    n_new = 0
+    for line in patched_lines:
+        if line.startswith("// XCODE26"):
+            result.append(line)
+        elif any(p.search(line) for p in patterns):
+            # Never cascade a block-opening line: orphaning the body corrupts braces
+            if line.count("{") > line.count("}"):
                 result.append(line)
-            elif any(p.search(line) for p in patterns):
+            else:
                 result.append("// XCODE26 CASCADE " + line.rstrip() + "\n")
                 n_new += 1
-            else:
-                result.append(line)
+        else:
+            result.append(line)
 
-        patched_lines = result
-        total += n_new
-
-        if n_new == 0:
-            break
-
-    if total:
-        print(f"  cascade: {total} lines across passes")
-    return patched_lines
+    if n_new:
+        print(f"  cascade: {n_new} lines (vars: {sorted(cascade_vars)})")
+    return result
 
 
 def patch_file(path, removed_patterns, cascade=False):
