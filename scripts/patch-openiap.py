@@ -10,6 +10,13 @@ StoreKit APIs that existed in iOS 26 beta were removed from the final Xcode 26.4
   - Product.SubscriptionInfo.pricingTerms
 
 AllergyBuster only uses non-consumable IAP, so none of these code paths execute.
+
+Line prefixes used in patched output:
+  // XCODE26          primary match (matched a removed-API pattern directly)
+  // XCODE26 BODY     block/paren body (inside a primary-removed block or multiline call)
+  // XCODE26 CASCADE  cascade match (variable/function from a prior XCODE26 line)
+  // XCODE26 CASCADE BODY  body of a cascade-removed block
+  // XCODE26 CHAIN    dangling if-let/guard opener cleaned up after cascade
 """
 import os
 import re
@@ -33,19 +40,18 @@ REMOVED_BRIDGE_FUNCS = [
     "billingPlanTypeIOS",
     "renewalBillingPlanTypeIOS",
     "transactionCommitmentInfoIOS",
-    # makeDiscounts calls pricingTerms.introductoryOffer / pricingTerms.discounts,
-    # which are removed.  Removing by name also fixes broken multiline call sites
-    # where only the `from:` argument line (containing .pricingTerms) was removed,
-    # leaving the call with a missing required parameter.
+    # makeDiscounts / makeDiscount call pricingTerms APIs and are removed by name so
+    # their entire bodies are block-tracked (BODY prefix) rather than being compiled,
+    # and so multiline call sites are removed via paren tracking.
     "makeDiscounts",
+    "makeDiscount",
 ]
 
 # Block-scoped statements where { may appear on the NEXT line (deferred brace).
 _BLOCK_STMT_RE = re.compile(r"^\s*(if\s|guard\s|while\s|for\s|func\s|init\(|switch\s)")
 
 # Named declarations that open a block: never cascade-remove these lines because
-# their opening { would orphan the body. if/guard/while/for blocks ARE removable
-# (they'll be removed together with their body via block-tracking cascade).
+# their opening { must stay or the body is orphaned.
 _DECL_OPEN_RE = re.compile(
     r"^\s*(?:(?:static|class|final|open|public|internal|private|fileprivate|override)\s+)*"
     r"(?:func|class\s+\w|struct\s+\w|enum\s+\w|extension\s+\w|init\s*[\(\<]|subscript\s*[\(\<])"
@@ -62,35 +68,41 @@ _SKIP_CASCADE = {
     "purchase", "purchaseIOS", "purchaseOptions",
 }
 
-# Subscription-related variable names that must ALWAYS be treated as cascade
-# vars, regardless of whether _BIND_RE can extract them.  These cover guard-
-# chain bindings and function-parameter names that the regex may not reach.
+# Subscription-related variable names that must ALWAYS be treated as cascade vars,
+# regardless of whether _BIND_RE can extract them (guard-chain bindings, function
+# parameters, and variables in BODY-prefixed blocks all escape extraction).
 _CASCADE_SEEDS = frozenset({
     "commitment",   # Transaction.commitmentInfo binding
-    "discounts",    # subscription discount array from pricingTerms/JSON
+    "discounts",    # subscription discount array
     "firstOffer",   # pricingTerms introductory offer
     "introOffer",   # introductory offer from JSON guard chain
     "pricingTerms", # Product.SubscriptionInfo.pricingTerms
     "billingPlan",  # billingPlanType binding
     "renewalPlan",  # renewalBillingPlanType binding
     "planType",     # billing plan type alias
-}) - _SKIP_CASCADE  # remove any that overlap with the skip list
+}) - _SKIP_CASCADE  # drop any names that overlap with the skip list
 
+
+# ── Primary patching pass ──────────────────────────────────────────────────────
 
 def _patch_lines(lines, removed_patterns):
     """
-    First pass: comment out lines containing removed patterns plus their block bodies.
+    Comment out lines containing removed patterns plus their block/call bodies.
 
-    Cases for the opening {:
-      a) { on matched line, net > 0   → skip_depth = net
-      b) { balanced on matched line   → single-line body, nothing to skip
-      c) { deferred to a later line   → pending_skip (block-statement lines only)
+    Prefixes used:
+      // XCODE26       — the trigger line itself
+      // XCODE26 BODY  — block body or paren-continuation line
 
-    Paren tracking: when a removed-pattern line opens an unclosed '(' (multiline
-    call), paren_depth > 0 keeps consuming continuation lines until ')' balances,
-    then resumes normal curly-brace tracking.  This prevents broken multiline
-    calls where only the `from:` argument line is removed, leaving the call site
-    with a missing required parameter.
+    BODY lines are intentionally excluded from cascade-var extraction so that
+    variables defined inside a removed function body (e.g. `paymentMode` inside
+    makeDiscounts) cannot contaminate cascade vars and cause knock-on damage
+    elsewhere in the file.
+
+    Cases for the trigger line:
+      a) net_c > 0  → curly block opened → skip_depth tracks the body
+      b) balanced   → single-line expression, no body to track
+      c) net_c = 0 and _BLOCK_STMT_RE match → block stmt with deferred {
+      d) net_p > 0  → multiline call with unclosed ( → paren_depth tracks args
     """
     patched = []
     skip_depth = 0
@@ -108,21 +120,20 @@ def _patch_lines(lines, removed_patterns):
 
         if skip_depth > 0:
             skip_depth = max(0, skip_depth + net_c)
-            patched.append("// XCODE26 " + stripped + "\n")
+            patched.append("// XCODE26 BODY " + stripped + "\n")
             continue
 
         if paren_depth > 0:
             paren_depth += net_p
-            patched.append("// XCODE26 " + stripped + "\n")
+            patched.append("// XCODE26 BODY " + stripped + "\n")
             if paren_depth <= 0:
                 paren_depth = 0
-                # If this closing line also opens a curly block (e.g. `) {`), track it
-                if net_c > 0:
+                if net_c > 0:   # e.g. closing `) {` also opens a curly block
                     skip_depth = net_c
             continue
 
         if pending_skip:
-            patched.append("// XCODE26 " + stripped + "\n")
+            patched.append("// XCODE26 BODY " + stripped + "\n")
             if opens_c > 0:
                 pending_skip = False
                 skip_depth = max(0, net_c)
@@ -131,11 +142,11 @@ def _patch_lines(lines, removed_patterns):
         if any(r in line for r in removed_patterns):
             patched.append("// XCODE26 " + stripped + "\n")
             if net_c > 0:
-                skip_depth = net_c                    # case a: block opened on this line
+                skip_depth = net_c                  # case a
             elif opens_c == 0 and _BLOCK_STMT_RE.match(line):
-                pending_skip = True                   # case c: { deferred to next line
+                pending_skip = True                 # case c
             elif net_p > 0:
-                paren_depth = net_p                   # multiline call: track to closing )
+                paren_depth = net_p                 # case d: multiline call
             # else case b — balanced or bare expression
         else:
             patched.append(line)
@@ -143,25 +154,68 @@ def _patch_lines(lines, removed_patterns):
     return patched
 
 
-# Regex to extract a variable name from any XCODE26-prefixed binding line.
-# Handles: `let X = ...`, `var X = ...`, `if let X = ...`, `guard let X = ...`, etc.
-_BIND_RE = re.compile(r"^// XCODE26.*?\b(?:let|var)\s+(\w+)\s*=")
+# ── Dangling if-let / guard chain cleanup ──────────────────────────────────────
+
+# Recognise if-let / guard chain openers and continuations.
+_CHAIN_OPENER_RE = re.compile(r"^\s*(if|guard)\s+(let|var)\s")
+_CHAIN_CONT_RE   = re.compile(r"^\s{2,}(let|var)\s")  # indented-only let/var
+
+def _remove_dangling_chains(patched_lines):
+    """
+    After primary patching: find any live if-let/guard chain line that ends with
+    a trailing ',' but whose next LIVE line is NOT a chain continuation.  This
+    happens when cascade (or primary) removes every subsequent binding, leaving
+    the opener dangling with no body or else clause — a Swift syntax error.
+
+    Marks those lines // XCODE26 CHAIN and iterates until stable.
+    """
+    result = list(patched_lines)
+    changed = True
+    while changed:
+        changed = False
+        live = [(i, result[i]) for i in range(len(result))
+                if not result[i].startswith("// XCODE26")]
+        for pos, (i, line) in enumerate(live):
+            stripped = line.rstrip()
+            if not stripped.endswith(","):
+                continue
+            if not (_CHAIN_OPENER_RE.match(stripped) or _CHAIN_CONT_RE.match(stripped)):
+                continue
+            # Is the next live line a chain continuation?
+            if pos + 1 < len(live):
+                next_s = live[pos + 1][1].rstrip()
+                if _CHAIN_CONT_RE.match(next_s):
+                    continue   # next is another binding — chain still valid
+            # Dangling — remove this opener/continuation
+            result[i] = "// XCODE26 CHAIN " + stripped + "\n"
+            changed = True
+            break   # live list is stale; restart the while loop
+
+    return result
+
+
+# ── Cascade pass ───────────────────────────────────────────────────────────────
+
+# Extract a bound variable name from a primary or CASCADE (non-BODY) XCODE26 line.
+# Deliberately excludes:
+#   // XCODE26 BODY  — variables inside removed blocks (e.g. makeDiscounts body)
+#   // XCODE26 CASCADE BODY — body of a cascade-removed block
+# This prevents spurious contamination of cascade vars.
+_BIND_RE = re.compile(
+    r"^// XCODE26 (?!BODY|CASCADE BODY).*?\b(?:let|var)\s+(\w+)\s*="
+)
 
 
 def _cascade_pass(patched_lines):
     """
-    One cascade pass.  Extracts cascade vars from ALL // XCODE26 lines
-    (primary, block-body, and prior CASCADE lines), then comments out every
-    live line that references any of those vars as a whole word (\bVAR\b).
+    One cascade pass.  Seeds cascade vars from _CASCADE_SEEDS, then extracts
+    additional vars from PRIMARY and CASCADE (non-BODY) XCODE26 lines via
+    _BIND_RE.  BODY lines are excluded so function-body locals cannot become
+    cascade vars.
 
-    Block-opening lines are handled as follows:
-      - Named declarations (func/class/struct/enum/extension/init): NEVER
-        cascade-removed — their opening { must stay or the body is orphaned.
-      - All other block openers (if/guard/while/closure, etc.): cascade-
-        removed WITH their entire body (block-tracking) so braces stay balanced.
+    Then comments out every LIVE line that references any cascade var as a
+    whole word (\\bVAR\\b), using block-tracking for non-declaration openers.
     """
-    # Seed with known subscription-API variable names that may appear as guard
-    # bindings or function parameters and escape _BIND_RE extraction.
     cascade_vars = set(_CASCADE_SEEDS)
 
     for line in patched_lines:
@@ -199,9 +253,7 @@ def _cascade_pass(patched_lines):
                 result.append(line)
                 i += 1
             elif net > 0:
-                # Block-opening non-declaration (if/guard/closure/etc.):
-                # cascade-remove this line AND its entire block body so
-                # braces remain balanced.
+                # Block-opening non-declaration: cascade with block body
                 result.append("// XCODE26 CASCADE " + line.rstrip() + "\n")
                 n_new += 1
                 depth = net
@@ -212,7 +264,7 @@ def _cascade_pass(patched_lines):
                     if body.startswith("// XCODE26"):
                         result.append(body)
                     else:
-                        result.append("// XCODE26 CASCADE " + body.rstrip() + "\n")
+                        result.append("// XCODE26 CASCADE BODY " + body.rstrip() + "\n")
                         n_new += 1
                     i += 1
             else:
@@ -227,13 +279,9 @@ def _cascade_pass(patched_lines):
 
 
 def _patch_cascade(patched_lines):
-    """
-    Up to 2 cascade passes so transitive variable dependencies are caught
-    (e.g. `terms` → `firstOffer` → line 890).  Stops early if nothing new
-    is cascade-commented.
-    """
+    """Up to 2 cascade passes; stops early when nothing new is removed."""
     total = 0
-    for pass_num in range(1, 3):
+    for _ in range(2):
         patched_lines, n_new = _cascade_pass(patched_lines)
         total += n_new
         if n_new == 0:
@@ -255,10 +303,12 @@ def _debug_cascade_vars(patched_lines):
             if v not in _SKIP_CASCADE and len(v) >= 5:
                 cascade_vars.add(v)
     extracted = cascade_vars - _CASCADE_SEEDS
-    print(f"  cascade seeds : {sorted(_CASCADE_SEEDS)}")
+    print(f"  cascade seeds    : {sorted(_CASCADE_SEEDS)}")
     print(f"  cascade extracted: {sorted(extracted)}")
-    print(f"  cascade total vars: {sorted(cascade_vars)}")
+    print(f"  cascade total    : {sorted(cascade_vars)}")
 
+
+# ── Main patch pipeline ────────────────────────────────────────────────────────
 
 def patch_file(path, removed_patterns, cascade=False):
     with open(path) as f:
@@ -267,6 +317,10 @@ def patch_file(path, removed_patterns, cascade=False):
     patched = _patch_lines(lines, removed_patterns)
 
     if cascade:
+        # Remove dangling if-let/guard chain openers BEFORE cascade so the
+        # cascade pass sees a structurally valid (commented) chain, not a
+        # half-removed one with a trailing comma and no continuation.
+        patched = _remove_dangling_chains(patched)
         patched = _patch_cascade(patched)
 
     os.chmod(path, 0o644)
@@ -280,7 +334,7 @@ def patch_file(path, removed_patterns, cascade=False):
 def patch_types(path):
     """
     Make commitmentRenewalBillingPlanType optional (= nil default) so struct
-    initialisers that omit it (because we patched out the argument) still compile.
+    initialisers that omit it still compile.
     """
     with open(path) as f:
         content = f.read()
@@ -321,7 +375,6 @@ if not check_file(bridge, "StoreKitTypesBridge.swift"):
 with open(bridge) as _f:
     _bridge_lines = _f.readlines()
 
-# Show what cascade vars will be used (before patching so the raw file is visible)
 _primary_patched = _patch_lines(_bridge_lines, REMOVED_STOREKIT + REMOVED_BRIDGE_FUNCS)
 _debug_cascade_vars(_primary_patched)
 
