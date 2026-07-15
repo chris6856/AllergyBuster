@@ -27,22 +27,24 @@ REMOVED_STOREKIT = [
     "SubscriptionInfo.BillingPlanType",
 ]
 
-# Bridge helper functions whose definitions used the missing APIs.
-# Their call sites must also be commented out.
+# Bridge helper functions whose definitions used the missing APIs;
+# call sites in any file must also be commented out.
 REMOVED_BRIDGE_FUNCS = [
     "billingPlanTypeIOS",
     "renewalBillingPlanTypeIOS",
     "transactionCommitmentInfoIOS",
 ]
 
-# Patterns that begin a block-scoped statement — { may appear on the next line.
-# Only these trigger pending_skip; plain `let/var` assignments do not.
+# Block-scoped statements where { may appear on the NEXT line (deferred brace).
 _BLOCK_STMT_RE = re.compile(r"^\s*(if\s|guard\s|while\s|for\s|func\s|init\(|switch\s)")
 
-# Variable names too generic to cascade-comment safely
+# Variable names too generic or too important for non-subscription code
+# to safely cascade-comment everywhere.
 _SKIP_CASCADE = {
     "self", "super", "result", "error", "value", "data",
-    "response", "config", "state", "options", "context", "type", "key",
+    "response", "config", "state", "options", "context",
+    "type", "key", "info", "item", "name", "text",
+    "price", "date", "status", "count", "index", "total",
     "product", "transaction", "subscription",
 }
 
@@ -51,10 +53,10 @@ def _patch_lines(lines, removed_patterns):
     """
     First pass: comment out lines containing removed patterns plus their block bodies.
 
-    Three cases for the opening {:
-      a) { on the matched line, net > 0   → skip_depth = net (classic)
-      b) { balanced on the matched line   → single-line body, nothing to skip
-      c) { deferred to a later line       → pending_skip (only for block statements)
+    Cases for the opening {:
+      a) { on matched line, net > 0   → skip_depth = net
+      b) { balanced on matched line   → single-line body, nothing to skip
+      c) { deferred to a later line   → pending_skip (block-statement lines only)
     """
     patched = []
     skip_depth = 0
@@ -83,53 +85,70 @@ def _patch_lines(lines, removed_patterns):
             if net > 0:
                 skip_depth = net                      # case a
             elif opens == 0 and _BLOCK_STMT_RE.match(line):
-                pending_skip = True                   # case c — deferred {
-            # else case b — balanced or bare expression, no block to skip
+                pending_skip = True                   # case c
+            # else case b — balanced or bare expression
         else:
             patched.append(line)
 
     return patched
 
 
+# Regex to extract a variable name from any XCODE26-prefixed binding line.
+# Handles: `let X = ...`, `var X = ...`, `if let X = ...`, `guard let X = ...`, etc.
+_BIND_RE = re.compile(r"^// XCODE26.*?\b(?:let|var)\s+(\w+)\s*=")
+
+
 def _patch_cascade(patched_lines):
     """
-    Second pass: when a removed-API line bound a variable (let X = something.api),
-    that variable is now undefined.  Comment out any remaining live line that uses X.
+    Multi-pass cascade: any variable bound to a removed-API value on a
+    // XCODE26 line becomes undefined.  Comment out every remaining live line
+    that references that variable as a whole word (\bVAR\b), then repeat until
+    stable (handles transitive dependencies).
 
-    Matches: X. X? X! (i.e. the variable followed by an access or optional operator)
-    Uses a negative lookbehind so that `obj.X` (field access) does not match.
+    Unlike the previous [.?!] suffix approach this also catches:
+      - bare arguments:  someFunc(firstOffer)
+      - from: labels:    makeInfo(from: commitment)
+      - conditional use: if firstOffer != nil { ... }
     """
-    # Extract variable names from patched-out binding lines
-    bind_re = re.compile(r"^// XCODE26.*?\b(?:let|var)\s+(\w+)\s*=")
-    cascade_vars = set()
-    for line in patched_lines:
-        m = bind_re.match(line)
-        if m:
-            v = m.group(1)
-            if v not in _SKIP_CASCADE:
-                cascade_vars.add(v)
+    max_passes = 6
+    total = 0
 
-    if not cascade_vars:
-        return patched_lines, 0
+    for pass_num in range(max_passes):
+        # Re-extract cascade vars from ALL XCODE26-prefixed lines each pass
+        # (includes lines produced by previous cascade passes).
+        cascade_vars = set()
+        for line in patched_lines:
+            m = _BIND_RE.match(line)
+            if m:
+                v = m.group(1)
+                if v not in _SKIP_CASCADE and len(v) >= 5:
+                    cascade_vars.add(v)
 
-    print(f"  cascade variables: {sorted(cascade_vars)}")
-    patterns = [
-        re.compile(r"(?<![.\w])" + re.escape(v) + r"[.?!]")
-        for v in cascade_vars
-    ]
+        if not cascade_vars:
+            break
 
-    result = []
-    n = 0
-    for line in patched_lines:
-        if line.startswith("// XCODE26"):
-            result.append(line)
-        elif any(p.search(line) for p in patterns):
-            result.append("// XCODE26 CASCADE " + line.rstrip() + "\n")
-            n += 1
-        else:
-            result.append(line)
+        patterns = [re.compile(r"\b" + re.escape(v) + r"\b") for v in cascade_vars]
 
-    return result, n
+        result = []
+        n_new = 0
+        for line in patched_lines:
+            if line.startswith("// XCODE26"):
+                result.append(line)
+            elif any(p.search(line) for p in patterns):
+                result.append("// XCODE26 CASCADE " + line.rstrip() + "\n")
+                n_new += 1
+            else:
+                result.append(line)
+
+        patched_lines = result
+        total += n_new
+
+        if n_new == 0:
+            break
+
+    if total:
+        print(f"  cascade: {total} lines across passes")
+    return patched_lines
 
 
 def patch_file(path, removed_patterns, cascade=False):
@@ -139,9 +158,7 @@ def patch_file(path, removed_patterns, cascade=False):
     patched = _patch_lines(lines, removed_patterns)
 
     if cascade:
-        patched, n_cascade = _patch_cascade(patched)
-        if n_cascade:
-            print(f"  + {n_cascade} cascade lines")
+        patched = _patch_cascade(patched)
 
     os.chmod(path, 0o644)
     with open(path, "w") as f:
@@ -167,7 +184,7 @@ def patch_types(path):
     )
 
     if content == before:
-        print("Types.swift: no changes needed (already optional or pattern not found)")
+        print("Types.swift: no changes needed")
         return
 
     os.chmod(path, 0o644)
@@ -188,8 +205,6 @@ def check_file(path, label):
 
 
 # ── StoreKitTypesBridge.swift ──────────────────────────────────────────────────
-# Patch removed StoreKit APIs + call sites of removed bridge helpers.
-# Then cascade-comment any lines whose variables are now undefined.
 bridge = f"{PODS}/Helpers/StoreKitTypesBridge.swift"
 if not check_file(bridge, "StoreKitTypesBridge.swift"):
     sys.exit(1)
@@ -203,8 +218,6 @@ if check_file(types, "Types.swift"):
     patch_types(types)
 
 # ── OpenIapModule.swift ────────────────────────────────────────────────────────
-# Calls StoreKitTypesBridge.{renewalBillingPlanTypeIOS,billingPlanTypeIOS,
-# transactionCommitmentInfoIOS} — all removed by the bridge patch above.
 module = f"{PODS}/OpenIapModule.swift"
 if check_file(module, "OpenIapModule.swift"):
     n = patch_file(module, REMOVED_BRIDGE_FUNCS, cascade=False)
