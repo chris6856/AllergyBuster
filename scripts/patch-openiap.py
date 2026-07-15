@@ -60,6 +60,7 @@ for line in lines:
     else:
         patched.append(line)
 
+os.chmod(path, 0o644)
 with open(path, "w") as f:
     f.writelines(patched)
 
