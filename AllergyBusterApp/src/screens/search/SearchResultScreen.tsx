@@ -59,6 +59,11 @@ export function SearchResultScreen({route}: Props) {
     });
   }, []);
 
+  const isLoading = mode === 'products' ? productQuery.isLoading : establishmentsQuery.isLoading;
+  const isError   = mode === 'products' ? productQuery.isError   : establishmentsQuery.isError;
+  const products      = productQuery.data ?? [];
+  const allEstablishments = establishmentsQuery.data ?? [];
+
   const incrementedRef = useRef(false);
   useEffect(() => {
     if (mode === 'products' && !productQuery.isLoading && !productQuery.isError && products.length > 0 && !incrementedRef.current) {
@@ -66,11 +71,6 @@ export function SearchResultScreen({route}: Props) {
       incrementScanCount();
     }
   }, [mode, productQuery.isLoading, productQuery.isError, products.length]);
-
-  const isLoading = mode === 'products' ? productQuery.isLoading : establishmentsQuery.isLoading;
-  const isError   = mode === 'products' ? productQuery.isError   : establishmentsQuery.isError;
-  const products      = productQuery.data ?? [];
-  const allEstablishments = establishmentsQuery.data ?? [];
 
   const establishments =
     activeFilters.size === 0
