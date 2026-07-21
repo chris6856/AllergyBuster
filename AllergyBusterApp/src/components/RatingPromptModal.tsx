@@ -1,16 +1,11 @@
-import React, {useState} from 'react';
-import {Linking, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React from 'react';
+import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import InAppReview from 'react-native-in-app-review';
 import {useRatingPrompt} from '../hooks/useRatingPrompt';
-import {SUPPORT_EMAIL} from '../constants/purchases';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
-
-type Step = 'rate' | 'feedback';
 
 export function RatingPromptModal() {
   const {visible, dismiss} = useRatingPrompt();
-  const [step, setStep] = useState<Step>('rate');
-  const [comment, setComment] = useState('');
 
   if (!visible) {
     return null;
@@ -20,12 +15,6 @@ export function RatingPromptModal() {
     if (InAppReview.isAvailable()) {
       await InAppReview.RequestInAppReview();
     }
-    setStep('feedback');
-  };
-
-  const handleSendFeedback = () => {
-    const body = encodeURIComponent(comment || '(no comment)');
-    Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=AllergyBuster Feedback&body=${body}`);
     dismiss();
   };
 
@@ -33,60 +22,25 @@ export function RatingPromptModal() {
     <Modal visible transparent animationType="fade" onRequestClose={dismiss}>
       <View style={styles.overlay}>
         <View style={styles.card}>
-          {step === 'rate' ? (
-            <>
-              <Text style={styles.stars}>⭐️⭐️⭐️⭐️⭐️</Text>
-              <Text style={styles.title}>Glad we could help!</Text>
-              <Text style={styles.body}>
-                Every review helps another family discover AllergyBuster. Would you mind leaving us a quick rating?
-              </Text>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleRate}
-                accessibilityRole="button"
-                accessibilityLabel="Rate AllergyBuster">
-                <Text style={styles.primaryButtonText}>Rate Us</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={dismiss}
-                accessibilityRole="button"
-                accessibilityLabel="Not now">
-                <Text style={styles.secondaryButtonText}>Not Now</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <Text style={styles.title}>Thanks!</Text>
-              <Text style={styles.body}>
-                Want to tell us more? Your feedback helps us improve.
-              </Text>
-              <TextInput
-                style={styles.input}
-                multiline
-                numberOfLines={4}
-                placeholder="Optional comments..."
-                placeholderTextColor={colors.textDisabled}
-                value={comment}
-                onChangeText={setComment}
-                accessibilityLabel="Feedback comment"
-              />
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleSendFeedback}
-                accessibilityRole="button"
-                accessibilityLabel="Send feedback">
-                <Text style={styles.primaryButtonText}>Send Feedback</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={dismiss}
-                accessibilityRole="button"
-                accessibilityLabel="Skip">
-                <Text style={styles.secondaryButtonText}>Skip</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <Text style={styles.stars}>⭐️⭐️⭐️⭐️⭐️</Text>
+          <Text style={styles.title}>Glad we could help!</Text>
+          <Text style={styles.body}>
+            Every review helps another family discover AllergyBuster. Would you mind leaving us a quick rating?
+          </Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleRate}
+            accessibilityRole="button"
+            accessibilityLabel="Rate AllergyBuster">
+            <Text style={styles.primaryButtonText}>Rate Us</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={dismiss}
+            accessibilityRole="button"
+            accessibilityLabel="Not now">
+            <Text style={styles.secondaryButtonText}>Not Now</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -124,18 +78,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: spacing.md,
-  },
-  input: {
-    width: '100%',
-    minHeight: 88,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.sm,
-    fontSize: fontSizes.md,
-    color: colors.textPrimary,
-    textAlignVertical: 'top',
     marginBottom: spacing.md,
   },
   primaryButton: {
