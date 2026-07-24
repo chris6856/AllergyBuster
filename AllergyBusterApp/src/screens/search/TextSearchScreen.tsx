@@ -24,9 +24,10 @@ import {SearchStackScreenProps} from '../../navigation/navigationTypes';
 type Props = SearchStackScreenProps<'TextSearch'>;
 
 const GUIDANCE = [
-  {icon: '🥜', title: 'Search by product name',        description: 'Find allergen info for any packaged food product.',      mode: 'products' as SearchMode, example: 'e.g. "Skippy peanut butter"'},
-  {icon: '🌾', title: 'Search by ingredient or brand', description: 'Look up a specific ingredient or brand across products.', mode: 'products' as SearchMode, example: 'e.g. "wheat flour" or "Kelloggs"'},
-  {icon: '🍔', title: 'Search by restaurant name',     description: 'Browse allergen information for menu items.',            mode: 'restaurants' as SearchMode, example: 'e.g. "McDonald\'s" or "Olive Garden"'},
+  {icon: '🥜', title: 'Search by product name',        description: 'Find allergen info for any packaged food product.',                                          mode: 'products' as SearchMode,    jeeves: false, example: 'e.g. "Skippy peanut butter"'},
+  {icon: '🌾', title: 'Search by ingredient or brand', description: 'Find products that contain a specific ingredient or brand — not an ingredient explanation.', mode: 'products' as SearchMode,    jeeves: false, example: 'e.g. "wheat flour" or "Kelloggs"'},
+  {icon: '🤖', title: 'What is this ingredient?',      description: 'Ask Jeeves to explain any ingredient, additive, or allergen in plain language.',             mode: 'products' as SearchMode,    jeeves: true,  example: 'e.g. "What is ammonium hydroxide?"'},
+  {icon: '🍔', title: 'Search by restaurant name',     description: 'Browse allergen information for menu items.',                                                mode: 'restaurants' as SearchMode, jeeves: false, example: 'e.g. "McDonald\'s" or "Olive Garden"'},
 ];
 
 export function TextSearchScreen({route}: Props) {
@@ -168,7 +169,14 @@ export function TextSearchScreen({route}: Props) {
               <TouchableOpacity
                 key={card.title}
                 style={styles.card}
-                onPress={() => { setQuery(''); inputRef.current?.focus(); }}
+                onPress={() => {
+                  if (card.jeeves) {
+                    navigation.navigate('JeevesTab');
+                  } else {
+                    setQuery('');
+                    inputRef.current?.focus();
+                  }
+                }}
                 activeOpacity={0.8}>
                 <Text style={styles.cardIcon}>{card.icon}</Text>
                 <View style={styles.cardBody}>
