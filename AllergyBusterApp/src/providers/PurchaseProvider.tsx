@@ -33,13 +33,22 @@ export function PurchaseProvider({children}: {children: React.ReactNode}) {
     finishTransaction,
     availablePurchases,
     getAvailablePurchases,
+    restorePurchases,
   } = useIAP({
     onPurchaseSuccess: async purchase => {
+      // Android deferred payments (cash, etc.) arrive as 'pending' first and
+      // must not be acknowledged or granted until the state is 'purchased'.
+      if (purchase.purchaseState !== 'purchased') {
+        return;
+      }
+      // Mark purchased first so the app unlocks even if finishTransaction has issues.
+      await markPurchased();
       try {
         await finishTransaction({purchase, isConsumable: false});
-        await markPurchased();
       } catch {
-        setError('We could not confirm your purchase. Please try restoring purchases.');
+        // finishTransaction failure is non-critical; purchase is already recorded.
+        // iOS replays unfinished transactions on next launch; Android acknowledges
+        // on next getAvailablePurchases call if the token is still valid.
       }
     },
     onPurchaseError: purchaseError => {
@@ -88,11 +97,14 @@ export function PurchaseProvider({children}: {children: React.ReactNode}) {
   const restore = useCallback(async () => {
     setError(null);
     try {
-      await getAvailablePurchases();
+      // restorePurchases calls syncIOS first on iOS (contacts Apple's servers),
+      // then refreshes availablePurchases. Using getAvailablePurchases alone
+      // only reads the local cache and misses reinstalls on StoreKit 1 devices.
+      await restorePurchases();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not restore purchases.');
     }
-  }, [getAvailablePurchases]);
+  }, [restorePurchases]);
 
   const product = products.find(p => p.id === LIFETIME_UNLOCK_SKU) ?? null;
 

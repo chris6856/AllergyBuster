@@ -21,7 +21,7 @@ export function TrialEndingModal() {
     return null;
   }
 
-  const price = product?.localizedPrice ?? LIFETIME_PRICE_DISPLAY;
+  const price = product?.displayPrice ?? LIFETIME_PRICE_DISPLAY;
 
   const handleUnlock = async () => {
     dismiss();
