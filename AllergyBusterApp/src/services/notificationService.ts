@@ -1,4 +1,5 @@
 import notifee, {
+  AlarmType,
   AndroidImportance,
   AuthorizationStatus,
   RepeatFrequency,
@@ -93,6 +94,11 @@ export async function scheduleWeeklyReminders(): Promise<void> {
         type: TriggerType.TIMESTAMP,
         timestamp: nextOccurrence(r.dayOfWeek, r.hour, r.minute).getTime(),
         repeatFrequency: RepeatFrequency.WEEKLY,
+        alarmManager: {
+          // Inexact alarm — no special permission required.
+          // Weekly reminders don't need precision beyond ~30 minutes.
+          type: AlarmType.SET_AND_ALLOW_WHILE_IDLE,
+        },
       },
     );
   }
