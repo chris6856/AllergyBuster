@@ -13,7 +13,7 @@ import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {PhotoStackScreenProps} from '../../navigation/navigationTypes';
 import {MainTabNavigationProp} from '../../navigation/navigationTypes';
 import {extractAllergensFromOcr} from '../../utils/ocrAllergenExtractor';
-import {incrementScanCount} from '../../utils/scanCounter';
+import {useScanCount} from '../../providers/ScanCountProvider';
 
 type Props = PhotoStackScreenProps<'PhotoResult'>;
 
@@ -25,13 +25,14 @@ export function PhotoResultScreen({route}: Props) {
 
   const {detected, rawText} = extractAllergensFromOcr(rawOcrText);
 
+  const {increment} = useScanCount();
   const incrementedRef = useRef(false);
   useEffect(() => {
     if (rawText.trim() && !incrementedRef.current) {
       incrementedRef.current = true;
-      incrementScanCount();
+      increment();
     }
-  }, [rawText]);
+  }, [rawText, increment]);
 
   // No usable text detected at all
   if (!rawText.trim()) {

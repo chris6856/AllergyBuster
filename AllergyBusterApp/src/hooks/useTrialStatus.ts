@@ -1,12 +1,12 @@
-import {useInstallAge} from './useInstallAge';
-import {TRIAL_DAYS} from '../constants/purchases';
+import {useScanCount} from '../providers/ScanCountProvider';
+import {FREE_SCANS} from '../constants/purchases';
 
 export function useTrialStatus() {
-  const {daysSinceInstall, isLoading} = useInstallAge();
+  const {scanCount} = useScanCount();
 
   return {
-    isLoading,
-    daysSinceInstall,
-    trialExpired: daysSinceInstall !== null && daysSinceInstall >= TRIAL_DAYS,
+    isLoading: scanCount === null,
+    scanCount,
+    trialExpired: scanCount !== null && scanCount >= FREE_SCANS,
   };
 }

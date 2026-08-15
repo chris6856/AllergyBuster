@@ -8,6 +8,7 @@ import {queryClient} from './src/store/queryClient';
 import {RootNavigator} from './src/navigation/RootNavigator';
 import {ErrorBoundary} from './src/components/ErrorBoundary';
 import {PurchaseProvider} from './src/providers/PurchaseProvider';
+import {ScanCountProvider} from './src/providers/ScanCountProvider';
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
@@ -36,11 +37,13 @@ export default function App() {
       <GestureHandlerRootView style={{flex: 1}}>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
-            <PurchaseProvider>
-              <NavigationContainer ref={navigationRef}>
-                <RootNavigator />
-              </NavigationContainer>
-            </PurchaseProvider>
+            <ScanCountProvider>
+              <PurchaseProvider>
+                <NavigationContainer ref={navigationRef}>
+                  <RootNavigator />
+                </NavigationContainer>
+              </PurchaseProvider>
+            </ScanCountProvider>
           </QueryClientProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

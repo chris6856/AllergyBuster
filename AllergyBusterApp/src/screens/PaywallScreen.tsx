@@ -41,10 +41,10 @@ export function PaywallScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.hero}>
         <Text style={styles.heroIcon}>🔒</Text>
-        <Text style={styles.title}>Your Free Trial Has Ended</Text>
+        <Text style={styles.title}>You've Used Your Free Scans</Text>
         <Text style={styles.subtitle}>
-          You've had 14 days of full access to AllergyBuster. Unlock it for good with a single
-          one-time payment.
+          You've completed 6 free scans. Unlock lifetime access with a single
+          one-time payment and keep scanning without limits.
         </Text>
       </View>
 

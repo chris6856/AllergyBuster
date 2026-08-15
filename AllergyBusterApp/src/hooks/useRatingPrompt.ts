@@ -1,22 +1,18 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getScanCount} from '../utils/scanCounter';
+import {useScanCount} from '../providers/ScanCountProvider';
 import {SCANS_BEFORE_RATING} from '../constants/purchases';
 
 const STORAGE_KEY = 'ratingPromptShown';
 
 export function useRatingPrompt() {
+  const {scanCount} = useScanCount();
   const [shown, setShown] = useState<boolean | null>(null);
-  const [scanCount, setScanCount] = useState<number | null>(null);
 
   const load = useCallback(async () => {
-    const [shownValue, count] = await Promise.all([
-      AsyncStorage.getItem(STORAGE_KEY),
-      getScanCount(),
-    ]);
-    setShown(shownValue === 'true');
-    setScanCount(count);
+    const value = await AsyncStorage.getItem(STORAGE_KEY);
+    setShown(value === 'true');
   }, []);
 
   useEffect(() => { load(); }, [load]);

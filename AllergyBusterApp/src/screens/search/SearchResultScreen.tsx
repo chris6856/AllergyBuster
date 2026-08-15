@@ -19,7 +19,7 @@ import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {SearchStackScreenProps} from '../../navigation/navigationTypes';
 import {NormalizedProduct} from '../../types/product';
 import {searchEstablishments, Establishment} from '../../services/establishmentsService';
-import {incrementScanCount} from '../../utils/scanCounter';
+import {useScanCount} from '../../providers/ScanCountProvider';
 
 type Props = SearchStackScreenProps<'SearchResult'>;
 
@@ -64,13 +64,14 @@ export function SearchResultScreen({route}: Props) {
   const products      = productQuery.data ?? [];
   const allEstablishments = establishmentsQuery.data ?? [];
 
+  const {increment} = useScanCount();
   const incrementedRef = useRef(false);
   useEffect(() => {
     if (mode === 'products' && !productQuery.isLoading && !productQuery.isError && products.length > 0 && !incrementedRef.current) {
       incrementedRef.current = true;
-      incrementScanCount();
+      increment();
     }
-  }, [mode, productQuery.isLoading, productQuery.isError, products.length]);
+  }, [mode, productQuery.isLoading, productQuery.isError, products.length, increment]);
 
   const establishments =
     activeFilters.size === 0

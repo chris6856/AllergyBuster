@@ -33,9 +33,9 @@ export function TrialEndingModal() {
       <View style={styles.overlay}>
         <View style={styles.card}>
           <Text style={styles.emoji}>⏰</Text>
-          <Text style={styles.title}>Your trial ends soon</Text>
+          <Text style={styles.title}>1 free scan remaining</Text>
           <Text style={styles.body}>
-            Keep full access to everything you've been using:
+            Unlock unlimited access to keep everything working:
           </Text>
           <View style={styles.features}>
             {FEATURES.map(f => (

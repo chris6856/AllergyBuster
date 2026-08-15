@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useInstallAge} from './useInstallAge';
-import {TRIAL_DAYS, TRIAL_WARNING_DAY} from '../constants/purchases';
+import {useScanCount} from '../providers/ScanCountProvider';
+import {FREE_SCANS, TRIAL_WARNING_SCAN} from '../constants/purchases';
 
 const STORAGE_KEY = 'trialWarningShown';
 
 export function useTrialWarning() {
-  const {daysSinceInstall} = useInstallAge();
+  const {scanCount} = useScanCount();
   const [shown, setShown] = useState<boolean | null>(null);
 
   const load = useCallback(async () => {
@@ -25,9 +25,9 @@ export function useTrialWarning() {
 
   const visible =
     shown === false &&
-    daysSinceInstall !== null &&
-    daysSinceInstall >= TRIAL_WARNING_DAY &&
-    daysSinceInstall < TRIAL_DAYS;
+    scanCount !== null &&
+    scanCount >= TRIAL_WARNING_SCAN &&
+    scanCount < FREE_SCANS;
 
   return {visible, dismiss};
 }
