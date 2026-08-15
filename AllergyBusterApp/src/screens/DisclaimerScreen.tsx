@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   BackHandler,
   ImageBackground,
@@ -6,6 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {spacing} from '../constants/theme';
 import {RootNavigationProp} from '../navigation/navigationTypes';
@@ -14,10 +15,16 @@ const splashHero = require('../assets/splash-hero.png');
 
 export function DisclaimerScreen() {
   const navigation = useNavigation<RootNavigationProp>();
+  const nextRoute = useRef<'Onboarding' | 'MainTabs'>('MainTabs');
 
   useEffect(() => {
+    // Resolve destination during the splash so there's no delay after the timer.
+    AsyncStorage.getItem('onboardingSeen').then(v => {
+      nextRoute.current = v === 'true' ? 'MainTabs' : 'Onboarding';
+    });
+
     const timer = setTimeout(() => {
-      navigation.replace('MainTabs', undefined);
+      navigation.replace(nextRoute.current, undefined);
     }, 6000);
     return () => clearTimeout(timer);
   }, [navigation]);

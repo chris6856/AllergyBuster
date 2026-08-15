@@ -35,6 +35,7 @@ export type MainTabParamList = {
 
 export type RootStackParamList = {
   Disclaimer: undefined;
+  Onboarding: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
 };
 
