@@ -9,10 +9,17 @@ import {RootNavigator} from './src/navigation/RootNavigator';
 import {ErrorBoundary} from './src/components/ErrorBoundary';
 import {PurchaseProvider} from './src/providers/PurchaseProvider';
 import {ScanCountProvider} from './src/providers/ScanCountProvider';
+import {scheduleWeeklyReminders} from './src/services/notificationService';
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
   const previousAppState = useRef<AppStateStatus>(AppState.currentState);
+
+  useEffect(() => {
+    // Reschedule silently on every launch — no-op if permission not granted.
+    // Keeps reminders alive after reinstalls or OS notification resets.
+    scheduleWeeklyReminders().catch(() => {});
+  }, []);
 
   useEffect(() => {
     // 'background' (not 'inactive') means the app was actually backgrounded —

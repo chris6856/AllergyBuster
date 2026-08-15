@@ -12,6 +12,10 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import {RootNavigationProp} from '../navigation/navigationTypes';
+import {
+  requestNotificationPermission,
+  scheduleWeeklyReminders,
+} from '../services/notificationService';
 import {colors, borderRadius, fontSizes, spacing} from '../constants/theme';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
@@ -66,6 +70,12 @@ export function OnboardingScreen() {
 
   const finish = useCallback(async () => {
     await AsyncStorage.setItem('onboardingSeen', 'true');
+    // Ask for notification permission then schedule weekly reminders.
+    // If the user denies, scheduleWeeklyReminders is a no-op.
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      await scheduleWeeklyReminders();
+    }
     navigation.replace('MainTabs', undefined);
   }, [navigation]);
 
