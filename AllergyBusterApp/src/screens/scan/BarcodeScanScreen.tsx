@@ -3,14 +3,19 @@ import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Camera, useCameraDevice, useCodeScanner} from 'react-native-vision-camera';
 import {ScannerOverlay} from '../../components/ScannerOverlay';
+import {TrialLockedView} from '../../components/TrialLockedView';
 import {useCameraPermission} from '../../hooks/useCameraPermission';
 import {useAppState} from '../../hooks/useAppState';
+import {useTrialStatus} from '../../hooks/useTrialStatus';
+import {usePurchase} from '../../providers/PurchaseProvider';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {ScanStackScreenProps} from '../../navigation/navigationTypes';
 
 type Props = ScanStackScreenProps<'BarcodeScan'>;
 
 export function BarcodeScanScreen(_props: Props) {
+  const {trialExpired} = useTrialStatus();
+  const {isPurchased} = usePurchase();
   const navigation = useNavigation<Props['navigation']>();
   const isFocused = useIsFocused();
   const appState = useAppState();
@@ -58,6 +63,10 @@ export function BarcodeScanScreen(_props: Props) {
       [navigation],
     ),
   });
+
+  if (trialExpired && !isPurchased) {
+    return <TrialLockedView />;
+  }
 
   // Permission: still loading
   if (status === 'loading') {

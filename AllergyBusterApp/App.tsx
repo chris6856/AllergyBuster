@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {AppState, AppStateStatus} from 'react-native';
+import {AppState} from 'react-native';
 import {NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -13,7 +13,12 @@ import {scheduleWeeklyReminders} from './src/services/notificationService';
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
-  const previousAppState = useRef<AppStateStatus>(AppState.currentState);
+  // Track whether the app reached 'background' since the last foreground.
+  // We cannot use a simple prev→next comparison because on iOS returning from
+  // background fires background → inactive → active, so by the time 'active'
+  // fires the previous state is 'inactive', not 'background', and the check
+  // silently fails. A separate boolean survives that intermediate step.
+  const wasInBackground = useRef(false);
 
   useEffect(() => {
     // Reschedule silently on every launch — no-op if permission not granted.
@@ -22,19 +27,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // 'background' (not 'inactive') means the app was actually backgrounded —
-    // 'inactive' also fires for transient things like permission dialogs.
-    // Some OSes cache the process instead of killing it on close, so the JS
-    // state would otherwise survive and resume mid-screen; force it back to
-    // Home so re-opening the app always feels like a fresh start.
     const subscription = AppState.addEventListener('change', nextAppState => {
-      if (previousAppState.current === 'background' && nextAppState === 'active') {
+      if (nextAppState === 'background') {
+        wasInBackground.current = true;
+      } else if (nextAppState === 'active' && wasInBackground.current) {
+        wasInBackground.current = false;
         navigationRef.current?.resetRoot({
           index: 0,
           routes: [{name: 'MainTabs'}],
         });
       }
-      previousAppState.current = nextAppState;
     });
     return () => subscription.remove();
   }, [navigationRef]);

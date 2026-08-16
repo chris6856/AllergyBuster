@@ -23,7 +23,7 @@ export function PhotoResultScreen({route}: Props) {
   const parentNav = useNavigation<Props['navigation']>();
   const [showRawText, setShowRawText] = useState(false);
 
-  const {detected, rawText} = extractAllergensFromOcr(rawOcrText);
+  const {detected, traces, facilityWarnings, rawText} = extractAllergensFromOcr(rawOcrText);
 
   const {increment} = useScanCount();
   const incrementedRef = useRef(false);
@@ -52,7 +52,7 @@ export function PhotoResultScreen({route}: Props) {
     );
   }
 
-  const allergens = {declared: detected, traces: []};
+  const allergens = {declared: detected, traces};
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -61,6 +61,19 @@ export function PhotoResultScreen({route}: Props) {
         <Text style={styles.sectionTitle}>Detected Allergens</Text>
         <AllergenList allergens={allergens} />
       </View>
+
+      {/* Verbatim facility/cross-contamination warnings */}
+      {facilityWarnings.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Label Statements</Text>
+          {facilityWarnings.map((warning, idx) => (
+            <View key={idx} style={styles.warningRow}>
+              <Text style={styles.warningIcon}>⚠️</Text>
+              <Text style={styles.warningText}>{warning}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Collapsible raw text — hidden by default */}
       <TouchableOpacity
@@ -132,6 +145,23 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing.md,
+  },
+  warningRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  warningIcon: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  warningText: {
+    flex: 1,
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    lineHeight: 22,
+    fontStyle: 'italic',
   },
   toggleRow: {
     paddingHorizontal: spacing.md,

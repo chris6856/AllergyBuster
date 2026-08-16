@@ -16,8 +16,11 @@ import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
 import {SearchSegmentedControl, SearchMode} from '../../components/SearchSegmentedControl';
+import {TrialLockedView} from '../../components/TrialLockedView';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
+import {useTrialStatus} from '../../hooks/useTrialStatus';
+import {usePurchase} from '../../providers/PurchaseProvider';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {SearchStackScreenProps} from '../../navigation/navigationTypes';
 
@@ -33,6 +36,9 @@ const GUIDANCE = [
 export function TextSearchScreen({route}: Props) {
   const navigation = useNavigation<Props['navigation']>();
   const {isConnected} = useNetworkStatus();
+
+  const {trialExpired} = useTrialStatus();
+  const {isPurchased} = usePurchase();
 
   const [mode, setMode]       = useState<SearchMode>(route.params?.initialMode ?? 'products');
   const [query, setQuery]     = useState(route.params?.initialQuery ?? '');
@@ -85,12 +91,14 @@ export function TextSearchScreen({route}: Props) {
     });
   };
 
+  const productSearchLocked = trialExpired && !isPurchased && mode === 'products';
+
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
       {!isConnected && <NoNetworkBanner />}
       <SearchSegmentedControl mode={mode} onChange={setMode} />
-
-      <ScrollView
+      {productSearchLocked && <TrialLockedView />}
+      {!productSearchLocked && <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -193,7 +201,7 @@ export function TextSearchScreen({route}: Props) {
             </Text>
           </>
         )}
-      </ScrollView>
+      </ScrollView>}
     </KeyboardAvoidingView>
   );
 }

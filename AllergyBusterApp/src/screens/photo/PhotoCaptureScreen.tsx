@@ -10,8 +10,11 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Camera, useCameraDevice} from 'react-native-vision-camera';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import {ScannerOverlay} from '../../components/ScannerOverlay';
+import {TrialLockedView} from '../../components/TrialLockedView';
 import {useCameraPermission} from '../../hooks/useCameraPermission';
 import {useAppState} from '../../hooks/useAppState';
+import {useTrialStatus} from '../../hooks/useTrialStatus';
+import {usePurchase} from '../../providers/PurchaseProvider';
 import {extractAllergensFromOcr} from '../../utils/ocrAllergenExtractor';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {PhotoStackScreenProps} from '../../navigation/navigationTypes';
@@ -21,6 +24,8 @@ type Props = PhotoStackScreenProps<'PhotoCapture'>;
 export function PhotoCaptureScreen(_props: Props) {
   const navigation = useNavigation<Props['navigation']>();
   const isFocused = useIsFocused();
+  const {trialExpired} = useTrialStatus();
+  const {isPurchased} = usePurchase();
   const appState = useAppState();
   const {status, requestPermission, openSettings} = useCameraPermission();
   const device = useCameraDevice('back');
@@ -65,6 +70,10 @@ export function PhotoCaptureScreen(_props: Props) {
       setIsProcessing(false);
     }
   }, [isProcessing, torchOn, navigation]);
+
+  if (trialExpired && !isPurchased) {
+    return <TrialLockedView />;
+  }
 
   if (status === 'loading') {
     return <View style={styles.centered} />;

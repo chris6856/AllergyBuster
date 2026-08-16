@@ -40,7 +40,7 @@ export const ALLERGEN_KEYWORDS: Record<string, string[]> = {
   Eggs: ['egg', 'eggs', 'albumin', 'mayonnaise'],
   Fish: ['fish', 'cod', 'salmon', 'tuna', 'tilapia', 'pollock', 'bass', 'flounder', 'anchovy'],
   Shellfish: ['shellfish', 'shrimp', 'crab', 'lobster', 'crawfish', 'clam', 'oyster', 'scallop', 'mussel'],
-  'Tree Nuts': ['almond', 'cashew', 'walnut', 'pecan', 'pistachio', 'hazelnut', 'macadamia', 'brazil nut', 'pine nut'],
+  'Tree Nuts': ['tree nut', 'tree nuts', 'almond', 'cashew', 'walnut', 'pecan', 'pistachio', 'hazelnut', 'macadamia', 'brazil nut', 'pine nut'],
   Peanuts: ['peanut', 'groundnut', 'arachis oil'],
   Soy: ['soy', 'soya', 'soybean', 'tofu', 'miso', 'tempeh', 'edamame'],
   Sesame: ['sesame', 'tahini', 'til', 'gingelly'],
