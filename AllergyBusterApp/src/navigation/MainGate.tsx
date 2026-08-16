@@ -1,5 +1,5 @@
 import React from 'react';
-import {View} from 'react-native';
+import {Modal, View} from 'react-native';
 import {MainTabNavigator} from './MainTabNavigator';
 import {PaywallScreen} from '../screens/PaywallScreen';
 import {useTrialStatus} from '../hooks/useTrialStatus';
@@ -14,9 +14,14 @@ export function MainGate() {
     return <View style={{flex: 1, backgroundColor: colors.background}} />;
   }
 
-  if (trialExpired && !isPurchased) {
-    return <PaywallScreen />;
-  }
-
-  return <MainTabNavigator />;
+  return (
+    <>
+      <MainTabNavigator />
+      {trialExpired && !isPurchased && (
+        <Modal visible animationType="slide" onRequestClose={() => {}}>
+          <PaywallScreen />
+        </Modal>
+      )}
+    </>
+  );
 }

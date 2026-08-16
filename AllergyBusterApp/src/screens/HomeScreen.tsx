@@ -12,7 +12,6 @@ import {useDailyTip} from '../hooks/useDailyTip';
 import {useNetworkStatus} from '../hooks/useNetworkStatus';
 import {NoNetworkBanner} from '../components/NoNetworkBanner';
 import {RatingPromptModal} from '../components/RatingPromptModal';
-import {TrialEndingModal} from '../components/TrialEndingModal';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 import {MainTabNavigationProp} from '../navigation/navigationTypes';
 
@@ -72,7 +71,6 @@ export function HomeScreen() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <RatingPromptModal />
-      <TrialEndingModal />
       {!isConnected && <NoNetworkBanner />}
 
       {/* Hero header */}

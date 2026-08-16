@@ -43,7 +43,7 @@ export function PaywallScreen() {
         <Text style={styles.heroIcon}>🔒</Text>
         <Text style={styles.title}>You've Used Your Free Scans</Text>
         <Text style={styles.subtitle}>
-          You've completed 6 free scans. Unlock lifetime access with a single
+          You've completed 5 free scans. Unlock lifetime access with a single
           one-time payment and keep scanning without limits.
         </Text>
       </View>
