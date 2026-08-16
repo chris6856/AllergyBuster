@@ -10,29 +10,37 @@ export interface OcrExtractionResult {
 /**
  * Extracts allergen names from raw OCR text.
  *
- * Step 1 — explicit "Contains:" / "Allergens:" sections → declared
- * Step 2 — cross-contamination / facility warnings → traces + verbatim facilityWarnings
- * Step 3 — full-text keyword scan on traces-stripped text → declared (fallback)
- * Step 4 — allergens already in declared are removed from traces
+ * All pattern matching runs on lowerRaw (lowercased, punctuation preserved) so
+ * that colon/period/question-mark terminators in the patterns work correctly.
+ * lower (punctuation replaced by spaces) is only used for the final full-text
+ * keyword scan, where the space-normalisation helps keywords match regardless of
+ * surrounding punctuation (e.g. "sesame," → "sesame ").
  *
- * facilityWarnings contains the verbatim matched sentence only when it
- * includes at least one recognised allergen keyword.
+ * Because lower and lowerRaw are the same length (1:1 char replacement),
+ * match positions from lowerRaw patterns are used directly to blank out those
+ * ranges in lower before the full-text scan — preventing trace-only allergens
+ * from being misclassified as declared.
+ *
+ * Step 1 — explicit "Contains:" / "Allergens:" sections → declared
+ * Step 2 — cross-contamination / facility warnings → traces + facilityWarnings
+ * Step 3 — full-text keyword scan on traces-stripped lower → declared (fallback)
+ * Step 4 — allergens in declared are removed from traces
  */
 export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
   if (!rawText.trim()) {
     return {detected: [], traces: [], facilityWarnings: [], rawText};
   }
 
-  // lower — punctuation replaced by spaces; used for allergen keyword matching
-  const lower = rawText.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
-  // lowerRaw — only lowercased; used for capturing readable warning sentences
+  // lowerRaw — lowercase only; punctuation intact so pattern terminators work
   const lowerRaw = rawText.toLowerCase();
+  // lower — punctuation replaced by spaces; used only for full-text keyword scan
+  const lower = lowerRaw.replace(/[^a-z0-9\s]/g, ' ');
 
   const declaredFound = new Set<string>();
-  const tracesFound = new Set<string>();
+  const tracesFound  = new Set<string>();
   const facilityWarnings: string[] = [];
 
-  // ── Step 1: explicit declared sections ───────────────────────────────────
+  // ── Step 1: explicit declared sections (run on lowerRaw — colon must survive) ──
   const declaredPatterns = [
     /contains?:\s*([^.!?\n]+)/gi,
     /allergens?:\s*([^.!?\n]+)/gi,
@@ -40,7 +48,7 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
   ];
   for (const pattern of declaredPatterns) {
     let match;
-    while ((match = pattern.exec(lower)) !== null) {
+    while ((match = pattern.exec(lowerRaw)) !== null) {
       const section = match[match.length - 1] ?? '';
       for (const [name, kws] of Object.entries(ALLERGEN_KEYWORDS)) {
         if (kws.some(kw => section.includes(kw))) {
@@ -50,26 +58,28 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
     }
   }
 
-  // ── Step 2: cross-contamination / facility warnings ───────────────────────
-  // Patterns match whole warning sentences — allergens are scanned from the
-  // full match, not just a trailing capture group.
-  const tracesPatternSources = [
+  // ── Step 2: cross-contamination / facility warnings → traces ─────────────
+  // Run on lowerRaw so . ! ? sentence terminators work correctly.
+  // Facility pattern does NOT require "also" or a specific verb after
+  // "that/which" — real labels use "uses", "processes", "handles", etc.
+  const tracesPatterns = [
     /may contain:?[^.!?\n]*/gi,
-    /(?:processed|manufactured|made|produced|packaged)\s+(?:in|at|on)\s+(?:a\s+)?(?:facility|plant|equipment|line)\s+(?:that|which)\s+also\s+(?:produces?|processes?|handles?|makes?)[^.!?\n]*/gi,
+    /(?:processed|manufactured|made|produced|packaged)\s+(?:in|at|on)\s+(?:a\s+)?(?:facility|plant|equipment|line)\s+(?:that|which)[^.!?\n]*/gi,
     /manufactured\s+on\s+(?:shared\s+)?equipment[^.!?\n]*/gi,
     /processed\s+on\s+(?:shared\s+)?equipment[^.!?\n]*/gi,
     /may\s+be\s+(?:present|manufactured|processed)[^.!?\n]*/gi,
     /cross.?contaminat\w*[^.!?\n]*/gi,
   ];
 
-  for (let i = 0; i < tracesPatternSources.length; i++) {
-    const patternStr = tracesPatternSources[i].source;
-    const patternFlags = tracesPatternSources[i].flags;
+  // Collect ranges to blank out in lower (positions are identical since
+  // lower and lowerRaw differ only by 1:1 char substitution, same length).
+  const tracesRanges: Array<{start: number; end: number}> = [];
 
-    // Use the punctuation-stripped version for allergen keyword matching
-    const matchPattern = new RegExp(patternStr, patternFlags);
+  for (const pattern of tracesPatterns) {
     let match;
-    while ((match = matchPattern.exec(lower)) !== null) {
+    while ((match = pattern.exec(lowerRaw)) !== null) {
+      tracesRanges.push({start: match.index, end: match.index + match[0].length});
+
       const segment = match[0];
       const matchedAllergens: string[] = [];
       for (const [name, kws] of Object.entries(ALLERGEN_KEYWORDS)) {
@@ -79,30 +89,25 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
         }
       }
 
-      // Only capture verbatim warning text if it contains a recognised allergen
+      // Only surface verbatim text when a recognised allergen is present
       if (matchedAllergens.length > 0) {
-        // Find the equivalent match in lowerRaw for a readable sentence
-        const displayPattern = new RegExp(patternStr, patternFlags);
-        displayPattern.lastIndex = match.index;
-        const displayMatch = displayPattern.exec(lowerRaw);
-        if (displayMatch) {
-          const sentence = displayMatch[0].trim().replace(/\s+/g, ' ');
-          const display = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-          if (display && !facilityWarnings.includes(display)) {
-            facilityWarnings.push(display);
-          }
+        const sentence = segment.trim().replace(/\s+/g, ' ');
+        const display = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+        if (display && !facilityWarnings.includes(display)) {
+          facilityWarnings.push(display);
         }
       }
     }
   }
 
-  // ── Step 3: full-text scan on traces-stripped text → declared (fallback) ─
-  // Removing traces segments first prevents trace-only allergens from being
-  // misclassified as directly declared.
+  // ── Step 3: full-text scan on traces-stripped lower → declared (fallback) ─
+  // Blank out every traces range so trace-only allergens don't bleed into declared.
   let ingredientsText = lower;
-  for (const pattern of tracesPatternSources) {
-    pattern.lastIndex = 0;
-    ingredientsText = ingredientsText.replace(pattern, ' ');
+  for (const {start, end} of tracesRanges) {
+    ingredientsText =
+      ingredientsText.substring(0, start) +
+      ' '.repeat(end - start) +
+      ingredientsText.substring(end);
   }
   for (const [name, kws] of Object.entries(ALLERGEN_KEYWORDS)) {
     if (kws.some(kw => ingredientsText.includes(kw))) {
@@ -117,7 +122,7 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
 
   return {
     detected: Array.from(declaredFound).sort(),
-    traces: Array.from(tracesFound).sort(),
+    traces:   Array.from(tracesFound).sort(),
     facilityWarnings,
     rawText,
   };
