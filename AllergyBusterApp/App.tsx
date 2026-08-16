@@ -34,7 +34,15 @@ export default function App() {
         wasInBackground.current = false;
         navigationRef.current?.resetRoot({
           index: 0,
-          routes: [{name: 'MainTabs'}],
+          routes: [
+            {
+              name: 'MainTabs',
+              state: {
+                index: 0,
+                routes: [{name: 'Home'}],
+              },
+            },
+          ],
         });
       }
     });
