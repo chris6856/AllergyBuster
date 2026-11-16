@@ -1,15 +1,18 @@
 import {edamamClient} from './http';
-import {NormalizedProduct} from '../types/product';
+import {ProductRecord} from '../types/product';
 import {EDAMAM_APP_ID, EDAMAM_APP_KEY} from '../constants/config';
 import {extractAllergensFromText} from '../utils/allergenParser';
+import {cleanIngredientsText, edamamNutrients, toGtin13} from '../utils/productRecord';
 
 interface EdamamFood {
   foodId: string;
   label?: string;
   brand?: string;
   image?: string;
-  nutrients?: object;
-  ingredientsText?: string;
+  category?: string; // "Packaged foods", "Generic foods", ...
+  nutrients?: Record<string, unknown>;
+  /** Ingredient list for packaged foods. (Edamam has no `ingredientsText` field.) */
+  foodContentsLabel?: string;
   knownAs?: string;
 }
 
@@ -21,11 +24,14 @@ interface EdamamResponse {
   hints: EdamamHint[];
 }
 
-function normalize(food: EdamamFood): NormalizedProduct {
-  const ingredientsText = food.ingredientsText ?? food.knownAs ?? '';
-  // Edamam uses absence-of-allergen health labels, not presence lists.
-  // We derive allergen presence by keyword-scanning the ingredient text instead.
-  const declared = extractAllergensFromText(ingredientsText);
+export function normalize(food: EdamamFood, barcode?: string): ProductRecord {
+  // Only the real ingredient list is scanned. Scanning `knownAs` (the product
+  // name) used to produce "no allergens" for products with no ingredient data.
+  const ingredientsText = cleanIngredientsText(food.foodContentsLabel);
+  // Edamam uses absence-of-allergen health labels, not presence lists, so
+  // allergen presence is derived by keyword-scanning the ingredient text.
+  const declared = ingredientsText ? extractAllergensFromText(ingredientsText) : [];
+  const per100 = edamamNutrients(food.nutrients);
 
   return {
     id: food.foodId,
@@ -35,6 +41,25 @@ function normalize(food: EdamamFood): NormalizedProduct {
     allergens: {declared, traces: []},
     ingredientsText,
     source: 'edamam',
+
+    gtin: toGtin13(barcode),
+    category: 'food',
+    categoryTags: [],
+    additives: [],
+    labels: [],
+    ingredientsAnalysis: [],
+    novaGroup: null,
+    packaging: [],
+    nutrition: per100 ? {per100, perServing: null, servingSize: null, servingGrams: null} : null,
+    completeness: {
+      hasIngredients: ingredientsText.length > 0,
+      hasAllergenTags: false,
+      hasNutrition: per100 !== null,
+      hasPackaging: false,
+      sourceScore: null,
+    },
+    sourceUpdatedAt: null,
+    fetchedAt: new Date().toISOString(),
   };
 }
 
@@ -43,7 +68,7 @@ const authParams = {
   app_key: EDAMAM_APP_KEY,
 };
 
-export async function getProductByBarcode(barcode: string): Promise<NormalizedProduct | null> {
+export async function getProductByBarcode(barcode: string): Promise<ProductRecord | null> {
   if (!EDAMAM_APP_ID || !EDAMAM_APP_KEY) {
     return null;
   }
@@ -53,10 +78,10 @@ export async function getProductByBarcode(barcode: string): Promise<NormalizedPr
   });
 
   const hint = response.data.hints?.[0];
-  return hint ? normalize(hint.food) : null;
+  return hint ? normalize(hint.food, barcode) : null;
 }
 
-export async function searchProducts(query: string): Promise<NormalizedProduct[]> {
+export async function searchProducts(query: string): Promise<ProductRecord[]> {
   if (!EDAMAM_APP_ID || !EDAMAM_APP_KEY) {
     return [];
   }

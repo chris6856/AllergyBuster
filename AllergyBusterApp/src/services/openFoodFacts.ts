@@ -1,16 +1,59 @@
 import {offClient} from './http';
-import {NormalizedProduct} from '../types/product';
+import {ProductRecord} from '../types/product';
 import {parseAllergens} from '../utils/allergenParser';
+import {
+  cleanIngredientsText,
+  inferCategory,
+  offNutrients,
+  parseNovaGroup,
+  toGtin13,
+  unixToIso,
+} from '../utils/productRecord';
 
-const FIELDS = 'product_name,brands,allergens_tags,traces_tags,ingredients_text,image_url';
+const FIELDS = [
+  'code',
+  'product_name',
+  'brands',
+  'image_url',
+  'product_type',
+  'allergens_tags',
+  'traces_tags',
+  'ingredients_text',
+  'ingredients_analysis_tags',
+  'additives_tags',
+  'categories_tags',
+  'labels_tags',
+  'nova_group',
+  'packaging_tags',
+  'packaging_materials_tags',
+  'nutriments',
+  'serving_size',
+  'serving_quantity',
+  'completeness',
+  'last_modified_t',
+].join(',');
 
 interface OFFProduct {
+  code?: string;
   product_name?: string;
   brands?: string;
+  image_url?: string;
+  product_type?: string;
   allergens_tags?: string[];
   traces_tags?: string[];
   ingredients_text?: string;
-  image_url?: string;
+  ingredients_analysis_tags?: string[];
+  additives_tags?: string[];
+  categories_tags?: string[];
+  labels_tags?: string[];
+  nova_group?: number | string;
+  packaging_tags?: string[];
+  packaging_materials_tags?: string[];
+  nutriments?: Record<string, unknown>;
+  serving_size?: string;
+  serving_quantity?: number | string;
+  completeness?: number;
+  last_modified_t?: number;
 }
 
 interface OFFBarcodeResponse {
@@ -23,24 +66,58 @@ interface OFFSearchResponse {
   products: (OFFProduct & {_id?: string; id?: string})[];
 }
 
-function normalize(raw: OFFProduct, id: string): NormalizedProduct {
-  const ingredientsText = raw.ingredients_text ?? '';
+const unique = (xs: string[]) => [...new Set(xs.filter(x => x.trim().length > 0))];
+
+export function normalize(raw: OFFProduct, id: string): ProductRecord {
+  const ingredientsText = cleanIngredientsText(raw.ingredients_text);
+  const allergenTags = raw.allergens_tags ?? [];
+  const tracesTags = raw.traces_tags ?? [];
+  const categoryTags = raw.categories_tags ?? [];
+  const packaging = unique([...(raw.packaging_tags ?? []), ...(raw.packaging_materials_tags ?? [])]);
+
+  const nutriments = raw.nutriments ?? {};
+  const per100 = offNutrients(nutriments, '_100g');
+  const perServing = offNutrients(nutriments, '_serving');
+  const servingGrams = Number(raw.serving_quantity);
+
   return {
     id,
-    name: raw.product_name ?? 'Unknown Product',
+    name: raw.product_name?.trim() || 'Unknown Product',
     brand: raw.brands ?? '',
     imageUrl: raw.image_url,
-    allergens: parseAllergens(
-      raw.allergens_tags ?? [],
-      raw.traces_tags ?? [],
-      ingredientsText,
-    ),
+    allergens: parseAllergens(allergenTags, tracesTags, ingredientsText),
     ingredientsText,
     source: 'openfoodfacts',
+
+    gtin: toGtin13(raw.code ?? id),
+    category: inferCategory(raw.product_type, categoryTags),
+    categoryTags,
+    additives: unique(raw.additives_tags ?? []),
+    labels: unique(raw.labels_tags ?? []),
+    ingredientsAnalysis: unique(raw.ingredients_analysis_tags ?? []),
+    novaGroup: parseNovaGroup(raw.nova_group),
+    packaging,
+    nutrition: per100
+      ? {
+          per100,
+          perServing,
+          servingSize: raw.serving_size ?? null,
+          servingGrams: Number.isFinite(servingGrams) && servingGrams > 0 ? servingGrams : null,
+        }
+      : null,
+    completeness: {
+      hasIngredients: ingredientsText.length > 0,
+      hasAllergenTags: allergenTags.length > 0 || tracesTags.length > 0,
+      hasNutrition: per100 !== null,
+      hasPackaging: packaging.length > 0,
+      sourceScore: typeof raw.completeness === 'number' ? raw.completeness : null,
+    },
+    sourceUpdatedAt: unixToIso(raw.last_modified_t),
+    fetchedAt: new Date().toISOString(),
   };
 }
 
-export async function getProductByBarcode(barcode: string): Promise<NormalizedProduct | null> {
+export async function getProductByBarcode(barcode: string): Promise<ProductRecord | null> {
   const response = await offClient.get<OFFBarcodeResponse>(
     `/api/v2/product/${barcode}.json`,
     {params: {fields: FIELDS}},
@@ -53,7 +130,7 @@ export async function getProductByBarcode(barcode: string): Promise<NormalizedPr
   return normalize(response.data.product, barcode);
 }
 
-export async function searchProducts(query: string): Promise<NormalizedProduct[]> {
+export async function searchProducts(query: string): Promise<ProductRecord[]> {
   const response = await offClient.get<OFFSearchResponse>('/cgi/search.pl', {
     params: {
       search_terms: query,
@@ -70,6 +147,6 @@ export async function searchProducts(query: string): Promise<NormalizedProduct[]
   }
 
   return response.data.products.map(p =>
-    normalize(p, p._id ?? p.id ?? query),
+    normalize(p, p.code ?? p._id ?? p.id ?? query),
   );
 }

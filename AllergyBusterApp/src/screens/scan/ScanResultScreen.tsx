@@ -8,6 +8,7 @@ import {LoadingOverlay} from '../../components/LoadingOverlay';
 import {NoResultsBanner} from '../../components/NoResultsBanner';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {useProductByBarcode} from '../../hooks/useProductByBarcode';
+import {hasIngredientData} from '../../services/productService';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
 import {colors, spacing} from '../../constants/theme';
 import {ScanStackScreenProps} from '../../navigation/navigationTypes';
@@ -27,7 +28,9 @@ export function ScanResultScreen({route}: Props) {
   const {increment} = useScanCount();
   const incrementedRef = useRef(false);
   useEffect(() => {
-    if (product && !incrementedRef.current) {
+    // A recognised product with no ingredient data gives the user nothing to
+    // act on, so (as when a barcode isn't found) it doesn't use a free scan.
+    if (product && hasIngredientData(product) && !incrementedRef.current) {
       incrementedRef.current = true;
       increment();
     }
@@ -73,7 +76,10 @@ export function ScanResultScreen({route}: Props) {
         source={product.source}
       />
       <View style={styles.allergenSection}>
-        <AllergenList allergens={product.allergens} />
+        <AllergenList
+          allergens={product.allergens}
+          hasIngredientData={hasIngredientData(product)}
+        />
       </View>
     </ScrollView>
   );

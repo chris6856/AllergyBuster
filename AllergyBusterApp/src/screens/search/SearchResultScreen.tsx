@@ -18,7 +18,7 @@ import {AllergenCard} from '../../components/AllergenCard';
 import {ProfileMatchSummary} from '../../components/ProfileMatchSummary';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {SearchStackScreenProps} from '../../navigation/navigationTypes';
-import {NormalizedProduct} from '../../types/product';
+import {ProductRecord} from '../../types/product';
 import {searchEstablishments, Establishment} from '../../services/establishmentsService';
 import {useScanCount} from '../../providers/ScanCountProvider';
 
@@ -195,9 +195,11 @@ export function SearchResultScreen({route}: Props) {
 
 // --- Product row ---
 
-function ProductRow({product}: {product: NormalizedProduct}) {
+function ProductRow({product}: {product: ProductRecord}) {
   const hasDeclared = product.allergens.declared.length > 0;
   const hasTraces = product.allergens.traces.length > 0;
+  const hasIngredientData =
+    product.completeness.hasIngredients || product.completeness.hasAllergenTags;
 
   return (
     <View style={styles.card}>
@@ -239,7 +241,13 @@ function ProductRow({product}: {product: NormalizedProduct}) {
         </View>
       )}
 
-      {!hasDeclared && !hasTraces && (
+      {!hasDeclared && !hasTraces && !hasIngredientData && (
+        <Text style={styles.noDataText}>
+          No ingredient information listed. Check the package label.
+        </Text>
+      )}
+
+      {!hasDeclared && !hasTraces && hasIngredientData && (
         <View style={styles.noAllergenRow}>
           <View style={styles.noAllergenIcon}>
             <Text style={styles.noAllergenCheck}>✓</Text>
@@ -717,6 +725,12 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
     flex: 1,
+  },
+  noDataText: {
+    fontSize: fontSizes.xs,
+    color: colors.warning,
+    fontWeight: '600',
+    marginTop: spacing.xs,
   },
   sourceLabel: {
     marginTop: spacing.sm,

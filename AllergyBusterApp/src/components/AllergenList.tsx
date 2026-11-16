@@ -7,11 +7,32 @@ import {colors, fontSizes, spacing} from '../constants/theme';
 
 interface Props {
   allergens: AllergenInfo;
+  /**
+   * False when the source had no ingredient list and no allergen tags. An
+   * empty allergen list then means "unknown", not "none found".
+   */
+  hasIngredientData?: boolean;
 }
 
-export function AllergenList({allergens}: Props) {
+export function AllergenList({allergens, hasIngredientData = true}: Props) {
   const hasDeclared = allergens.declared.length > 0;
   const hasTraces = allergens.traces.length > 0;
+
+  if (!hasDeclared && !hasTraces && !hasIngredientData) {
+    return (
+      <View style={styles.emptyContainer}>
+        <View style={[styles.safeIcon, styles.unknownIcon]}>
+          <Text style={styles.safeCheck}>?</Text>
+        </View>
+        <Text style={[styles.safeTitle, styles.unknownTitle]}>No Ingredient Information</Text>
+        <Text style={styles.emptyText}>
+          This product's listing has no ingredients or allergen details, so we can't
+          check it. Read the package label, or use Scan Label to photograph the
+          ingredient list.
+        </Text>
+      </View>
+    );
+  }
 
   if (!hasDeclared && !hasTraces) {
     return (
@@ -97,6 +118,12 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: '700',
     lineHeight: 42,
+  },
+  unknownIcon: {
+    backgroundColor: colors.warning,
+  },
+  unknownTitle: {
+    color: colors.warning,
   },
   safeTitle: {
     fontSize: fontSizes.lg,
