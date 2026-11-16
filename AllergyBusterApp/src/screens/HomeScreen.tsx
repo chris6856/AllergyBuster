@@ -16,6 +16,7 @@ import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 import {MainTabNavigationProp} from '../navigation/navigationTypes';
 import {useAllergyProfile} from '../providers/AllergyProfileProvider';
 import {profileLabel} from '../utils/allergenMatching';
+import {APP_VERSION, BUILD_NUMBER} from '../constants/version';
 
 type QuickAction = {
   icon: string;
@@ -147,7 +148,9 @@ export function HomeScreen() {
         packaging and consult a healthcare professional regarding your specific
         dietary needs.
       </Text>
-      <Text style={styles.buildTag}>v1.1.3 (29)</Text>
+      <Text style={styles.buildTag}>
+        v{APP_VERSION} ({BUILD_NUMBER})
+      </Text>
     </ScrollView>
   );
 }
