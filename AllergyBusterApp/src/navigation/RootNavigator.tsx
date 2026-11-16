@@ -4,6 +4,8 @@ import {RootStackParamList} from './navigationTypes';
 import {MainGate} from './MainGate';
 import {DisclaimerScreen} from '../screens/DisclaimerScreen';
 import {OnboardingScreen} from '../screens/OnboardingScreen';
+import {AllergyProfileScreen} from '../screens/AllergyProfileScreen';
+import {colors} from '../constants/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -21,6 +23,16 @@ export function RootNavigator() {
         options={{animation: 'fade'}}
       />
       <Stack.Screen name="MainTabs" component={MainGate} />
+      <Stack.Screen
+        name="AllergyProfile"
+        component={AllergyProfileScreen}
+        options={{
+          headerShown: true,
+          title: 'My Allergies',
+          headerTintColor: colors.primary,
+          headerBackTitle: 'Back',
+        }}
+      />
     </Stack.Navigator>
   );
 }

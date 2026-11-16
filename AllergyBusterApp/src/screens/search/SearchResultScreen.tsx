@@ -15,6 +15,7 @@ import {useProductSearch} from '../../hooks/useProductSearch';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {AllergenCard} from '../../components/AllergenCard';
+import {ProfileMatchSummary} from '../../components/ProfileMatchSummary';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {SearchStackScreenProps} from '../../navigation/navigationTypes';
 import {NormalizedProduct} from '../../types/product';
@@ -213,6 +214,8 @@ function ProductRow({product}: {product: NormalizedProduct}) {
           ) : null}
         </View>
       </View>
+
+      <ProfileMatchSummary allergens={product.allergens} compact />
 
       {hasDeclared && (
         <View style={styles.allergenRow}>

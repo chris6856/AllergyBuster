@@ -9,6 +9,7 @@ import {RootNavigator} from './src/navigation/RootNavigator';
 import {ErrorBoundary} from './src/components/ErrorBoundary';
 import {PurchaseProvider} from './src/providers/PurchaseProvider';
 import {ScanCountProvider} from './src/providers/ScanCountProvider';
+import {AllergyProfileProvider} from './src/providers/AllergyProfileProvider';
 import {scheduleWeeklyReminders} from './src/services/notificationService';
 
 export default function App() {
@@ -56,9 +57,11 @@ export default function App() {
           <QueryClientProvider client={queryClient}>
             <ScanCountProvider>
               <PurchaseProvider>
-                <NavigationContainer ref={navigationRef}>
-                  <RootNavigator />
-                </NavigationContainer>
+                <AllergyProfileProvider>
+                  <NavigationContainer ref={navigationRef}>
+                    <RootNavigator />
+                  </NavigationContainer>
+                </AllergyProfileProvider>
               </PurchaseProvider>
             </ScanCountProvider>
           </QueryClientProvider>

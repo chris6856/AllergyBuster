@@ -14,6 +14,8 @@ import {NoNetworkBanner} from '../components/NoNetworkBanner';
 import {RatingPromptModal} from '../components/RatingPromptModal';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 import {MainTabNavigationProp} from '../navigation/navigationTypes';
+import {useAllergyProfile} from '../providers/AllergyProfileProvider';
+import {profileLabel} from '../utils/allergenMatching';
 
 type QuickAction = {
   icon: string;
@@ -58,6 +60,7 @@ export function HomeScreen() {
   const navigation = useNavigation<MainTabNavigationProp>();
   const {isConnected} = useNetworkStatus();
   const {data: tip, isLoading: tipLoading} = useDailyTip();
+  const {profile, hasProfile} = useAllergyProfile();
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -80,6 +83,29 @@ export function HomeScreen() {
         <Text style={styles.tagline}>
           Know what's in your food — before you eat it.
         </Text>
+      </View>
+
+      {/* My Allergies */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={[styles.profileCard, !hasProfile && styles.profileCardSetup]}
+          onPress={() => navigation.navigate('AllergyProfile')}
+          activeOpacity={0.75}
+          accessibilityRole="button"
+          accessibilityLabel={hasProfile ? 'Edit my allergies' : 'Set up my allergies'}
+          accessibilityHint="Choose which allergens AllergyBuster alerts you about">
+          <View style={styles.actionBody}>
+            <Text style={styles.actionLabel}>
+              {hasProfile ? 'My Allergies' : 'Set Up My Allergies'}
+            </Text>
+            <Text style={styles.actionDescription} numberOfLines={2}>
+              {hasProfile
+                ? profile.allergens.map(profileLabel).join(', ')
+                : 'Get personal alerts on every scan for the allergens that matter to you.'}
+            </Text>
+          </View>
+          <Text style={styles.profileEdit}>{hasProfile ? 'Edit' : 'Start'} ›</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Daily tip */}
@@ -180,6 +206,25 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.06,
     shadowRadius: 3,
+  },
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
+  profileCardSetup: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  profileEdit: {
+    fontSize: fontSizes.md,
+    fontWeight: '700',
+    color: colors.primary,
+    marginLeft: spacing.sm,
   },
   actionIcon: {
     width: 48,

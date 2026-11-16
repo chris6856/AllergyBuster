@@ -1,4 +1,5 @@
 import {ALLERGEN_KEYWORDS} from '../constants/allergens';
+import {containsAnyKeyword} from './keywordMatch';
 
 export interface OcrExtractionResult {
   detected: string[];
@@ -51,7 +52,7 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
     while ((match = pattern.exec(lowerRaw)) !== null) {
       const section = match[match.length - 1] ?? '';
       for (const [name, kws] of Object.entries(ALLERGEN_KEYWORDS)) {
-        if (kws.some(kw => section.includes(kw))) {
+        if (containsAnyKeyword(section, kws)) {
           declaredFound.add(name);
         }
       }
@@ -83,7 +84,7 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
       const segment = match[0];
       const matchedAllergens: string[] = [];
       for (const [name, kws] of Object.entries(ALLERGEN_KEYWORDS)) {
-        if (kws.some(kw => segment.includes(kw))) {
+        if (containsAnyKeyword(segment, kws)) {
           tracesFound.add(name);
           matchedAllergens.push(name);
         }
@@ -110,7 +111,7 @@ export function extractAllergensFromOcr(rawText: string): OcrExtractionResult {
       ingredientsText.substring(end);
   }
   for (const [name, kws] of Object.entries(ALLERGEN_KEYWORDS)) {
-    if (kws.some(kw => ingredientsText.includes(kw))) {
+    if (containsAnyKeyword(ingredientsText, kws)) {
       declaredFound.add(name);
     }
   }

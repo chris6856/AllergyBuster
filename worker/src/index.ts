@@ -22,10 +22,15 @@
  *   TIPS_CACHE  — KV namespace for tip cache
  *   CHAINS_DB   — KV namespace for chain allergen database
  *
+ *   GET  /kroger/locations, /kroger/products   — see kroger.ts
+ *
  * Required secrets (wrangler secret put):
  *   ANTHROPIC_API_KEY
  *   ADMIN_KEY
+ *   KROGER_CLIENT_ID, KROGER_CLIENT_SECRET
  */
+
+import {handleKroger} from './kroger';
 
 export interface Env {
   TIPS_CACHE: KVNamespace;
@@ -35,6 +40,10 @@ export interface Env {
   ADMIN_KEY: string;
   SENDGRID_API_KEY: string;
   GOOGLE_PLACES_API_KEY: string;
+  KROGER_CLIENT_ID: string;
+  KROGER_CLIENT_SECRET: string;
+  KROGER_API_BASE?: string;
+  KROGER_REDIRECT_URI?: string;
 }
 
 const CORS_HEADERS = {
@@ -719,6 +728,12 @@ export default {
 
     const url = new URL(request.url);
     const path = url.pathname;
+
+    // /kroger/*  (retailer connector — see kroger.ts)
+    const krogerResponse = await handleKroger(request, env);
+    if (krogerResponse) {
+      return krogerResponse;
+    }
 
     // /tip
     if (path === '/tip' && request.method === 'GET') {

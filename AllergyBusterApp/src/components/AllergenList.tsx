@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {AllergenInfo} from '../types/product';
 import {AllergenCard} from './AllergenCard';
+import {ProfileMatchSummary} from './ProfileMatchSummary';
 import {colors, fontSizes, spacing} from '../constants/theme';
 
 interface Props {
@@ -28,6 +29,8 @@ export function AllergenList({allergens}: Props) {
 
   return (
     <View style={styles.container}>
+      <ProfileMatchSummary allergens={allergens} />
+
       {hasDeclared && (
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Contains</Text>

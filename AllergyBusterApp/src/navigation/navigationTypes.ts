@@ -37,6 +37,7 @@ export type RootStackParamList = {
   Disclaimer: undefined;
   Onboarding: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
+  AllergyProfile: undefined;
 };
 
 // --- Typed navigation props ---

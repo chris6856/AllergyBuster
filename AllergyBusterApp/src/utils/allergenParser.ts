@@ -1,4 +1,5 @@
 import {ALLERGEN_TAG_MAP, ALLERGEN_KEYWORDS} from '../constants/allergens';
+import {containsAnyKeyword} from './keywordMatch';
 import {AllergenInfo} from '../types/product';
 
 /**
@@ -53,7 +54,7 @@ export function extractAllergensFromText(text: string): string[] {
   const found: string[] = [];
 
   for (const [allergenName, keywords] of Object.entries(ALLERGEN_KEYWORDS)) {
-    if (keywords.some(kw => lower.includes(kw))) {
+    if (containsAnyKeyword(lower, keywords)) {
       found.push(allergenName);
     }
   }

@@ -3,6 +3,15 @@ main = "src/index.ts"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Don't let a deploy wipe variables set in the Cloudflare dashboard.
+keep_vars = true
+
+# Non-secret Kroger settings. Secrets (KROGER_CLIENT_ID, KROGER_CLIENT_SECRET)
+# are set with `wrangler secret put` on the account that owns this Worker.
+[vars]
+KROGER_API_BASE = "https://api.kroger.com/v1"
+KROGER_REDIRECT_URI = "https://allergybuster-tips.allergybuster-tips.workers.dev/kroger/callback"
+
 # KV namespace for caching generated tips (one entry per date, TTL 25 hours)
 # Create with: wrangler kv namespace create TIPS_CACHE
 # Then replace the id below with the output ID.
