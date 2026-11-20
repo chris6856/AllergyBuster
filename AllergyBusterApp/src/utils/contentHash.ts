@@ -25,6 +25,7 @@ export function productContentHash(p: ProductRecord): string {
 }
 
 /** Two independent 32-bit FNV-1a passes → 16 hex chars. Not cryptographic. */
+/* eslint-disable no-bitwise -- hashing is bit arithmetic by design */
 function hash64(s: string): string {
   let h1 = 0x811c9dc5;
   let h2 = 0xcbf29ce4;
@@ -36,3 +37,4 @@ function hash64(s: string): string {
   const hex = (n: number) => (n >>> 0).toString(16).padStart(8, '0');
   return hex(h1) + hex(h2);
 }
+/* eslint-enable no-bitwise */

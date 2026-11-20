@@ -107,6 +107,16 @@ export function HomeScreen() {
           </View>
           <Text style={styles.profileEdit}>{hasProfile ? 'Edit' : 'Start'} ›</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.prefsLink}
+          onPress={() => navigation.navigate('Preferences')}
+          accessibilityRole="button"
+          accessibilityLabel="My preferences"
+          accessibilityHint="Choose what AllergyBuster highlights: additives, sugar, sodium, packaging, fragrance">
+          <Text style={styles.prefsLinkText}>
+            My Preferences: additives, sugar, sodium, packaging, fragrance ›
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Daily tip */}
@@ -222,6 +232,15 @@ const styles = StyleSheet.create({
   profileCardSetup: {
     borderColor: colors.primary,
     borderWidth: 2,
+  },
+  prefsLink: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
+  prefsLinkText: {
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    fontWeight: '600',
   },
   profileEdit: {
     fontSize: fontSizes.md,

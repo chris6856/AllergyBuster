@@ -10,6 +10,7 @@ import {ErrorBoundary} from './src/components/ErrorBoundary';
 import {PurchaseProvider} from './src/providers/PurchaseProvider';
 import {ScanCountProvider} from './src/providers/ScanCountProvider';
 import {AllergyProfileProvider} from './src/providers/AllergyProfileProvider';
+import {PreferencesProvider} from './src/providers/PreferencesProvider';
 import {scheduleWeeklyReminders} from './src/services/notificationService';
 
 export default function App() {
@@ -58,9 +59,11 @@ export default function App() {
             <ScanCountProvider>
               <PurchaseProvider>
                 <AllergyProfileProvider>
-                  <NavigationContainer ref={navigationRef}>
-                    <RootNavigator />
-                  </NavigationContainer>
+                  <PreferencesProvider>
+                    <NavigationContainer ref={navigationRef}>
+                      <RootNavigator />
+                    </NavigationContainer>
+                  </PreferencesProvider>
                 </AllergyProfileProvider>
               </PurchaseProvider>
             </ScanCountProvider>
