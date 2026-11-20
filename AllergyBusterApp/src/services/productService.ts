@@ -1,6 +1,7 @@
 import * as openFoodFacts from './openFoodFacts';
 import * as edamam from './edamam';
 import {ProductRecord} from '../types/product';
+import {lookupViaWorker, LookupUnavailableError} from './lookupService';
 
 /** True when the record has an ingredient list or allergen tags to check. */
 export function hasIngredientData(p: ProductRecord): boolean {
@@ -9,13 +10,32 @@ export function hasIngredientData(p: ProductRecord): boolean {
 
 /**
  * Look up a product by barcode.
+ *
+ * Goes through the AllergyBuster Worker (/lookup), which also searches Open
+ * Beauty Facts and Open Products Facts and caches results. If the Worker is
+ * unreachable, falls back to calling Open Food Facts and Edamam directly
+ * (food only), so scanning never depends on the Worker being up.
+ */
+export async function getProductByBarcode(barcode: string): Promise<ProductRecord | null> {
+  try {
+    return await lookupViaWorker(barcode);
+  } catch (err) {
+    if (!(err instanceof LookupUnavailableError)) {
+      throw err;
+    }
+    return getProductByBarcodeDirect(barcode);
+  }
+}
+
+/**
+ * Direct lookup without the Worker (fallback path).
  * Tries Open Food Facts first. If OFF is missing the product or has no
  * ingredient/allergen data, tries Edamam. If Edamam has nothing better, the
  * OFF record is still returned so the user sees the product was recognised;
  * screens show "No Ingredient Information" for it (see hasIngredientData).
  * Returns null only if neither source knows the barcode.
  */
-export async function getProductByBarcode(barcode: string): Promise<ProductRecord | null> {
+export async function getProductByBarcodeDirect(barcode: string): Promise<ProductRecord | null> {
   let offResult: ProductRecord | null = null;
   try {
     offResult = await openFoodFacts.getProductByBarcode(barcode);

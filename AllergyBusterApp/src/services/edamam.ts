@@ -4,7 +4,7 @@ import {EDAMAM_APP_ID, EDAMAM_APP_KEY} from '../constants/config';
 import {extractAllergensFromText} from '../utils/allergenParser';
 import {cleanIngredientsText, edamamNutrients, toGtin13} from '../utils/productRecord';
 
-interface EdamamFood {
+export interface EdamamFood {
   foodId: string;
   label?: string;
   brand?: string;

@@ -8,6 +8,15 @@ export interface Ingredient {
   id?: string;
 }
 
+export type ProductSource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'edamam';
+
+export const SOURCE_LABELS: Record<ProductSource, string> = {
+  openfoodfacts: 'Open Food Facts',
+  openbeautyfacts: 'Open Beauty Facts',
+  openproductsfacts: 'Open Products Facts',
+  edamam: 'Edamam',
+};
+
 /** 1.x product shape. Every ProductRecord is also a NormalizedProduct. */
 export interface NormalizedProduct {
   id: string;
@@ -16,7 +25,7 @@ export interface NormalizedProduct {
   imageUrl?: string;
   allergens: AllergenInfo;
   ingredientsText: string;
-  source: 'openfoodfacts' | 'edamam';
+  source: ProductSource;
 }
 
 // ── 2.0 product record ──────────────────────────────────────────────────────

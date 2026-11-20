@@ -22,6 +22,7 @@
  *   TIPS_CACHE  — KV namespace for tip cache
  *   CHAINS_DB   — KV namespace for chain allergen database
  *
+ *   GET  /lookup?barcode=…[&locationId=…]        — see lookup.ts
  *   GET  /kroger/locations, /kroger/products   — see kroger.ts
  *
  * Required secrets (wrangler secret put):
@@ -31,6 +32,7 @@
  */
 
 import {handleKroger} from './kroger';
+import {handleLookup} from './lookup';
 
 export interface Env {
   TIPS_CACHE: KVNamespace;
@@ -44,6 +46,8 @@ export interface Env {
   KROGER_CLIENT_SECRET: string;
   KROGER_API_BASE?: string;
   KROGER_REDIRECT_URI?: string;
+  EDAMAM_APP_ID?: string;
+  EDAMAM_APP_KEY?: string;
 }
 
 const CORS_HEADERS = {
@@ -728,6 +732,11 @@ export default {
 
     const url = new URL(request.url);
     const path = url.pathname;
+
+    // /lookup  (universal barcode lookup — see lookup.ts)
+    if (path === '/lookup' && request.method === 'GET') {
+      return handleLookup(request, env);
+    }
 
     // /kroger/*  (retailer connector — see kroger.ts)
     const krogerResponse = await handleKroger(request, env);

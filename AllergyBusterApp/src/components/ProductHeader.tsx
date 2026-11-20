@@ -1,12 +1,13 @@
 import React from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
 import {colors, fontSizes, spacing} from '../constants/theme';
+import {ProductSource, SOURCE_LABELS} from '../types/product';
 
 interface Props {
   name: string;
   brand: string;
   imageUrl?: string;
-  source: 'openfoodfacts' | 'edamam';
+  source: ProductSource;
 }
 
 export function ProductHeader({name, brand, imageUrl, source}: Props) {
@@ -23,7 +24,7 @@ export function ProductHeader({name, brand, imageUrl, source}: Props) {
         <Text style={styles.name} numberOfLines={2}>{name}</Text>
         {brand ? <Text style={styles.brand}>{brand}</Text> : null}
         <Text style={styles.source}>
-          Source: {source === 'openfoodfacts' ? 'Open Food Facts' : 'Edamam'}
+          Source: {SOURCE_LABELS[source]}
         </Text>
       </View>
     </View>

@@ -21,7 +21,9 @@ const PERSONAL_CARE_TAG_RE =
   /cosmetic|shampoo|conditioner|soap|toothpaste|deodorant|lotion|skin-care|hair-care|sunscreen|make-up|hygiene/;
 
 export function inferCategory(productType: string | undefined, categoryTags: string[]): ProductCategory {
-  const tags = categoryTags.join(' ');
+  // User-entered tags vary in case and spacing ("en:Hand Dishwashing Soap"),
+  // so normalise to the canonical lowercase-hyphen form before matching.
+  const tags = categoryTags.map(t => t.toLowerCase().replace(/[\s_]+/g, '-')).join(' ');
   switch (productType) {
     case 'food':
       return 'food';
@@ -99,9 +101,29 @@ export function edamamNutrients(raw: Record<string, unknown> | undefined): Nutri
   });
 }
 
-/** Strips a leading "Ingredients:" label some sources include in the text. */
+const HTML_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+};
+
+/** Decodes the HTML entities some community records contain ("&gt;30% agua"). */
+function decodeEntities(s: string): string {
+  return s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) => {
+    if (e[0] === '#') {
+      const code = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : m;
+    }
+    return HTML_ENTITIES[e.toLowerCase()] ?? m;
+  });
+}
+
+/** Decodes entities and strips a leading "Ingredients:" label some sources include. */
 export function cleanIngredientsText(text: string | undefined | null): string {
-  return (text ?? '').replace(/^\s*ingredients\s*:\s*/i, '').trim();
+  return decodeEntities(text ?? '').replace(/^\s*ingredients\s*:\s*/i, '').trim();
 }
 
 export function parseNovaGroup(v: unknown): 1 | 2 | 3 | 4 | null {

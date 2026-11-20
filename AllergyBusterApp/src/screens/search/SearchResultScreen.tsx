@@ -18,7 +18,7 @@ import {AllergenCard} from '../../components/AllergenCard';
 import {ProfileMatchSummary} from '../../components/ProfileMatchSummary';
 import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {SearchStackScreenProps} from '../../navigation/navigationTypes';
-import {ProductRecord} from '../../types/product';
+import {ProductRecord, SOURCE_LABELS} from '../../types/product';
 import {searchEstablishments, Establishment} from '../../services/establishmentsService';
 import {useScanCount} from '../../providers/ScanCountProvider';
 
@@ -257,7 +257,7 @@ function ProductRow({product}: {product: ProductRecord}) {
       )}
 
       <Text style={styles.sourceLabel}>
-        {product.source === 'openfoodfacts' ? 'Open Food Facts' : 'Edamam'}
+        {SOURCE_LABELS[product.source]}
       </Text>
     </View>
   );

@@ -22,5 +22,7 @@ export const TIPS_PROXY_URL = 'https://allergybuster-tips.allergybuster-tips.wor
 export const CHAINS_PROXY_URL = 'https://allergybuster-tips.allergybuster-tips.workers.dev';
 
 export const CHAT_PROXY_URL = 'https://allergybuster-tips.allergybuster-tips.workers.dev/chat';
+// Universal barcode lookup (OFF / Open Beauty Facts / Open Products Facts / Edamam)
+export const LOOKUP_URL = 'https://allergybuster-tips.allergybuster-tips.workers.dev/lookup';
 
 export const APP_USER_AGENT = `AllergyBuster/1.0 (${Platform.OS})`;

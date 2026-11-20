@@ -1,10 +1,11 @@
-import {getProductByBarcode} from '../src/services/productService';
+import {getProductByBarcodeDirect as getProductByBarcode} from '../src/services/productService';
 import * as off from '../src/services/openFoodFacts';
 import * as edamam from '../src/services/edamam';
 import {ProductRecord} from '../src/types/product';
 
 jest.mock('../src/services/openFoodFacts');
 jest.mock('../src/services/edamam');
+jest.mock('../src/services/lookupService', () => ({lookupViaWorker: jest.fn(), LookupUnavailableError: class extends Error {}}));
 
 const mockOff = off.getProductByBarcode as jest.MockedFunction<typeof off.getProductByBarcode>;
 const mockEdamam = edamam.getProductByBarcode as jest.MockedFunction<typeof edamam.getProductByBarcode>;
@@ -40,7 +41,7 @@ function record(source: ProductRecord['source'], withIngredients: boolean): Prod
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('getProductByBarcode fallback', () => {
+describe('getProductByBarcodeDirect fallback', () => {
   it('returns OFF directly when it has ingredients (no Edamam call)', async () => {
     mockOff.mockResolvedValue(record('openfoodfacts', true));
     expect((await getProductByBarcode('1'))?.source).toBe('openfoodfacts');

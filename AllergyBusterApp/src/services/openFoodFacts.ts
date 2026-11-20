@@ -1,5 +1,7 @@
 import {offClient} from './http';
-import {ProductRecord} from '../types/product';
+import {ProductRecord, ProductSource} from '../types/product';
+
+export type OpenFactsSource = Exclude<ProductSource, 'edamam'>;
 import {parseAllergens} from '../utils/allergenParser';
 import {
   cleanIngredientsText,
@@ -10,6 +12,7 @@ import {
   unixToIso,
 } from '../utils/productRecord';
 
+// Keep in sync with OFF_FIELDS in worker/src/lookup.ts.
 const FIELDS = [
   'code',
   'product_name',
@@ -33,7 +36,7 @@ const FIELDS = [
   'last_modified_t',
 ].join(',');
 
-interface OFFProduct {
+export interface OFFProduct {
   code?: string;
   product_name?: string;
   brands?: string;
@@ -68,7 +71,15 @@ interface OFFSearchResponse {
 
 const unique = (xs: string[]) => [...new Set(xs.filter(x => x.trim().length > 0))];
 
-export function normalize(raw: OFFProduct, id: string): ProductRecord {
+/**
+ * Maps an Open Food Facts–family record (OFF, Open Beauty Facts and Open
+ * Products Facts share one schema) to a ProductRecord.
+ */
+export function normalize(
+  raw: OFFProduct,
+  id: string,
+  source: OpenFactsSource = 'openfoodfacts',
+): ProductRecord {
   const ingredientsText = cleanIngredientsText(raw.ingredients_text);
   const allergenTags = raw.allergens_tags ?? [];
   const tracesTags = raw.traces_tags ?? [];
@@ -87,7 +98,7 @@ export function normalize(raw: OFFProduct, id: string): ProductRecord {
     imageUrl: raw.image_url,
     allergens: parseAllergens(allergenTags, tracesTags, ingredientsText),
     ingredientsText,
-    source: 'openfoodfacts',
+    source,
 
     gtin: toGtin13(raw.code ?? id),
     category: inferCategory(raw.product_type, categoryTags),

@@ -313,6 +313,31 @@ async function handleProducts(url: URL, env: KrogerEnv): Promise<Response> {
   return json({products, matched: products.length > 0});
 }
 
+export type KrogerProduct = ReturnType<typeof shapeProduct>;
+
+/**
+ * Kroger catalog match for a scanned barcode, for use by other endpoints
+ * (e.g. /lookup). Shares the /kroger/products cache. Throws on Kroger errors.
+ */
+export async function findKrogerByUpc(
+  env: KrogerEnv,
+  upc: string,
+  locationId?: string | null,
+): Promise<KrogerProduct[]> {
+  const candidates = upcCandidates(upc);
+  if (candidates.length === 0 || (locationId && !LOCATION_ID_RE.test(locationId))) {
+    return [];
+  }
+  const params: Record<string, string> = {'filter.productId': candidates.join(',')};
+  if (locationId) {
+    params['filter.locationId'] = locationId;
+  }
+  return cached(env, `${ns(env)}upc:${candidates.join(',')}:${locationId ?? '-'}`, PRODUCT_CACHE_TTL, async () => {
+    const res = await krogerGet<{data: RawProduct[]}>(env, '/products', params);
+    return (res.data ?? []).map(shapeProduct);
+  });
+}
+
 /** Returns a Response for /kroger/* paths, or null if the path isn't ours. */
 export async function handleKroger(request: Request, env: KrogerEnv): Promise<Response | null> {
   const url = new URL(request.url);
