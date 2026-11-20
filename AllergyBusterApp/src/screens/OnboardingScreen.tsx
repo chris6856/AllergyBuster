@@ -132,7 +132,7 @@ export function OnboardingScreen() {
     } else {
       finish();
     }
-  }, [activeIndex, finish]);
+  }, [activeIndex, finish, SLIDES_SHOWN.length]);
 
   const onViewableItemsChanged = useRef(
     ({viewableItems}: {viewableItems: ViewToken[]}) => {
