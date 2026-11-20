@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(start c:/source/AllergyBuster/AllergyBusterWeb/index.html)"
+      "Bash(start c:/source/AllergyBuster/AllergyBusterWeb/index.html)",
+      "Read(//c/source/AllergyBuster/worker/**)",
+      "Bash(npx wrangler:*)"
     ]
   }
 }

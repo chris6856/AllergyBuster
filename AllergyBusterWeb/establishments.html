@@ -10,6 +10,7 @@
     gtag('config', 'AW-18116393800');
   </script>
   <meta charset="UTF-8" />
+  <link rel="canonical" href="https://allergybusted.com/establishments.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Allergy-Friendly Places Near You — AllergyBuster</title>
   <meta name="description" content="Find allergy-friendly restaurants, bakeries and cafés near you. Community allergen ratings for peanuts, dairy, gluten, eggs, soy, fish, shellfish, sesame and more." />
@@ -222,6 +223,7 @@
     .allergen-score-tag.great  { background: rgba(45,92,64,.10); color: var(--green-mid); border: 1px solid rgba(45,92,64,.2); }
     .allergen-score-tag.ok     { background: rgba(232,160,32,.10); color: #92600a; border: 1px solid rgba(232,160,32,.25); }
     .allergen-score-tag.poor   { background: rgba(192,57,43,.08); color: var(--red); border: 1px solid rgba(192,57,43,.18); }
+    .allergen-score-tag.unrated { background: rgba(107,107,90,.07); color: var(--muted); border: 1px dashed rgba(107,107,90,.3); }
     .allergen-score-tag.highlighted { box-shadow: 0 0 0 2px var(--green-light); }
 
     .no-community { font-size: .78rem; color: var(--muted); font-style: italic; }
@@ -431,7 +433,7 @@
 
     <!-- Allergen highlight pills -->
     <div class="filter-row" id="allergen-pills">
-      <span class="filter-label">Highlight:</span>
+      <span class="filter-label">I'm allergic to:</span>
       <button class="acc-pill" data-allergen="peanuts">🥜 Peanuts</button>
       <button class="acc-pill" data-allergen="tree-nuts">🌰 Tree Nuts</button>
       <button class="acc-pill" data-allergen="milk">🥛 Dairy</button>
@@ -498,11 +500,11 @@
     <div class="modal-field">
       <label class="modal-label">How well did they accommodate this allergy?</label>
       <div class="safety-grid">
-        <button class="safety-btn" data-val="1">1<span>Could not accommodate</span></button>
-        <button class="safety-btn" data-val="2">2<span>Limited, felt unsafe</span></button>
-        <button class="safety-btn" data-val="3">3<span>Tried, but uncertain</span></button>
-        <button class="safety-btn" data-val="4">4<span>Good, felt safe</span></button>
-        <button class="safety-btn" data-val="5">5<span>Excellent, dedicated menu</span></button>
+        <button class="safety-btn" data-val="1">1<span>Not safe — contains allergen</span></button>
+        <button class="safety-btn" data-val="2">2<span>Cross-contamination risk</span></button>
+        <button class="safety-btn" data-val="3">3<span>Tried to help, uncertain</span></button>
+        <button class="safety-btn" data-val="4">4<span>Safe — well accommodated</span></button>
+        <button class="safety-btn" data-val="5">5<span>Very safe — dedicated menu</span></button>
       </div>
     </div>
 
@@ -595,6 +597,66 @@
 <!-- ─── JavaScript ────────────────────────────────────────────────────────────── -->
 <script>
   const WORKER = 'https://allergybuster-tips.allergybuster-tips.workers.dev';
+  const placeCache = {}; // place.id → place object for modal lookup
+
+  // Known chain allergen page URLs — keyed by lowercase substring of restaurant name
+  const ALLERGEN_URLS = {
+    'chipotle':         'https://www.chipotle.com/allergens',
+    'chick-fil-a':      'https://www.chick-fil-a.com/menu-items/allergen-information',
+    'five guys':        'https://www.fiveguys.com/allergen-information',
+    'shake shack':      'https://www.shakeshack.com/food-safety-allergens/',
+    'panera':           'https://www.panerabread.com/en-us/articles/allergen-menu.html',
+    'starbucks':        'https://www.starbucks.com/menu/catalog/nutrition',
+    'outback':          'https://www.outback.com/menuitem-detail/allergen-guide',
+    "p.f. chang":       'https://www.pfchangs.com/menu/special-diets.html',
+    'blaze pizza':      'https://www.blazepizza.com/allergen-info',
+    'mod pizza':        'https://www.modpizza.com/allergen-information',
+    'subway':           'https://www.subway.com/en-US/MenuNutrition/Nutrition/AllergenAndNutrition',
+    'taco bell':        'https://www.tacobell.com/nutrition/allergens',
+    "mcdonald":         'https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html',
+    'olive garden':     'https://www.olivegarden.com/menu/nutrition',
+    "applebee":         'https://www.applebees.com/en/menu/nutritional-info',
+    "chili":            'https://www.chilis.com/menu/special-diets/allergen-menu',
+    'red robin':        'https://www.redrobin.com/menu/allergen-info.html',
+    "wendy":            'https://www.wendys.com/nutrition/allergen-info',
+    'burger king':      'https://www.bk.com/menu/picker',
+    'dairy queen':      'https://www.dairyqueen.com/en-us/nutrition/allergen-information/',
+    'in-n-out':         'https://www.in-n-out.com/menu/protein-style',
+    'bonefish':         'https://www.bonefishgrill.com/menu/allergen-information',
+    'true food':        'https://www.truefoodkitchen.com/menu',
+    'jersey mike':      'https://www.jerseymikes.com/menu/allergen-info',
+    'panda express':    'https://www.pandaexpress.com/nutrition',
+    'raising cane':     'https://www.raisingcanes.com/nutrition-allergen-information/',
+    'wingstop':         'https://www.wingstop.com/menu',
+    'culver':           'https://www.culvers.com/nutrition-allergens',
+    'red lobster':      'https://www.redlobster.com/menu/nutrition-info',
+    'texas roadhouse':  'https://www.texasroadhouse.com/menu-items',
+    'longhorn':         'https://www.longhornsteakhouse.com/menu/nutritional-info',
+    'ihop':             'https://www.ihop.com/en/menu/specials/nutrition-allergen-information',
+    'denny':            'https://www.dennys.com/menu/allergen-information/',
+    'cracker barrel':   'https://www.crackerbarrel.com/menu-nutrition/',
+    'buffalo wild':     'https://www.buffalowildwings.com/en/food/nutrition/allergen-menu/',
+    'cheesecake factory': 'https://www.thecheesecakefactory.com/menu/',
+    'legal sea':        'https://www.legalseafoods.com/allergen-information/',
+    'bj\'s':            'https://www.bjsrestaurants.com/menu/allergen',
+    'cold stone':       'https://www.coldstonecreamery.com/icecream/allergeninformation',
+    'baskin':           'https://www.baskinrobbins.com/en/nutritional-information.html',
+    'erin mckenna':     'https://www.erinmckennasbakery.com/pages/faqs',
+    'mariposa':         'https://www.mariposabaking.com/menu',
+  };
+
+  function getAllergenLink(place) {
+    const name = place.name.toLowerCase();
+    for (const [key, url] of Object.entries(ALLERGEN_URLS)) {
+      if (name.includes(key)) return { url, label: 'Allergen Info' };
+    }
+    if (place.website) return { url: place.website, label: 'Website' };
+    // Fallback: Google search for their allergen menu
+    return {
+      url: `https://www.google.com/search?q=${encodeURIComponent(place.name + ' allergen menu')}`,
+      label: 'Find Allergen Info',
+    };
+  }
 
   const ALLERGEN_LABELS = {
     'peanuts':   '🥜 Peanuts',
@@ -662,6 +724,7 @@
 
   // ── Card rendering ───────────────────────────────────────────────────────────
   function renderCard(place) {
+    placeCache[place.id] = place;
     const cat = CAT_LABELS[place.category] || 'Restaurant';
     const emoji = CAT_EMOJI[place.category] || '🍴';
     const color = CAT_COLOR[place.category] || '#4a8c62';
@@ -669,19 +732,33 @@
 
     // Allergen score tags
     let allergenHtml = '';
-    const ratedAllergens = Object.keys(ratings);
-    if (ratedAllergens.length > 0) {
-      allergenHtml = ratedAllergens.map(key => {
-        const r = ratings[key];
-        const cls = scoreClass(r.avg);
-        const highlighted = highlightedAllergens.has(key) ? ' highlighted' : '';
-        const label = ALLERGEN_LABELS[key] || key;
-        return `<span class="allergen-score-tag ${cls}${highlighted}" title="${r.count} rating${r.count !== 1 ? 's' : ''}">
-          ${label} ★${r.avg} <span style="opacity:.6">·${r.count}</span>
-        </span>`;
+    if (highlightedAllergens.size > 0) {
+      // Show a status tag for each selected allergen
+      allergenHtml = [...highlightedAllergens].map(allergen => {
+        const r = ratings[allergen];
+        const label = ALLERGEN_LABELS[allergen] || allergen;
+        if (r) {
+          const cls = scoreClass(r.avg);
+          return `<span class="allergen-score-tag ${cls}" title="${r.count} rating${r.count !== 1 ? 's' : ''}">
+            ${label} ★${r.avg} <span style="opacity:.6">·${r.count}</span>
+          </span>`;
+        }
+        return `<span class="allergen-score-tag unrated" title="No community ratings yet">${label} — unverified</span>`;
       }).join('');
     } else {
-      allergenHtml = '<span class="no-community">No community ratings yet — be the first!</span>';
+      // No filter — show all community ratings if any exist
+      const ratedAllergens = Object.keys(ratings);
+      if (ratedAllergens.length > 0) {
+        allergenHtml = ratedAllergens.map(key => {
+          const r = ratings[key];
+          const cls = scoreClass(r.avg);
+          return `<span class="allergen-score-tag ${cls}" title="${r.count} rating${r.count !== 1 ? 's' : ''}">
+            ${ALLERGEN_LABELS[key] || key} ★${r.avg} <span style="opacity:.6">·${r.count}</span>
+          </span>`;
+        }).join('');
+      } else {
+        allergenHtml = '<span class="no-community">No community ratings yet — rate this place!</span>';
+      }
     }
 
     const openBadge = place.isOpen === true
@@ -698,12 +775,11 @@
          </div>`
       : '';
 
-    const websiteBtn = place.website
-      ? `<a href="${place.website}" target="_blank" rel="noopener" class="card-website-btn">
-          Website
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-         </a>`
-      : '<span></span>';
+    const { url: allergenUrl, label: allergenLabel } = getAllergenLink(place);
+    const websiteBtn = `<a href="${allergenUrl}" target="_blank" rel="noopener" class="card-website-btn">
+        ${allergenLabel}
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+       </a>`;
 
     return `
       <div class="est-card">
@@ -722,9 +798,7 @@
         <div class="allergen-scores">${allergenHtml}</div>
         <div class="card-footer">
           ${websiteBtn}
-          <button class="rate-btn" onclick="openModal(${JSON.stringify({id: place.id, name: place.name, addr: place.address || ''}).replace(/'/g, '&#39;')})">
-            Rate This Place
-          </button>
+          <button class="rate-btn" data-place-id="${escHtml(place.id)}">Rate This Place</button>
         </div>
       </div>`;
   }
@@ -733,21 +807,60 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // ── Render results ───────────────────────────────────────────────────────────
-  function renderResults(results) {
-    currentResults = results;
+  // ── Filter results ────────────────────────────────────────────────────────────
+  // Show place if: all selected allergens are either unrated OR rated safe (>= 3)
+  // Hide place only if: community has rated it UNSAFE (< 3) for a selected allergen
+  function getFilteredResults() {
+    if (highlightedAllergens.size === 0) return currentResults;
+    return currentResults.filter(place => {
+      const ratings = place.allergenRatings || {};
+      for (const allergen of highlightedAllergens) {
+        const r = ratings[allergen];
+        if (r && r.avg < 3) return false; // rated unsafe — exclude
+      }
+      return true; // unrated or rated safe — include
+    });
+  }
+
+  // ── Render a filtered subset of cards ────────────────────────────────────────
+  function renderCards(filtered) {
     const grid = document.getElementById('results-grid');
     const meta = document.getElementById('result-meta');
 
-    if (!results || results.length === 0) { showEmpty(); return; }
+    if (!filtered || filtered.length === 0) {
+      if (highlightedAllergens.size > 0 && currentResults.length > 0) {
+        const names = [...highlightedAllergens].map(a => (ALLERGEN_LABELS[a] || a).replace(/^[^\s]+\s/, '')).join(', ');
+        grid.innerHTML = `<div class="state-screen">
+          <div class="state-icon">🛡️</div>
+          <h3>No verified safe places found</h3>
+          <p>No nearby places have been community-verified as safe for <strong>${names}</strong> yet. Dine somewhere and be the first to rate it — your review helps everyone with the same allergy.</p>
+        </div>`;
+        meta.innerHTML = `<strong>0</strong> of ${currentResults.length} nearby places verified safe for your allergies`;
+      } else {
+        showEmpty();
+        meta.innerHTML = '';
+      }
+      return;
+    }
 
-    grid.innerHTML = results.map(renderCard).join('');
-    meta.innerHTML = `Showing <strong>${results.length}</strong> place${results.length !== 1 ? 's' : ''}`;
+    grid.innerHTML = filtered.map(renderCard).join('');
+
+    if (highlightedAllergens.size > 0) {
+      meta.innerHTML = `<strong>${filtered.length}</strong> safe place${filtered.length !== 1 ? 's' : ''} found near you · <span style="opacity:.7">${currentResults.length} total searched</span>`;
+    } else {
+      meta.innerHTML = `Showing <strong>${filtered.length}</strong> place${filtered.length !== 1 ? 's' : ''} — select your allergies above to filter safe options`;
+    }
   }
 
-  // ── Re-render cards (when highlight pills change) ─────────────────────────────
+  // ── Render results (stores all, then filters) ─────────────────────────────────
+  function renderResults(results) {
+    currentResults = results;
+    renderCards(getFilteredResults());
+  }
+
+  // ── Re-render when allergen pills change ──────────────────────────────────────
   function reRender() {
-    if (currentResults.length > 0) renderResults(currentResults);
+    if (currentResults.length > 0) renderCards(getFilteredResults());
   }
 
   // ── Fetch from worker ─────────────────────────────────────────────────────────
@@ -824,6 +937,14 @@
     if (highlightedAllergens.has(a)) { highlightedAllergens.delete(a); btn.classList.remove('active'); }
     else { highlightedAllergens.add(a); btn.classList.add('active'); }
     reRender();
+  });
+
+  // ── Rate button delegation ────────────────────────────────────────────────────
+  document.getElementById('results-grid').addEventListener('click', e => {
+    const btn = e.target.closest('.rate-btn');
+    if (!btn) return;
+    const place = placeCache[btn.dataset.placeId];
+    if (place) openModal({ id: place.id, name: place.name, addr: place.address || '' });
   });
 
   // ── Modal ─────────────────────────────────────────────────────────────────────
