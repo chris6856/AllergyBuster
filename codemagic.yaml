@@ -13,6 +13,11 @@ workflows:
       vars:
         BUNDLE_ID: "com.allergybusterapp"
       node: 22.11.0
+      # Apple requires the iOS 27 SDK (Xcode 27+) for uploads from April 2027
+      # (ITMS-90725 on 1.3.0 build 39, which used Xcode 26.5, the image default).
+      # Once a build passes, pin the exact version here (e.g. xcode: 27.1) so
+      # image updates can't change the toolchain unexpectedly.
+      xcode: latest
 
     scripts:
       - name: Install dependencies
