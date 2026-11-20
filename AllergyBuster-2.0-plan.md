@@ -165,7 +165,8 @@ Allergen matches from the user's profile stay a separate, always-first section, 
 - [ ] M8 (1.2a–f) Hazard pipeline: D1 tables; ingredient → CAS resolver (OFF taxonomy → CosIng → PubChem) with unresolved queue; data built by scripts (Workers CPU limits) for Prop 65, IARC, CosIng Annex II/III (+ 2023/1545 fragrance allergens), EPA PFAS list, Safer Choice; live PubChem GHS / EPA CTX; severity tiers; `/evidence`; attribution screen; licence review per source
 - [ ] M9 (1.5, 1.5a revised) Household ingredients automated: OPF via `/lookup`, ingredient list OCR'd from the user's label photo saved as the product's snapshot (and household warnings from the photo); optional contribution back to OPF
 - [ ] M10 (1.10) Grounded explanations (Claude phrases evidence records only; cached per ingredient)
-- [ ] Background refresh of saved products (weekly) for recheck monitoring
+- [ ] Background refresh of saved products (weekly) for recheck monitoring; recall alerts for saved products (FDA/USDA recall data)
+- [ ] M11 Subscription (decided 2026-11-20 to launch with 2.0, not 1.3): ~$1.99/month + annual (~$14.99/year); existing $7.99 lifetime buyers keep everything (grandfathered); lifetime for new users dropped or repriced at 2–3× annual. Paid value: monitoring (background recheck + recalls), hazard intelligence, Ask Jeeves (with a monthly usage cap), later Kroger. Decide: free tier 5 lifetime scans vs 5 per month (test). Check competitor pricing before setting final prices. Needs: subscription products in App Store Connect / Play Console, react-native-iap subscription flow, paywall with terms + manage-subscription link, entitlement check replacing `isPurchased`
 
 ### Phase 2 — Kroger
 - [x] 2.1 Kroger Developer Portal registration, **Production** credentials (secrets on the Worker). Redirect URI: `https://allergybuster-tips.allergybuster-tips.workers.dev/kroger/callback`
