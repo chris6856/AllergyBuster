@@ -2,15 +2,14 @@ import React, {useEffect, useRef} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useScanCount} from '../../providers/ScanCountProvider';
-import {ProductHeader} from '../../components/ProductHeader';
-import {AllergenList} from '../../components/AllergenList';
 import {LoadingOverlay} from '../../components/LoadingOverlay';
 import {NoResultsBanner} from '../../components/NoResultsBanner';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {useProductByBarcode} from '../../hooks/useProductByBarcode';
 import {hasIngredientData} from '../../services/productService';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
-import {colors, spacing} from '../../constants/theme';
+import {colors} from '../../constants/theme';
+import {ProductInsights} from '../../components/ProductInsights';
 import {ScanStackScreenProps} from '../../navigation/navigationTypes';
 import {MainTabNavigationProp} from '../../navigation/navigationTypes';
 
@@ -69,18 +68,7 @@ export function ScanResultScreen({route}: Props) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <ProductHeader
-        name={product.name}
-        brand={product.brand}
-        imageUrl={product.imageUrl}
-        source={product.source}
-      />
-      <View style={styles.allergenSection}>
-        <AllergenList
-          allergens={product.allergens}
-          hasIngredientData={hasIngredientData(product)}
-        />
-      </View>
+      <ProductInsights record={product} refreshSaved />
     </ScrollView>
   );
 }
@@ -89,10 +77,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  allergenSection: {
-    marginTop: spacing.md,
-    backgroundColor: colors.surface,
-    paddingVertical: spacing.md,
   },
 });
