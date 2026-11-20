@@ -148,29 +148,28 @@ Allergen matches from the user's profile stay a separate, always-first section, 
 - [ ] 0.5 Anonymous device ID (uuid in secure storage)
 - [ ] 0.6 Tests: allergen parser + profile matching regression suite (protects 1.x behaviour)
 
-### Phase 1 — Product Intelligence + Approved Pantry (= 2.0 launch)
-- [ ] 1.1 Preferences screen (toggles + sugar/sodium thresholds)
-- [ ] 1.2a D1 migrations (`ingredient_reference`, `ingredient_evidence`, `evidence_source`, `household_product`)
-- [ ] 1.2b Ingredient normaliser + CAS resolver (OFF taxonomy → CosIng → PubChem), with an unresolved-name queue
-- [ ] 1.2c Bulk ingest cron jobs: OFF additives, Prop 65, IARC, CosIng, FDA SAF, Safer Choice, EPA PFAS list
-- [ ] 1.2d Live hazard lookups: PubChem GHS + EPA CTX (request key), with caching and rate limits
-- [ ] 1.2e Severity tiering + `/evidence` endpoint (batch: list of ingredients → findings)
-- [ ] 1.2f Licence/terms review for every source; attribution screen in-app
-- [ ] 1.3 Food analyzer (allergens, hazard tiers for additives/ingredients, nutrition vs thresholds, packaging "insufficient information" by default)
-- [ ] 1.4 Personal care analyzer (INCI mapping, Annex II/III, EU fragrance allergens, GHS sensitisers, label warnings)
-- [ ] 1.5 Household analyzer (beta: curated `household_product` ingredients + hazard tiers, label signal words like DANGER/WARNING via OCR)
-- [ ] 1.5a Household curation: admin form (extend existing `AllergyBusterWeb/admin.html`), seed top ~200 cleaner GTINs
-- [ ] 1.6 Product Insights screen + decision bar
-- [ ] 1.7 My Products (filter by category/status, "Recheck needed" badges)
-- [ ] 1.8 Shopping lists (multiple, reusable, check-off in store)
-- [ ] 1.9 Snapshot hashing + recheck detection on re-scan and background refresh of pantry items (weekly, piggyback on the existing launch-time notification reschedule)
-- [ ] 1.10 Grounded `/explain` (Claude phrases curated evidence; cached per ingredient)
-- [ ] 1.11 Navigation restructure + onboarding v2 + disclaimer v2
-- [ ] 1.12 Paywall rework (§6), store listing/screenshots, website copy ("Know What's Inside")
+### Phase 1 — Product Intelligence + Approved Pantry
+
+**Release 1.3.0 (iOS build 39, Android versionCode 40): built 2026-11-20, awaiting device testing.** Commits f996958 → 8b52079.
+
+- [x] M1 (1.9) Data layer: migration v2 (product, product_snapshot with content hash, product_approval, shopping_list(_item), user_preference); pantry/list/preference stores; "Recheck needed" when ingredients/allergens/additives change after a decision (decision kept)
+- [x] M2 (1.1) My Preferences: additives, added sugar / sodium per-serving limits (defaults = FDA "high", 20% DV), PFAS/packaging, fragrance
+- [x] M3 (1.3–1.5, partial) Analysis: Allergy Check; additives from bundled OFF additives taxonomy (`scripts/build-additives-data.mjs`; EFSA evaluation date/link, EFSA overexposure risk → potential concern); nutrition vs limits + NOVA; PFAS & packaging (always "insufficient information" until M8); fragrance + EU Annex III fragrance allergens (original 26); household label warnings (signal words). Hazard tiers from regulatory lists → M8
+- [x] M4 (1.6) Product Insights screen + decision bar (Approved / Needs review / Avoid / Add to list, recheck banner + confirm)
+- [x] M5 (1.7, 1.8) My Products (status/category/recheck filters, saved-product view, check for updates, remove); Shopping List (multiple lists, free text, quantities, check-off, finish trip, quick-add from approved)
+- [x] M6 (1.11) Tabs: Home · Scan (Barcode / Label / Search via ScanModeBar) · My Products · List · Ask Jeeves
+- [x] M7 (1.11, 1.12) Scan-only paywall (scan, product + restaurant search and Ask Jeeves locked after 5 lifetime scans; everything else open), Restore on locked screens, disclaimer text for all product types, onboarding v2 ("What's new" once for existing users, with disclaimer and set-up button)
+- [ ] 1.3 release: device test checklist, store text, privacy policy note on `/lookup`, screenshots
+
+**Release 2.0 (hazard intelligence):**
+- [ ] M8 (1.2a–f) Hazard pipeline: D1 tables; ingredient → CAS resolver (OFF taxonomy → CosIng → PubChem) with unresolved queue; data built by scripts (Workers CPU limits) for Prop 65, IARC, CosIng Annex II/III (+ 2023/1545 fragrance allergens), EPA PFAS list, Safer Choice; live PubChem GHS / EPA CTX; severity tiers; `/evidence`; attribution screen; licence review per source
+- [ ] M9 (1.5, 1.5a revised) Household ingredients automated: OPF via `/lookup`, ingredient list OCR'd from the user's label photo saved as the product's snapshot (and household warnings from the photo); optional contribution back to OPF
+- [ ] M10 (1.10) Grounded explanations (Claude phrases evidence records only; cached per ingredient)
+- [ ] Background refresh of saved products (weekly) for recheck monitoring
 
 ### Phase 2 — Kroger
 - [x] 2.1 Kroger Developer Portal registration, **Production** credentials (secrets on the Worker). Redirect URI: `https://allergybuster-tips.allergybuster-tips.workers.dev/kroger/callback`
-- [~] 2.2 Worker (`worker/src/kroger.ts`): **done (tested against Production 2026-11-15, not yet deployed)**: app token (cached in KV), `GET /kroger/locations` (filters internal spoke/warehouse nodes), `GET /kroger/products` by UPC (scanned UPC-A / EAN-13 / UPC-E all match; Kroger IDs = 13-digit UPC without check digit) or term, with store price/promo/stock/aisle. **Remaining:** auth-code + PKCE flow, `/kroger/callback`, refresh-token storage, `/kroger/cart/add`
+- [~] 2.2 Worker (`worker/src/kroger.ts`): **done and deployed (tested against Production 2026-11-15)**: app token (cached in KV), `GET /kroger/locations` (filters internal spoke/warehouse nodes), `GET /kroger/products` by UPC (scanned UPC-A / EAN-13 / UPC-E all match; Kroger IDs = 13-digit UPC without check digit) or term, with store price/promo/stock/aisle. **Remaining:** auth-code + PKCE flow, `/kroger/callback`, refresh-token storage, `/kroger/cart/add`
 - [ ] 2.3 App: **store picker**: user chooses their Kroger store near them, by ZIP code (backed by the live `GET /kroger/locations?zip=`; optionally pre-fill ZIP from device location, already used for restaurant search). Save the chosen `locationId` locally; prices, stock and aisle in lists depend on it. Allow changing store anytime. Store choice must work *without* connecting a Kroger account (browse prices/availability first, connect only to send to cart).
 - [ ] 2.3a App: connect Kroger account (in-app browser → `/kroger/callback` → deep link back to app)
 - [ ] 2.4 UPC match list items → show match / no match / price & availability at selected store
