@@ -7,12 +7,13 @@ import {
   View,
 } from 'react-native';
 import {usePurchase} from '../providers/PurchaseProvider';
-import {LIFETIME_PRICE_DISPLAY} from '../constants/purchases';
+import {FREE_SCANS, LIFETIME_PRICE_DISPLAY} from '../constants/purchases';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 
 export function TrialLockedView() {
-  const {product, purchase} = usePurchase();
+  const {product, purchase, restore} = usePurchase();
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   const price = product?.displayPrice ?? LIFETIME_PRICE_DISPLAY;
 
@@ -22,12 +23,19 @@ export function TrialLockedView() {
     setIsPurchasing(false);
   };
 
+  const handleRestore = async () => {
+    setIsRestoring(true);
+    await restore();
+    setIsRestoring(false);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.icon}>🔒</Text>
       <Text style={styles.title}>You've Used Your Free Scans</Text>
       <Text style={styles.body}>
-        You've completed 6 free scans. Unlock lifetime access to keep scanning for allergens.
+        You've completed {FREE_SCANS} free scans. Unlock lifetime access to keep scanning and searching
+        products and restaurants.
       </Text>
       <TouchableOpacity
         style={[styles.button, isPurchasing && styles.buttonDisabled]}
@@ -41,6 +49,17 @@ export function TrialLockedView() {
           <Text style={styles.buttonText}>Unlock for {price}</Text>
         )}
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.restore}
+        onPress={handleRestore}
+        disabled={isRestoring}
+        accessibilityRole="button"
+        accessibilityLabel="Restore purchase">
+        {isRestoring ? <ActivityIndicator color={colors.primary} /> : <Text style={styles.restoreText}>Restore purchase</Text>}
+      </TouchableOpacity>
+      <Text style={styles.reassure}>
+        Your saved products, shopping lists and allergy profile are still available.
+      </Text>
     </View>
   );
 }
@@ -81,6 +100,21 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.6,
+  },
+  restore: {
+    marginTop: spacing.md,
+    padding: spacing.sm,
+  },
+  restoreText: {
+    color: colors.primary,
+    fontSize: fontSizes.md,
+    fontWeight: '600',
+  },
+  reassure: {
+    marginTop: spacing.lg,
+    fontSize: fontSizes.sm,
+    color: colors.textSecondary,
+    textAlign: 'center',
   },
   buttonText: {
     color: colors.white,

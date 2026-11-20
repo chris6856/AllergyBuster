@@ -10,21 +10,35 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {spacing} from '../constants/theme';
 import {RootNavigationProp} from '../navigation/navigationTypes';
+import {ONBOARDING_VERSION} from './OnboardingScreen';
 
 const splashHero = require('../assets/splash-hero.png');
 
 export function DisclaimerScreen() {
   const navigation = useNavigation<RootNavigationProp>();
-  const nextRoute = useRef<'Onboarding' | 'MainTabs'>('MainTabs');
+  // Where the splash goes next: full onboarding (new users), "What's new"
+  // (returning users who haven't seen this version's slides) or the app.
+  const nextRoute = useRef<{name: 'Onboarding' | 'MainTabs'; whatsNew?: boolean}>({name: 'MainTabs'});
 
   useEffect(() => {
     // Resolve destination during the splash so there's no delay after the timer.
-    AsyncStorage.getItem('onboardingSeen').then(v => {
-      nextRoute.current = v === 'true' ? 'MainTabs' : 'Onboarding';
+    AsyncStorage.multiGet(['onboardingSeen', 'onboardingVersion']).then(([[, seen], [, version]]) => {
+      if (seen !== 'true') {
+        nextRoute.current = {name: 'Onboarding'};
+      } else if (version !== ONBOARDING_VERSION) {
+        nextRoute.current = {name: 'Onboarding', whatsNew: true};
+      } else {
+        nextRoute.current = {name: 'MainTabs'};
+      }
     });
 
     const timer = setTimeout(() => {
-      navigation.replace(nextRoute.current, undefined);
+      const next = nextRoute.current;
+      if (next.name === 'Onboarding') {
+        navigation.replace('Onboarding', {whatsNew: next.whatsNew});
+      } else {
+        navigation.replace('MainTabs', undefined);
+      }
     }, 6000);
     return () => clearTimeout(timer);
   }, [navigation]);
@@ -60,10 +74,11 @@ export function DisclaimerScreen() {
         </Text>
 
         <Text style={styles.disclaimer}>
-          This app provides general allergen information only and does not
-          constitute medical advice. Always verify allergen data on product
-          packaging or with restaurant staff, and consult your doctor or
-          allergist for personalised guidance.
+          AllergyBuster provides general information about allergens and
+          ingredients in foods, personal care and household products. It is
+          not medical advice and does not certify any product as safe. Always
+          verify on the package label or with restaurant staff, and consult
+          your doctor or allergist for personalised guidance.
         </Text>
       </View>
     </View>

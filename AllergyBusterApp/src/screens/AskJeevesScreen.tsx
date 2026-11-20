@@ -13,6 +13,9 @@ import {
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {CHAT_PROXY_URL} from '../constants/config';
+import {useTrialStatus} from '../hooks/useTrialStatus';
+import {usePurchase} from '../providers/PurchaseProvider';
+import {TrialLockedView} from '../components/TrialLockedView';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 
 interface Message {
@@ -34,6 +37,8 @@ export function AskJeevesScreen() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
+  const {trialExpired} = useTrialStatus();
+  const {isPurchased} = usePurchase();
 
   const send = useCallback(async () => {
     const text = input.trim();
@@ -108,6 +113,12 @@ export function AskJeevesScreen() {
       </View>
     );
   }, []);
+
+  // Ask Jeeves uses a paid AI service; it was behind the global paywall
+  // before 1.3, so it stays locked after the free scans.
+  if (trialExpired && !isPurchased) {
+    return <TrialLockedView />;
+  }
 
   return (
     <KeyboardAvoidingView

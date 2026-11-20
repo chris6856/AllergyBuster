@@ -92,7 +92,8 @@ export function TextSearchScreen({route}: Props) {
     });
   };
 
-  const productSearchLocked = trialExpired && !isPurchased && mode === 'products';
+  // Both modes: restaurant search was behind the global paywall before 1.3.
+  const productSearchLocked = trialExpired && !isPurchased;
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>

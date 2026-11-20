@@ -10,8 +10,8 @@ import {
   ViewToken,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
-import {RootNavigationProp} from '../navigation/navigationTypes';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {RootNavigationProp, RootStackScreenProps} from '../navigation/navigationTypes';
 import {
   requestNotificationPermission,
   scheduleWeeklyReminders,
@@ -30,7 +30,12 @@ interface Slide {
   body: string;
   example?: {label: string; value: string};
   contexts?: string[];
+  /** Small print under the body (used for the disclaimer on the last slide). */
+  note?: string;
 }
+
+/** Bump when "What's new" slides change; returning users see them once. */
+export const ONBOARDING_VERSION = '2';
 
 const SLIDES: Slide[] = [
   {
@@ -62,25 +67,67 @@ const SLIDES: Slide[] = [
   },
 ];
 
+// New in 1.3. Shown after SLIDES for new users, and on their own (once) to
+// existing users.
+const NEW_SLIDES: Slide[] = [
+  {
+    key: 'save',
+    icon: '⭐',
+    title: 'Save the products you trust',
+    body: 'After a scan, mark a product Approved, Needs review or Avoid. It goes into My Products, so you can find it again without re-checking.',
+    example: {label: 'If a recipe changes', value: "We flag \"Recheck needed\" when a saved product's ingredients change"},
+  },
+  {
+    key: 'list',
+    icon: '🛒',
+    title: 'Shop from your approved list',
+    body: "Build reusable shopping lists from products you've already reviewed, and tick them off in the store.",
+  },
+  {
+    key: 'beyond',
+    icon: '🧴',
+    title: "Know what's inside, beyond food",
+    body: 'See additives, nutrition against your limits, fragrance ingredients in personal care products, and label warnings on household cleaners (beta).',
+  },
+  {
+    key: 'matters',
+    icon: '🎯',
+    title: 'What matters to you?',
+    body: 'Choose your allergens and what AllergyBuster should highlight: additives, added sugar, sodium, packaging, fragrance.',
+    note: "AllergyBuster explains available information from public databases and your label photos. It can be incomplete or out of date, isn't medical advice, and doesn't certify any product as safe. Your approvals are your own choices. Always read the package label and consult your doctor or allergist.",
+  },
+];
+
 export function OnboardingScreen() {
   const navigation = useNavigation<RootNavigationProp>();
+  const {params} = useRoute<RootStackScreenProps<'Onboarding'>['route']>();
+  const whatsNew = params?.whatsNew === true;
+  const SLIDES_SHOWN = whatsNew ? NEW_SLIDES : [...SLIDES, ...NEW_SLIDES];
   const [activeIndex, setActiveIndex] = useState(0);
   const listRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  const finish = useCallback(async () => {
-    await AsyncStorage.setItem('onboardingSeen', 'true');
-    // Ask for notification permission then schedule weekly reminders.
-    // If the user denies, scheduleWeeklyReminders is a no-op.
-    const granted = await requestNotificationPermission();
-    if (granted) {
-      await scheduleWeeklyReminders();
+  const finish = useCallback(async (setUp = false) => {
+    await AsyncStorage.multiSet([
+      ['onboardingSeen', 'true'],
+      ['onboardingVersion', ONBOARDING_VERSION],
+    ]);
+    // New users: ask for notification permission, then schedule weekly
+    // reminders (no-op if denied). Returning users were already asked.
+    if (!whatsNew) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        await scheduleWeeklyReminders();
+      }
     }
     navigation.replace('MainTabs', undefined);
-  }, [navigation]);
+    if (setUp) {
+      navigation.navigate('AllergyProfile');
+    }
+  }, [navigation, whatsNew]);
 
   const next = useCallback(() => {
-    if (activeIndex < SLIDES.length - 1) {
+    if (activeIndex < SLIDES_SHOWN.length - 1) {
       listRef.current?.scrollToIndex({index: activeIndex + 1, animated: true});
     } else {
       finish();
@@ -95,14 +142,14 @@ export function OnboardingScreen() {
     },
   ).current;
 
-  const isLast = activeIndex === SLIDES.length - 1;
+  const isLast = activeIndex === SLIDES_SHOWN.length - 1;
 
   return (
     <View style={styles.container}>
       {/* Skip button */}
       <TouchableOpacity
         style={styles.skipBtn}
-        onPress={finish}
+        onPress={() => finish()}
         accessibilityRole="button"
         accessibilityLabel="Skip onboarding">
         <Text style={styles.skipText}>Skip</Text>
@@ -111,7 +158,7 @@ export function OnboardingScreen() {
       {/* Slides */}
       <Animated.FlatList
         ref={listRef}
-        data={SLIDES}
+        data={SLIDES_SHOWN}
         keyExtractor={item => item.key}
         horizontal
         pagingEnabled
@@ -128,7 +175,7 @@ export function OnboardingScreen() {
 
       {/* Dot indicators */}
       <View style={styles.dotsRow}>
-        {SLIDES.map((_, i) => {
+        {SLIDES_SHOWN.map((_, i) => {
           const inputRange = [
             (i - 1) * SCREEN_WIDTH,
             i * SCREEN_WIDTH,
@@ -153,10 +200,21 @@ export function OnboardingScreen() {
         })}
       </View>
 
+      {/* Set up (last slide only) */}
+      {isLast && (
+        <TouchableOpacity
+          style={styles.secondaryBtn}
+          onPress={() => finish(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Set up my allergies and preferences">
+          <Text style={styles.secondaryBtnText}>Set up what matters to me</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Next / Get Started */}
       <TouchableOpacity
         style={styles.primaryBtn}
-        onPress={next}
+        onPress={() => next()}
         activeOpacity={0.85}
         accessibilityRole="button"
         accessibilityLabel={isLast ? 'Get started' : 'Next slide'}>
@@ -184,6 +242,8 @@ function SlideView({slide}: {slide: Slide}) {
           <Text style={styles.exampleValue}>{slide.example.value}</Text>
         </View>
       )}
+
+      {slide.note ? <Text style={styles.slideNote}>{slide.note}</Text> : null}
 
       {slide.contexts && (
         <View style={styles.contextList}>
@@ -330,5 +390,30 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: fontSizes.lg,
     fontWeight: '700',
+  },
+  secondaryBtn: {
+    position: 'absolute',
+    bottom: 128,
+    left: spacing.xl,
+    right: spacing.xl,
+    borderWidth: 2,
+    borderColor: BRAND_GREEN,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.sm + 2,
+    alignItems: 'center',
+  },
+  secondaryBtnText: {
+    color: BRAND_GREEN,
+    fontSize: fontSizes.md,
+    fontWeight: '700',
+  },
+  slideNote: {
+    fontSize: fontSizes.xs,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 16,
+    fontStyle: 'italic',
+    marginBottom: spacing.md,
   },
 });

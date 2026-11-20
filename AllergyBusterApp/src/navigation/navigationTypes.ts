@@ -43,7 +43,7 @@ export type MainTabParamList = {
 
 export type RootStackParamList = {
   Disclaimer: undefined;
-  Onboarding: undefined;
+  Onboarding: {whatsNew?: boolean} | undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
   AllergyProfile: undefined;
   Preferences: undefined;
