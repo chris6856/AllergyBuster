@@ -32,28 +32,28 @@ const QUICK_ACTIONS: QuickAction[] = [
     label: 'Scan Barcode',
     description: 'Instant allergen lookup from a product barcode',
     hint: 'Opens the barcode scanner',
-    onPress: nav => nav.navigate('ScanTab'),
+    onPress: nav => nav.navigate('ScanTab', {screen: 'BarcodeScan'}),
   },
   {
     icon: '🔍',
     label: 'Scan Label',
     description: 'Photograph an ingredient list and extract allergens',
     hint: 'Opens the camera to photograph a product label',
-    onPress: nav => nav.navigate('PhotoTab'),
+    onPress: nav => nav.navigate('ScanTab', {screen: 'PhotoCapture'}),
   },
   {
     icon: '🍽️',
     label: 'Find Restaurants Near Me',
     description: 'Search for restaurants and see allergen safety ratings',
     hint: 'Opens restaurant search with location',
-    onPress: nav => nav.navigate('SearchTab', {screen: 'TextSearch', params: {initialMode: 'restaurants'}}),
+    onPress: nav => nav.navigate('ScanTab', {screen: 'TextSearch', params: {initialMode: 'restaurants'}}),
   },
   {
     icon: '🛒',
     label: 'Search Products',
     description: 'Look up packaged foods, brands or ingredients',
     hint: 'Opens product search',
-    onPress: nav => nav.navigate('SearchTab', {screen: 'TextSearch', params: {initialMode: 'products'}}),
+    onPress: nav => nav.navigate('ScanTab', {screen: 'TextSearch', params: {initialMode: 'products'}}),
   },
 ];
 

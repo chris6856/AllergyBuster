@@ -72,7 +72,7 @@ export function useListItems(listId: string | null | undefined) {
 }
 
 /** A mutation that refreshes every pantry/list query when it settles. */
-function useAction<A extends unknown[]>(fn: (...a: A) => Promise<unknown>) {
+function useAction<A extends unknown[], R>(fn: (...a: A) => Promise<R>) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (args: A) => fn(...args),

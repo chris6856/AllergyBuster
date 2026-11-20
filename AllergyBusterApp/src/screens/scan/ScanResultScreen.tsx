@@ -53,7 +53,7 @@ export function ScanResultScreen({route}: Props) {
         message="We couldn't find allergen information for this product."
         ctaLabel="Search Instead"
         onCta={() =>
-          navigation.navigate('SearchTab', {
+          navigation.navigate('ScanTab', {
             screen: 'TextSearch',
             params: {initialQuery: barcode, initialMode: 'products'},
           })

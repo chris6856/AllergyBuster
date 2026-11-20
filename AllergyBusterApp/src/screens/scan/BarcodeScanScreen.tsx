@@ -1,9 +1,10 @@
 import React, {useCallback, useRef, useState} from 'react';
-import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Camera, useCameraDevice, useCodeScanner} from 'react-native-vision-camera';
 import {ScannerOverlay} from '../../components/ScannerOverlay';
 import {TrialLockedView} from '../../components/TrialLockedView';
+import {ScanModeBar} from '../../components/ScanModeBar';
 import {useCameraPermission} from '../../hooks/useCameraPermission';
 import {useAppState} from '../../hooks/useAppState';
 import {useTrialStatus} from '../../hooks/useTrialStatus';
@@ -135,6 +136,7 @@ export function BarcodeScanScreen(_props: Props) {
         onToggleTorch={() => setTorchOn(t => !t)}
         hint="Point the camera at a product barcode"
       />
+      <ScanModeBar current="BarcodeScan" overlay />
     </View>
   );
 }

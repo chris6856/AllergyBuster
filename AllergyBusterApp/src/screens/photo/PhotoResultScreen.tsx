@@ -42,7 +42,7 @@ export function PhotoResultScreen({route}: Props) {
           message="We couldn't read any text from the label. Try again in better lighting, holding the camera flat over the ingredient list."
           ctaLabel="Search Instead"
           onCta={() =>
-            navigation.navigate('SearchTab', {
+            navigation.navigate('ScanTab', {
               screen: 'TextSearch',
               params: {initialMode: 'products'},
             })
@@ -113,7 +113,7 @@ export function PhotoResultScreen({route}: Props) {
         <TouchableOpacity
           style={[styles.actionButton, styles.primaryButton]}
           onPress={() =>
-            navigation.navigate('SearchTab', {
+            navigation.navigate('ScanTab', {
               screen: 'TextSearch',
               params: {initialMode: 'products'},
             })

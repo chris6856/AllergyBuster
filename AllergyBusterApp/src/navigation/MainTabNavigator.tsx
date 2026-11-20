@@ -1,89 +1,61 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {MainTabParamList} from './navigationTypes';
 import {HomeScreen} from '../screens/HomeScreen';
 import {ScanStack} from './ScanStack';
-import {PhotoStack} from './PhotoStack';
-import {SearchStack} from './SearchStack';
+import {ProductsStack} from './ProductsStack';
+import {ListStack} from './ListStack';
 import {AskJeevesScreen} from '../screens/AskJeevesScreen';
 import {colors, fontSizes} from '../constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-function TabIcon({label, focused}: {label: string; focused: boolean}) {
-  const icons: Record<string, string> = {
-    Home: '🏠',
-    Scan: '📷',
-    Photo: '🖼️',
-    Search: '🔍',
-    Jeeves: '🎩',
-  };
-  return (
-    <Text style={{fontSize: focused ? 22 : 20, opacity: focused ? 1 : 0.6}}>
-      {icons[label]}
-    </Text>
+const ICONS: Record<keyof MainTabParamList, string> = {
+  Home: '🏠',
+  ScanTab: '📷',
+  ProductsTab: '⭐',
+  ListTab: '🛒',
+  JeevesTab: '🎩',
+};
+
+// Defined outside the navigator so React doesn't remount icons each render.
+function renderIcon(name: keyof MainTabParamList) {
+  return ({focused}: {focused: boolean}) => (
+    <Text style={focused ? styles.iconFocused : styles.icon}>{ICONS[name]}</Text>
   );
 }
 
+const icons = {
+  Home: renderIcon('Home'),
+  ScanTab: renderIcon('ScanTab'),
+  ProductsTab: renderIcon('ProductsTab'),
+  ListTab: renderIcon('ListTab'),
+  JeevesTab: renderIcon('JeevesTab'),
+};
+
+/** Tabs: Home · Scan (barcode / label / search) · My Products · List · Ask Jeeves. */
 export function MainTabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {backgroundColor: colors.surface},
         tabBarLabelStyle: {fontSize: fontSizes.xs},
-        headerStyle: {backgroundColor: colors.surface},
-        headerTintColor: colors.primary,
-        headerTitleStyle: {fontWeight: '600'},
       }}>
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          title: 'Home',
-          headerShown: false,
-          tabBarIcon: ({focused}) => <TabIcon label="Home" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="ScanTab"
-        component={ScanStack}
-        options={{
-          title: 'Scan',
-          headerShown: false,
-          tabBarIcon: ({focused}) => <TabIcon label="Scan" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="PhotoTab"
-        component={PhotoStack}
-        options={{
-          title: 'Photo',
-          headerShown: false,
-          tabBarIcon: ({focused}) => <TabIcon label="Photo" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="SearchTab"
-        component={SearchStack}
-        options={{
-          title: 'Search',
-          headerShown: false,
-          tabBarIcon: ({focused}) => <TabIcon label="Search" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="JeevesTab"
-        component={AskJeevesScreen}
-        options={{
-          title: 'Ask Jeeves',
-          headerShown: false,
-          tabBarIcon: ({focused}) => <TabIcon label="Jeeves" focused={focused} />,
-        }}
-      />
+      <Tab.Screen name="Home" component={HomeScreen} options={{title: 'Home', tabBarIcon: icons.Home}} />
+      <Tab.Screen name="ScanTab" component={ScanStack} options={{title: 'Scan', tabBarIcon: icons.ScanTab}} />
+      <Tab.Screen name="ProductsTab" component={ProductsStack} options={{title: 'My Products', tabBarIcon: icons.ProductsTab}} />
+      <Tab.Screen name="ListTab" component={ListStack} options={{title: 'List', tabBarIcon: icons.ListTab}} />
+      <Tab.Screen name="JeevesTab" component={AskJeevesScreen} options={{title: 'Ask Jeeves', tabBarIcon: icons.JeevesTab}} />
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  icon: {fontSize: 20, opacity: 0.6},
+  iconFocused: {fontSize: 22, opacity: 1},
+});

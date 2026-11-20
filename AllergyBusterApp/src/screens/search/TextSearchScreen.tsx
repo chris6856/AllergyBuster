@@ -17,6 +17,7 @@ import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
 import {SearchSegmentedControl, SearchMode} from '../../components/SearchSegmentedControl';
 import {TrialLockedView} from '../../components/TrialLockedView';
+import {ScanModeBar} from '../../components/ScanModeBar';
 import {NoNetworkBanner} from '../../components/NoNetworkBanner';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
 import {useTrialStatus} from '../../hooks/useTrialStatus';
@@ -96,6 +97,7 @@ export function TextSearchScreen({route}: Props) {
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
       {!isConnected && <NoNetworkBanner />}
+      <ScanModeBar current="TextSearch" />
       <SearchSegmentedControl mode={mode} onChange={setMode} />
       {productSearchLocked && <TrialLockedView />}
       {!productSearchLocked && <ScrollView

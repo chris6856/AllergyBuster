@@ -11,6 +11,7 @@ import {Camera, useCameraDevice} from 'react-native-vision-camera';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import {ScannerOverlay} from '../../components/ScannerOverlay';
 import {TrialLockedView} from '../../components/TrialLockedView';
+import {ScanModeBar} from '../../components/ScanModeBar';
 import {useCameraPermission} from '../../hooks/useCameraPermission';
 import {useAppState} from '../../hooks/useAppState';
 import {useTrialStatus} from '../../hooks/useTrialStatus';
@@ -63,7 +64,7 @@ export function PhotoCaptureScreen(_props: Props) {
 
       const extraction = extractAllergensFromOcr(ocrText);
       navigation.navigate('PhotoResult', {rawOcrText: extraction.rawText});
-    } catch (e) {
+    } catch {
       navigation.navigate('PhotoResult', {rawOcrText: ''});
     } finally {
       processingRef.current = false;
@@ -134,6 +135,7 @@ export function PhotoCaptureScreen(_props: Props) {
         onToggleTorch={() => setTorchOn(t => !t)}
         hint="Hold the camera flat over the ingredient list in good lighting"
       />
+      <ScanModeBar current="PhotoCapture" overlay />
 
       {/* Shutter button */}
       <View style={styles.shutterContainer} pointerEvents="box-none">
