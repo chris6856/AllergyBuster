@@ -5,38 +5,9 @@
 import {MIGRATIONS, SCHEMA_VERSION, runMigrations} from '../src/storage/migrations';
 import {setDbForTesting} from '../src/storage/db';
 import {loadProfile, saveProfile} from '../src/storage/profileStore';
-import {SqlDb, SqlExecutor} from '../src/storage/sqlTypes';
+import {nodeDb} from '../test-utils/nodeSqlite';
 
 jest.mock('@op-engineering/op-sqlite', () => ({open: jest.fn()}));
-
-const {DatabaseSync} = require('node:sqlite');
-
-function nodeDb(): SqlDb & {raw: any} {
-  const raw = new DatabaseSync(':memory:');
-  const exec: SqlExecutor['execute'] = async (sql, params = []) => {
-    const stmt = raw.prepare(sql);
-    const isQuery = /^\s*(select|pragma\s+\w+\s*$)/i.test(sql);
-    if (isQuery) {
-      return {rows: stmt.all(...params)};
-    }
-    stmt.run(...params);
-    return {rows: []};
-  };
-  return {
-    raw,
-    execute: exec,
-    transaction: async fn => {
-      raw.exec('BEGIN');
-      try {
-        await fn({execute: exec});
-        raw.exec('COMMIT');
-      } catch (e) {
-        raw.exec('ROLLBACK');
-        throw e;
-      }
-    },
-  };
-}
 
 describe('migrations', () => {
   it('migrates an empty database to the latest version', async () => {

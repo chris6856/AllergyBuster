@@ -229,4 +229,8 @@ The current hard gate (5 scans → whole app locked) works against a retention f
 | 1 | Category launch | Tiered: food full, personal care, household beta |
 | 2 | Subscription | Yes: Plus tier for retailer, monitoring, family features |
 | 3 | Release order | Phase 0 ships as 1.2, Phase 1 as 2.0 |
-| 4 | Evidence source | API/dataset-based (§2.4). Household cleaner product data curated by hand. Flag toxic/harmful ingredients with sourced severity tiers |
+| 4 | Evidence source | API/dataset-based (§2.4). Flag toxic/harmful ingredients with sourced severity tiers |
+| 5 | Phase 1 release split (2026-11-19) | **1.3** = shopping core (M1 data layer, M2 preferences, M3 analysis, M4 Product Insights, M5 My Products + Lists, M6 navigation, M7 paywall/disclaimer/onboarding). **2.0** = hazard intelligence (M8 hazard pipeline, M9 household ingredients, M10 grounded explanations) |
+| 6 | Free tier | Keep **5 lifetime scans**. After that only scanning is locked; My Products, lists and profile stay usable |
+| 7 | Tabs | Home · Scan (barcode / photo / search) · My Products · List · Ask Jeeves. Restaurants move onto Home |
+| 8 | Household ingredient data | **Automate via API as much as possible** (supersedes manual curation): Open Products Facts via `/lookup`, then ingredient lists OCR'd from the user's own label photo saved as that product's snapshot; optional later: contribute back to Open Products Facts. Manual entry only as last resort |
