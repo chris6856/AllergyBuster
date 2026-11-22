@@ -1190,6 +1190,73 @@
       .pill-new::before { animation: none; }
       .facts, .new-card { transition: none; }
     }
+
+    /* ═══ SEASONAL: Holiday reminders (remove after the holidays) ═══ */
+    #holidays {
+      padding: 5.5rem 0 5rem; position: relative; overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(232,160,32,.10), transparent 40%),
+        radial-gradient(circle at 88% 80%, rgba(198,40,40,.06), transparent 45%),
+        var(--cream);
+    }
+    /* A garland of small lights along the top edge */
+    #holidays::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 18px;
+      background-image: radial-gradient(circle at 12px 6px, var(--amber) 0 4px, transparent 4.5px),
+                        radial-gradient(circle at 36px 10px, var(--red) 0 4px, transparent 4.5px),
+                        radial-gradient(circle at 60px 6px, var(--green-light) 0 4px, transparent 4.5px);
+      background-size: 72px 18px; opacity: .8;
+    }
+    .holiday-head { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: end; margin-bottom: 3rem; }
+    .holiday-head h2 { font-family: var(--font-display); font-size: clamp(2.1rem, 3.8vw, 3.1rem); font-weight: 900; color: var(--green-deep); line-height: 1.1; }
+    .holiday-head h2 em { color: var(--red); }
+    .holiday-head p { color: var(--muted); font-size: 1.05rem; line-height: 1.8; }
+    .tags-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4rem 1.2rem; }
+    .gift-tag {
+      position: relative; background: #fffdf7; color: var(--charcoal);
+      padding: 2.1rem 1.25rem 1.3rem;
+      border: 1px solid rgba(15,35,24,.12);
+      border-radius: 6px 6px 14px 14px;
+      clip-path: polygon(14% 0, 86% 0, 100% 11%, 100% 100%, 0 100%, 0 11%);
+      box-shadow: 0 10px 24px rgba(15,35,24,.08);
+      transition: transform .3s ease;
+    }
+    .gift-tag:nth-child(odd)  { transform: rotate(-1.2deg); }
+    .gift-tag:nth-child(even) { transform: rotate(1deg); }
+    .gift-tag:hover { transform: rotate(0) translateY(-4px); }
+    /* punched hole + string */
+    .gift-tag::before {
+      content: ''; position: absolute; top: .7rem; left: 50%; width: 12px; height: 12px; margin-left: -6px;
+      border-radius: 50%; background: var(--cream); border: 2px solid rgba(15,35,24,.25);
+    }
+    .gift-tag::after {
+      content: ''; position: absolute; top: -10px; left: 50%; width: 2px; height: 20px; margin-left: -1px;
+      background: var(--red); opacity: .7;
+    }
+    .gift-tag .tag-icon { font-size: 1.6rem; margin-bottom: .55rem; display: block; }
+    .gift-tag h3 { font-family: var(--font-display); font-size: 1.08rem; color: var(--green-deep); line-height: 1.25; margin-bottom: .45rem; }
+    .gift-tag p { font-size: .9rem; color: var(--muted); line-height: 1.65; }
+    .gift-tag p strong { color: var(--charcoal); font-weight: 600; }
+    .gift-tag.app { background: var(--green-deep); border-color: var(--green-deep); }
+    .gift-tag.app h3 { color: var(--amber-light); }
+    .gift-tag.app p { color: rgba(247,242,232,.78); }
+    .gift-tag.app p strong { color: var(--cream); }
+    .gift-tag.app::before { background: var(--green-deep); border-color: rgba(247,242,232,.35); }
+    .holiday-foot { margin-top: 2.6rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+    .holiday-foot a.btn {
+      display: inline-flex; align-items: center; gap: .5rem; background: var(--green-deep); color: var(--cream);
+      font-weight: 700; text-decoration: none; border-radius: 10px; padding: .8rem 1.3rem; transition: transform .2s ease;
+    }
+    .holiday-foot a.btn:hover { transform: translateY(-2px); }
+    .holiday-foot a.btn.alt { background: transparent; color: var(--green-deep); border: 2px solid var(--green-deep); }
+    .holiday-foot small { color: var(--muted); font-size: .8rem; font-style: italic; flex-basis: 100%; }
+    @media (max-width: 1100px) { .tags-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 900px)  { .holiday-head { grid-template-columns: 1fr; gap: 1rem; } }
+    @media (max-width: 600px)  {
+      .tags-grid { grid-template-columns: 1fr; }
+      .gift-tag:nth-child(n) { transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .gift-tag { transition: none; } }
   </style>
 </head>
 <body>
@@ -1355,6 +1422,71 @@
       <span class="alert-item"><span class="alert-dot"></span>Lupin</span>
     </div>
   </div>
+
+  <!-- ═══ SEASONAL: Holiday reminders — remove after the holidays (CSS block "SEASONAL: Holiday reminders") ═══ -->
+  <section id="holidays" aria-labelledby="holidays-title">
+    <div class="container">
+      <div class="holiday-head reveal">
+        <div>
+          <span class="section-label" style="color:var(--red);">The holidays are here</span>
+          <h2 id="holidays-title">Before you gather, <em>a few reminders.</em></h2>
+        </div>
+        <p>
+          Holiday meals mean new recipes, shared kitchens, food gifts and travel, and more chances for an
+          allergen to slip through. Keep these in mind from Thanksgiving through New Year's.
+        </p>
+      </div>
+
+      <div class="tags-grid">
+        <div class="gift-tag reveal">
+          <span class="tag-icon">🦃</span>
+          <h3>Classic dishes hide allergens</h3>
+          <p>Stuffing and gravy often contain <strong>wheat</strong>; mashed potatoes and casseroles, <strong>milk</strong>; eggnog, <strong>milk and eggs</strong>; pies and candied yams can include <strong>pecans or walnuts</strong>. Ask what went into each dish.</p>
+        </div>
+        <div class="gift-tag reveal reveal-delay-1">
+          <span class="tag-icon">🍬</span>
+          <h3>Seasonal versions can differ</h3>
+          <p>Holiday-shaped candy and limited-edition treats can be made on <strong>different lines</strong> than the everyday version, with different "may contain" warnings. Check the label every time, even on a favorite.</p>
+        </div>
+        <div class="gift-tag reveal reveal-delay-2">
+          <span class="tag-icon">🍪</span>
+          <h3>Cookie trays &amp; buffets</h3>
+          <p>Shared platters and serving spoons spread allergens between dishes. Serve yourself <strong>first</strong>, use clean utensils, and skip homemade treats you can't confirm.</p>
+        </div>
+        <div class="gift-tag reveal reveal-delay-3">
+          <span class="tag-icon">🥂</span>
+          <h3>Check the drinks too</h3>
+          <p>Some liqueurs are made with <strong>nuts</strong> or <strong>cream</strong>, and alcohol labels aren't required to list allergens. When in doubt, ask the host or the brand.</p>
+        </div>
+        <div class="gift-tag reveal">
+          <span class="tag-icon">🎁</span>
+          <h3>Food gifts &amp; gift baskets</h3>
+          <p>Homemade and repackaged gifts often have <strong>no full ingredient label</strong>. Ask the giver, or set it aside until you can check it.</p>
+        </div>
+        <div class="gift-tag reveal reveal-delay-1">
+          <span class="tag-icon">🕯️</span>
+          <h3>Scented gifts</h3>
+          <p>Candles, lotions and gift sets often contain <strong>fragrance</strong>. If someone reacts to fragrance, check the ingredients before you wrap it.</p>
+        </div>
+        <div class="gift-tag reveal reveal-delay-2">
+          <span class="tag-icon">✈️</span>
+          <h3>Traveling? Pack the plan</h3>
+          <p>Keep epinephrine in your <strong>carry-on</strong>, not checked bags, check expiration dates before you go, and pack safe snacks for delays.</p>
+        </div>
+        <div class="gift-tag app reveal reveal-delay-3">
+          <span class="tag-icon">📱</span>
+          <h3>Scan it before you serve it</h3>
+          <p>Scan holiday treats, gift sets and the ingredients for new recipes with AllergyBuster. <strong>Save the ones you trust</strong> so next year's shopping list is already done.</p>
+        </div>
+      </div>
+
+      <div class="holiday-foot reveal">
+        <a class="btn" href="allergy-checklist.html" target="_blank">Free Safety Checklist (PDF)</a>
+        <a class="btn alt" href="#download">Get AllergyBuster</a>
+        <small>General reminders, not medical advice. Tell your host where your epinephrine is, and follow your allergist's emergency plan.</small>
+      </div>
+    </div>
+  </section>
 
   <!-- ─── Moments ─────────────────────────────────────────────────── -->
   <section id="moments" style="padding: 5rem 0; background: var(--cream-dark);">
