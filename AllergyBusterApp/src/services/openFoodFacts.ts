@@ -1,7 +1,7 @@
 import {offClient} from './http';
 import {ProductRecord, ProductSource} from '../types/product';
 
-export type OpenFactsSource = Exclude<ProductSource, 'edamam'>;
+export type OpenFactsSource = Exclude<ProductSource, 'edamam' | 'kroger'>;
 import {parseAllergens} from '../utils/allergenParser';
 import {
   cleanIngredientsText,

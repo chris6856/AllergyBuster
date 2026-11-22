@@ -66,6 +66,24 @@ describe('lookupViaWorker', () => {
     expect(p?.gtin).toBe('0012345678905');
   });
 
+  it('maps a Kroger catalog record as recognised with no ingredient data', async () => {
+    mockGet.mockReturnValue(ok({
+      found: true,
+      source: 'kroger',
+      product: {productId: '0080812470206', brand: "Mrs. Meyer's Clean Day", description: "Mrs. Meyer's Clean Day Peppermint Hand Soap", categories: ['Personal Care'], imageUrl: 'https://img/x.jpg', size: '12.5 fl oz'},
+    }));
+    const p = await lookupViaWorker('0808124702066');
+    expect(p).toMatchObject({
+      source: 'kroger',
+      category: 'personal_care',
+      name: "Mrs. Meyer's Clean Day Peppermint Hand Soap 12.5 fl oz",
+      gtin: '0808124702066',
+      ingredientsText: '',
+    });
+    expect(p?.completeness.hasIngredients).toBe(false);
+    expect(p?.allergens).toEqual({declared: [], traces: []});
+  });
+
   it('returns null when no database knows the barcode', async () => {
     mockGet.mockReturnValue(ok({found: false, source: null, product: null}));
     await expect(lookupViaWorker('0000000000000')).resolves.toBeNull();
@@ -106,6 +124,20 @@ describe('getProductByBarcode (Worker first, direct fallback)', () => {
     const p = await getProductByBarcode('016000275263');
     expect(spy).toHaveBeenCalledWith('016000275263');
     expect(p?.name).toBe('Cheerios');
+  });
+});
+
+describe('krogerCategory', () => {
+  const {krogerCategory} = require('../src/services/krogerCatalog');
+  it.each([
+    [['Cleaning Products'], 'household'],
+    [['Personal Care'], 'personal_care'],
+    [['Health', 'Beauty'], 'personal_care'],
+    [['Pet Care'], 'other'],
+    [['Breakfast'], 'food'],
+    [[], 'other'],
+  ])('%j -> %s', (cats, expected) => {
+    expect(krogerCategory(cats)).toBe(expected);
   });
 });
 

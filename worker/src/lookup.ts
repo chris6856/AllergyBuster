@@ -6,7 +6,8 @@
  * One Open Food Facts request with product_type=all. OFF redirects to Open
  * Beauty Facts / Open Products Facts when the barcode belongs to them, and the
  * final URL tells us which database answered. If a FOOD record has no
- * ingredient or allergen data, Edamam is tried (Edamam is food-only).
+ * ingredient or allergen data, Edamam is tried (Edamam is food-only). If no
+ * database has the barcode, Kroger's catalog is tried to at least identify it.
  *
  * Returns the source's raw record. The app maps it to a ProductRecord with
  * its existing normalisers, so the mapping logic lives in one place.
@@ -28,7 +29,7 @@ export interface LookupEnv extends KrogerEnv {
   EDAMAM_APP_KEY?: string;
 }
 
-export type LookupSource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'edamam';
+export type LookupSource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'edamam' | 'kroger';
 
 // Keep in sync with FIELDS in AllergyBusterApp/src/services/openFoodFacts.ts.
 const OFF_FIELDS = [
@@ -43,7 +44,8 @@ const OFF_BASE = 'https://world.openfoodfacts.org';
 const EDAMAM_BASE = 'https://api.edamam.com/api/food-database/v2';
 const USER_AGENT = 'AllergyBuster/1.2 (Cloudflare Worker; +https://allergybuster.com)';
 
-const CACHE_VERSION = 'v1';
+// v2: adds the Kroger catalog fallback (v1 entries may be stale "not found").
+const CACHE_VERSION = 'v2';
 const FOUND_TTL = 24 * 60 * 60;
 const NOT_FOUND_TTL = 6 * 60 * 60; // retry sooner: community databases grow
 
@@ -152,6 +154,19 @@ async function lookupBarcode(env: LookupEnv, code: string): Promise<LookupResult
   }
   if (edamam) {
     return {found: true, source: 'edamam', product: edamam};
+  }
+
+  // Last resort: Kroger's catalog recognises many products the open databases
+  // lack (especially personal care and household). It has no ingredient
+  // lists, so the app shows the product as recognised and asks for a label
+  // photo. A Kroger failure just means "not found".
+  try {
+    const [kroger] = await findKrogerByUpc(env, code);
+    if (kroger) {
+      return {found: true, source: 'kroger', product: kroger as unknown as Raw};
+    }
+  } catch (err) {
+    console.error('Kroger fallback failed', err);
   }
   return {found: false, source: null, product: null};
 }

@@ -3,6 +3,7 @@ import {LOOKUP_URL} from '../constants/config';
 import {ProductRecord, ProductSource} from '../types/product';
 import {normalize as normalizeOpenFacts, OFFProduct} from './openFoodFacts';
 import {EdamamFood, normalize as normalizeEdamam} from './edamam';
+import {KrogerCatalogProduct, normalize as normalizeKroger} from './krogerCatalog';
 
 interface LookupResponse {
   found: boolean;
@@ -10,13 +11,14 @@ interface LookupResponse {
   product: Record<string, unknown> | null;
 }
 
-const KNOWN_SOURCES: ProductSource[] = ['openfoodfacts', 'openbeautyfacts', 'openproductsfacts', 'edamam'];
+const KNOWN_SOURCES: ProductSource[] = ['openfoodfacts', 'openbeautyfacts', 'openproductsfacts', 'edamam', 'kroger'];
 
 export class LookupUnavailableError extends Error {}
 
 /**
  * Barcode lookup through the AllergyBuster Worker (/lookup), which searches
- * Open Food Facts, Open Beauty Facts, Open Products Facts and Edamam.
+ * Open Food Facts, Open Beauty Facts, Open Products Facts and Edamam, then
+ * Kroger's catalog to at least identify the product.
  *
  * Returns the ProductRecord, or null when no database knows the barcode.
  * Throws LookupUnavailableError when the Worker can't answer, so the caller
@@ -46,6 +48,9 @@ export async function lookupViaWorker(barcode: string): Promise<ProductRecord | 
     throw new LookupUnavailableError(`unknown source ${data.source}`);
   }
 
+  if (data.source === 'kroger') {
+    return normalizeKroger(data.product as unknown as KrogerCatalogProduct, barcode);
+  }
   if (data.source === 'edamam') {
     return normalizeEdamam(data.product as unknown as EdamamFood, barcode);
   }

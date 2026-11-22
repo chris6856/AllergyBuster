@@ -1,4 +1,6 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {MainTabNavigationProp} from '../navigation/navigationTypes';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {ProductRecord, ProductCategory, SOURCE_LABELS} from '../types/product';
 import {analyzeProduct} from '../analysis';
@@ -28,6 +30,7 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
  * formula shows "Recheck needed".
  */
 export function ProductInsights({record, refreshSaved = false}: {record: ProductRecord; refreshSaved?: boolean}) {
+  const navigation = useNavigation<MainTabNavigationProp>();
   const {profile} = useAllergyProfile();
   const {preferences} = usePreferences();
   const {data: saved} = useSavedProduct(record.gtin);
@@ -64,6 +67,23 @@ export function ProductInsights({record, refreshSaved = false}: {record: Product
           </InsightSectionCard>
         ))}
       </View>
+
+      {!hasIngredientData(record) ? (
+        <View style={styles.labelPrompt}>
+          <Text style={styles.labelPromptTitle}>No ingredient list for this product yet</Text>
+          <Text style={styles.labelPromptText}>
+            We recognized it, but its listing doesn't include ingredients. Photograph the
+            ingredient label to check allergens{record.category === 'household' ? ' and label warnings' : ''}.
+          </Text>
+          <TouchableOpacity
+            style={styles.labelPromptButton}
+            onPress={() => navigation.navigate('ScanTab', {screen: 'PhotoCapture'})}
+            accessibilityRole="button"
+            accessibilityLabel="Photograph the ingredient label">
+            <Text style={styles.labelPromptButtonText}>📸  Photograph the label</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       {record.ingredientsText ? (
         <TouchableOpacity
@@ -105,6 +125,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   sections: {paddingTop: spacing.md},
+  labelPrompt: {backgroundColor: colors.warningLight, marginHorizontal: spacing.md, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm},
+  labelPromptTitle: {fontSize: fontSizes.md, fontWeight: '800', color: colors.textPrimary},
+  labelPromptText: {fontSize: fontSizes.sm, color: colors.textPrimary, lineHeight: 18, marginTop: spacing.xs},
+  labelPromptButton: {marginTop: spacing.sm, backgroundColor: colors.primary, borderRadius: borderRadius.lg, paddingVertical: spacing.sm, alignItems: 'center'},
+  labelPromptButtonText: {color: colors.white, fontWeight: '700', fontSize: fontSizes.md},
   ingredients: {backgroundColor: colors.surface, marginHorizontal: spacing.md, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm},
   ingredientsTitle: {fontSize: fontSizes.md, fontWeight: '800', color: colors.textPrimary},
   ingredientsText: {fontSize: fontSizes.sm, color: colors.textSecondary, lineHeight: 20, marginTop: spacing.sm},

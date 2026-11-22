@@ -50,14 +50,9 @@ export function ScanResultScreen({route}: Props) {
   if (isError || product === null) {
     return (
       <NoResultsBanner
-        message="We couldn't find allergen information for this product."
-        ctaLabel="Search Instead"
-        onCta={() =>
-          navigation.navigate('ScanTab', {
-            screen: 'TextSearch',
-            params: {initialQuery: barcode, initialMode: 'products'},
-          })
-        }
+        message="We couldn't find this product in any of our product databases. Photograph its ingredient label and we'll read it for you."
+        ctaLabel="Scan the Label"
+        onCta={() => navigation.navigate('ScanTab', {screen: 'PhotoCapture'})}
       />
     );
   }

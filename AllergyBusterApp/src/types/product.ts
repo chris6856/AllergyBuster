@@ -8,13 +8,14 @@ export interface Ingredient {
   id?: string;
 }
 
-export type ProductSource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'edamam';
+export type ProductSource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'edamam' | 'kroger';
 
 export const SOURCE_LABELS: Record<ProductSource, string> = {
   openfoodfacts: 'Open Food Facts',
   openbeautyfacts: 'Open Beauty Facts',
   openproductsfacts: 'Open Products Facts',
   edamam: 'Edamam',
+  kroger: 'Kroger product catalog',
 };
 
 /** 1.x product shape. Every ProductRecord is also a NormalizedProduct. */
