@@ -100,9 +100,17 @@ async function fetchOpenFacts(code: string): Promise<{source: LookupSource; prod
   return {source: sourceFromUrl(res.url || url), product: body.product};
 }
 
-/** Edamam packaged-food lookup. Null = not found or not configured. */
+// Edamam's plan allows very few requests per minute (shared with direct calls
+// from the app). After a 429 we skip Edamam for a while instead of piling on.
+const EDAMAM_COOLDOWN_KEY = 'edamam:cooldown';
+const EDAMAM_COOLDOWN_TTL = 60; // KV minimum TTL
+
+/** Edamam packaged-food lookup. Null = not found, not configured or rate-limited. */
 async function fetchEdamam(env: LookupEnv, code: string): Promise<Raw | null> {
   if (!env.EDAMAM_APP_ID || !env.EDAMAM_APP_KEY) {
+    return null;
+  }
+  if (await env.TIPS_CACHE.get(EDAMAM_COOLDOWN_KEY)) {
     return null;
   }
   const url = new URL(`${EDAMAM_BASE}/parser`);
@@ -111,6 +119,11 @@ async function fetchEdamam(env: LookupEnv, code: string): Promise<Raw | null> {
   url.searchParams.set('upc', code);
   const res = await fetch(url.toString(), {headers: {Accept: 'application/json'}});
   if (res.status === 404) {
+    return null;
+  }
+  if (res.status === 429) {
+    console.error('Edamam rate limit hit; pausing Edamam lookups');
+    await env.TIPS_CACHE.put(EDAMAM_COOLDOWN_KEY, '1', {expirationTtl: EDAMAM_COOLDOWN_TTL});
     return null;
   }
   if (!res.ok) {
