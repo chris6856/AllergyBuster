@@ -43,7 +43,7 @@ const OFF_FIELDS = [
 
 const OFF_BASE = 'https://world.openfoodfacts.org';
 const EDAMAM_BASE = 'https://api.edamam.com/api/food-database/v2';
-const USER_AGENT = 'AllergyBuster/1.2 (Cloudflare Worker; +https://allergybuster.com)';
+const USER_AGENT = 'AllergyBuster/1.2 (Cloudflare Worker; +https://allergybusted.com)';
 
 // v2: adds the Kroger catalog fallback (v1 entries may be stale "not found").
 const CACHE_VERSION = 'v2';

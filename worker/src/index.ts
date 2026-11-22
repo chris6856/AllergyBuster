@@ -109,7 +109,7 @@ const PRIVACY_POLICY_HTML = `<!DOCTYPE html>
 </head><body>
 <h1>AllergyBuster Privacy Policy</h1>
 <p><em>Last updated: November 19, 2026</em></p>
-<p>We do not require an account, we do not sell your data, and we do not link your scans, searches, location or questions to you. The full policy is at <a href="https://allergybuster.com/privacy.html">allergybuster.com/privacy.html</a>.</p>
+<p>We do not require an account, we do not sell your data, and we do not link your scans, searches, location or questions to you. The full policy is at <a href="https://allergybusted.com/privacy.html">allergybusted.com/privacy.html</a>.</p>
 <h2>Stored only on your device</h2>
 <p>Your allergy profile, product preferences, saved products and your decisions about them, shopping lists, free-scan count and settings stay on your phone and are not sent to us. They are deleted when you uninstall the app.</p>
 <h2>How the app looks things up</h2>
@@ -128,7 +128,7 @@ const PRIVACY_POLICY_HTML = `<!DOCTYPE html>
 <h2>Children</h2>
 <p>AllergyBuster is not directed at children under 13 and does not knowingly collect data from children.</p>
 <h2>Contact</h2>
-<p>Questions? Email <a href="mailto:privacy@allergybuster.com">privacy@allergybuster.com</a>.</p>
+<p>Questions? Email <a href="mailto:info@allergybusted.com">info@allergybusted.com</a>.</p>
 </body></html>`;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

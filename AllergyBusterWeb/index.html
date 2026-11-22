@@ -12,10 +12,10 @@
   <meta charset="UTF-8" />
   <link rel="canonical" href="https://allergybusted.com/" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AllergyBuster — Know What's in Your Food Before You Take the First Bite</title>
-  <meta name="description" content="AllergyBuster helps families with food allergies instantly identify allergens—scan barcodes, read labels, or search any food. Free download on iOS and Android." />
-  <meta property="og:title" content="AllergyBuster — Know What's in Your Food Before You Take the First Bite" />
-  <meta property="og:description" content="When you have food allergies, every meal matters. AllergyBuster gives you confidence before every bite. Free download on iOS and Android." />
+  <title>AllergyBuster — Know What's Inside. Shop What You Trust.</title>
+  <meta name="description" content="Scan foods, personal care and household products to see allergens, additives, nutrition and label warnings, with sources. Save the products you trust and build shopping lists. Free on iOS and Android." />
+  <meta property="og:title" content="AllergyBuster — Know What's Inside. Shop What You Trust." />
+  <meta property="og:description" content="Allergens, additives, nutrition and label warnings for the products you buy, plus your own list of approved products. Version 1.3 is here; 2.0 is on the way." />
   <meta property="og:image" content="/assets/splash-hero.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1059,6 +1059,137 @@
       .footer-grid { grid-template-columns: 1fr; }
       .hero-badges { flex-direction: column; }
     }
+
+    /* ═══ 1.3 / 2.0 refresh (2026-11) ═══════════════════════════════ */
+    :root {
+      --red:        #c62828;
+      --red-pale:   #fdecea;
+      --amber-ink:  #8a5a00;
+      --label-ink:  #111;
+    }
+
+    /* Eyebrow pill for "New in 1.3" */
+    .pill-new {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: var(--font-mono); font-size: .72rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--green-deep); background: var(--amber);
+      padding: .3rem .7rem; border-radius: 999px; margin-bottom: 1.1rem;
+    }
+    .pill-new::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green-deep); animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+    /* Longer 1.3 headline: smaller than the original 4.4rem so it fits the 3-column hero. */
+    .hero-headline { font-size: clamp(2.3rem, 3.4vw, 3.4rem); }
+    /* Centre the pulsing scan rings on the phone instead of across the copy. */
+    .scan-ring { left: calc(50% + 410px); width: 300px; height: 300px; }
+    @media (max-width: 1100px) { .scan-ring { display: none; } }
+    /* Mobile overflow fix: let hero columns shrink below their content width. */
+    .hero-content > * { min-width: 0; }
+    @media (max-width: 900px) { .hero-content { grid-template-columns: minmax(0, 1fr); } }
+    .hero-categories { display: flex; flex-wrap: wrap; gap: .5rem; margin: -.25rem 0 1.4rem; }
+    .hero-categories span {
+      font-size: .8rem; font-weight: 600; color: var(--cream);
+      border: 1px solid rgba(247,242,232,.25); border-radius: 999px; padding: .3rem .75rem;
+      background: rgba(247,242,232,.06);
+    }
+
+    /* ─── Phone: Product Insights mock ─── */
+    .pi-screen { position: absolute; inset: 0; background: #f5f5f0; padding: 3.1rem .7rem .7rem; display: flex; flex-direction: column; gap: .42rem; font-family: var(--font-body); }
+    .pi-topbar { font-size: .62rem; font-weight: 700; color: var(--green-mid); text-align: center; letter-spacing: .04em; }
+    .pi-product { display: flex; gap: .5rem; align-items: center; background: #fff; border-radius: 10px; padding: .45rem .5rem; }
+    .pi-thumb { width: 30px; height: 30px; border-radius: 7px; background: var(--amber-pale); display: grid; place-items: center; font-size: .95rem; }
+    .pi-name { font-size: .7rem; font-weight: 700; color: var(--charcoal); line-height: 1.2; }
+    .pi-brand { font-size: .56rem; color: var(--muted); }
+    .pi-card { background: #fff; border-radius: 9px; padding: .38rem .5rem; border-left: 3px solid var(--green-pale); }
+    .pi-card-head { display: flex; justify-content: space-between; align-items: center; gap: .3rem; }
+    .pi-card-title { font-size: .6rem; font-weight: 800; color: var(--charcoal); }
+    .pi-badge { font-size: .48rem; font-weight: 700; padding: .08rem .35rem; border-radius: 999px; white-space: nowrap; }
+    .pi-card-sum { font-size: .56rem; color: var(--muted); margin-top: .12rem; line-height: 1.3; }
+    .pi-alert   { border-left-color: var(--red); }   .pi-alert .pi-badge   { background: var(--red-pale); color: var(--red); }
+    .pi-caution { border-left-color: var(--amber); } .pi-caution .pi-badge { background: var(--amber-pale); color: var(--amber-ink); }
+    .pi-info .pi-badge { background: #eee; color: var(--muted); }
+    .pi-alert .pi-card-sum { color: var(--red); font-weight: 700; }
+    .pi-decide { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; margin-top: auto; }
+    .pi-decide span { font-size: .52rem; font-weight: 700; text-align: center; border: 1.5px solid; border-radius: 8px; padding: .3rem 0; }
+    .pi-decide .on { background: var(--green-mid); border-color: var(--green-mid); color: #fff; }
+    .pi-decide .rv { border-color: var(--amber); color: var(--amber-ink); }
+    .pi-decide .av { border-color: var(--red); color: var(--red); }
+    .pi-list { font-size: .58rem; font-weight: 700; text-align: center; color: #fff; background: var(--green-deep); border-radius: 8px; padding: .38rem; }
+
+    /* ─── Scan → Understand → Decide → Shop ─── */
+    .steps-row.four { grid-template-columns: repeat(4, 1fr); }
+
+    /* ─── What's new in 1.3 ─── */
+    #new { padding: 6rem 0; background: var(--cream); }
+    .new-header { max-width: 720px; margin-bottom: 3rem; }
+    .new-header h2 { font-family: var(--font-display); font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--green-deep); line-height: 1.2; margin-bottom: 1rem; }
+    .new-header h2 em { color: var(--green-light); }
+    .new-header p { color: var(--muted); font-size: 1.05rem; line-height: 1.8; }
+    .new-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .new-card {
+      background: var(--white); border-radius: var(--radius-md); padding: 1.6rem 1.5rem 1.4rem;
+      border: 1px solid rgba(15,35,24,.08); box-shadow: var(--shadow-sm);
+      position: relative; transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .new-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .new-card.wide, .new-card.wide-lg { grid-column: span 2; }
+    .new-card .tag { position: absolute; top: 1.1rem; right: 1.1rem; font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--amber-ink); background: var(--amber-pale); padding: .2rem .5rem; border-radius: 4px; }
+    .new-card .icon { font-size: 1.7rem; margin-bottom: .8rem; }
+    .new-card h3 { font-family: var(--font-display); font-size: 1.25rem; color: var(--green-deep); margin-bottom: .5rem; }
+    .new-card p { color: var(--muted); font-size: .94rem; line-height: 1.7; }
+    .evidence-row { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
+    .ev { font-size: .74rem; font-weight: 700; padding: .28rem .65rem; border-radius: 999px; }
+    .ev.doc { background: #e8f5e9; color: var(--green-mid); }
+    .ev.pot { background: var(--amber-pale); color: var(--amber-ink); }
+    .ev.ins { background: #eee; color: var(--muted); }
+    .ev.rev { background: #e3f2ee; color: #1A7A6E; }
+    .new-note { margin-top: 1.5rem; font-size: .85rem; color: var(--muted); font-style: italic; }
+
+    /* ─── Coming in 2.0: "Roadmap Facts" label ─── */
+    #roadmap { padding: 6rem 0; background: var(--green-deep); position: relative; overflow: hidden; }
+    #roadmap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 85% 20%, rgba(232,160,32,.14), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(74,140,98,.2), transparent 50%); pointer-events: none; }
+    .roadmap-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 4rem; align-items: center; position: relative; }
+    .roadmap-text h2 { font-family: var(--font-display); font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 900; color: var(--cream); line-height: 1.15; margin-bottom: 1.2rem; }
+    .roadmap-text h2 em { color: var(--amber-light); }
+    .roadmap-text p { color: rgba(247,242,232,.72); font-size: 1.05rem; line-height: 1.8; margin-bottom: 1rem; }
+    .roadmap-text .fine { font-size: .82rem; color: rgba(247,242,232,.45); font-family: var(--font-mono); letter-spacing: .04em; }
+    .facts {
+      background: #fff; color: var(--label-ink); border: 2px solid var(--label-ink); padding: .7rem .9rem 1rem;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 520px; justify-self: end;
+      box-shadow: 18px 18px 0 rgba(232,160,32,.9); transform: rotate(-1.2deg); transition: transform .4s ease;
+    }
+    .facts:hover { transform: rotate(0deg); }
+    .facts-title { font-size: 2.35rem; font-weight: 900; letter-spacing: -.02em; line-height: 1; }
+    .facts-serv { font-size: .9rem; border-bottom: 10px solid var(--label-ink); padding: .25rem 0 .35rem; }
+    .facts-serv b { font-weight: 800; }
+    .facts-head { display: flex; justify-content: space-between; font-size: .72rem; font-weight: 800; border-bottom: 4px solid var(--label-ink); padding: .3rem 0; }
+    .facts-row { display: grid; grid-template-columns: 1fr auto; gap: .8rem; align-items: baseline; border-bottom: 1px solid var(--label-ink); padding: .45rem 0; }
+    .facts-row b { font-size: .98rem; font-weight: 800; }
+    .facts-row small { display: block; font-size: .78rem; font-weight: 400; color: #333; line-height: 1.4; margin-top: .12rem; }
+    .facts-row .st { font-size: .72rem; font-weight: 800; white-space: nowrap; }
+    .facts-foot { border-top: 6px solid var(--label-ink); margin-top: .1rem; padding-top: .45rem; font-size: .7rem; line-height: 1.45; color: #333; }
+
+    @media (max-width: 1100px) {
+      .new-grid { grid-template-columns: 1fr 1fr; }
+      .new-card.wide { grid-column: span 2; }
+      .new-card.wide-lg { grid-column: span 1; }
+    }
+    @media (max-width: 900px) {
+      .steps-row.four { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+      .roadmap-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .facts { justify-self: center; }
+    }
+    @media (max-width: 600px) {
+      .new-grid { grid-template-columns: 1fr; }
+      .new-card.wide, .new-card.wide-lg { grid-column: span 1; }
+      .steps-row.four { grid-template-columns: 1fr; }
+      .facts { transform: none; box-shadow: 10px 10px 0 rgba(232,160,32,.9); }
+      .facts-title { font-size: 1.9rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pill-new::before { animation: none; }
+      .facts, .new-card { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -1078,9 +1209,9 @@
           AllergyBuster
         </a>
         <ul class="nav-links">
+          <li><a href="#new">What's New</a></li>
           <li><a href="#how-it-works">How It Works</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#videos">Videos</a></li>
+          <li><a href="#roadmap">Coming in 2.0</a></li>
           <li><a href="establishments.html">Safe Places</a></li>
           <li><a href="#contribute">Contribute</a></li>
           <li><a href="https://apps.apple.com/us/app/allergybuster/id6762054855" target="_blank" rel="noopener" class="nav-cta">Download Free</a></li>
@@ -1121,11 +1252,14 @@
           </div>
         </div>
         <div class="hero-text">
-          <span class="section-label">Peace of mind for every meal</span>
-          <h1 class="hero-headline">Know What's in Your Food <em>Before</em> You Take the First Bite.</h1>
+          <span class="pill-new">New in version 1.3</span>
+          <h1 class="hero-headline">Know what's inside. <em>Shop what you trust.</em></h1>
           <p class="hero-subhead">
-            AllergyBuster helps individuals and families with food allergies instantly identify allergens by scanning barcodes, ingredient labels, or searching foods—giving you confidence wherever you eat.
+            Scan a barcode or photograph a label. AllergyBuster shows the allergens that matter to you, explains additives, checks nutrition against your limits, and flags fragrance and label warnings. Then save the products you trust and shop from your own list.
           </p>
+          <div class="hero-categories" aria-label="Product types">
+            <span>🍎 Food &amp; drink</span><span>🧴 Personal care</span><span>🧽 Household (beta)</span>
+          </div>
           <a href="allergy-checklist.html" target="_blank" style="display:inline-flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);color:#fff;font-size:.875rem;font-weight:600;text-decoration:none;border-radius:8px;padding:.6rem 1.1rem;margin-bottom:1.5rem;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Free Safety Checklist — Download PDF
@@ -1155,23 +1289,30 @@
         <div class="hero-phone">
           <div class="phone-shell">
             <div class="phone-notch"></div>
-            <div class="phone-screen">
-              <div style="font-family:var(--font-mono);font-size:.6rem;color:rgba(247,242,232,.4);letter-spacing:.1em;text-align:center;">SCANNING BARCODE</div>
-              <div class="phone-scan-box">
-                <div class="phone-scan-line"></div>
-                <span class="phone-scan-icon">🛒</span>
+            <div class="pi-screen" aria-label="Example Product Insights screen" role="img">
+              <div class="pi-topbar">PRODUCT INSIGHTS</div>
+              <div class="pi-product">
+                <div class="pi-thumb">🥣</div>
+                <div><div class="pi-name">Honey Nut Granola</div><div class="pi-brand">Example product · Food</div></div>
               </div>
-              <div class="phone-result">
-                <div class="phone-result-label">Allergens Detected</div>
-                <div class="phone-result-items">
-                  <span class="phone-allergen-tag">MILK</span>
-                  <span class="phone-allergen-tag">WHEAT</span>
-                  <span class="phone-allergen-tag">SOY</span>
-                  <span class="phone-allergen-tag">EGGS</span>
-                  <span class="phone-allergen-tag">TREE NUTS</span>
-                </div>
+              <div class="pi-card pi-alert">
+                <div class="pi-card-head"><span class="pi-card-title">Allergy Check</span><span class="pi-badge">Documented</span></div>
+                <div class="pi-card-sum">⚠ Contains your allergens: Tree Nuts</div>
               </div>
-              <div style="font-size:.65rem;color:rgba(247,242,232,.35);font-family:var(--font-mono);text-align:center;">Organic Granola Bar · 32g</div>
+              <div class="pi-card pi-caution">
+                <div class="pi-card-head"><span class="pi-card-title">Additives</span><span class="pi-badge">Potential concern</span></div>
+                <div class="pi-card-sum">3 additives, 1 with an EFSA intake concern</div>
+              </div>
+              <div class="pi-card pi-caution">
+                <div class="pi-card-head"><span class="pi-card-title">Nutrition</span><span class="pi-badge">Documented</span></div>
+                <div class="pi-card-sum">Added sugar 12 g per serving · above your 10 g limit</div>
+              </div>
+              <div class="pi-card pi-info">
+                <div class="pi-card-head"><span class="pi-card-title">PFAS &amp; Packaging</span><span class="pi-badge">Insufficient info</span></div>
+                <div class="pi-card-sum">Packaging can't show whether PFAS are present</div>
+              </div>
+              <div class="pi-decide"><span class="on">✓ Approved</span><span class="rv">? Review</span><span class="av">✕ Avoid</span></div>
+              <div class="pi-list">+ Add to shopping list</div>
             </div>
           </div>
         </div>
@@ -1249,11 +1390,11 @@
       <p class="reveal" style="font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; color: var(--green-deep); line-height: 1.65; margin-bottom: 1.5rem;">
         Every grocery trip.<br>
         Every birthday party.<br>
-        Every school event.<br>
+        Every shampoo and every cleaner.<br>
         Every restaurant.
       </p>
       <p class="reveal reveal-delay-1" style="font-size: 1.1rem; color: var(--muted); line-height: 1.8;">
-        AllergyBuster helps you make <strong style="color: var(--charcoal);">informed decisions before the first bite</strong>—so you can focus on living, not worrying.
+        AllergyBuster helps you make <strong style="color: var(--charcoal);">informed decisions about everything you bring home</strong>, and remembers the products you've already checked.
       </p>
     </div>
   </section>
@@ -1285,7 +1426,7 @@
             For millions of people, this isn't inconvenient — it's dangerous. A single hidden allergen can mean anaphylaxis, an ER visit, or worse.
           </p>
           <p>
-            <strong>AllergyBuster puts the information in your hands</strong>, instantly, wherever you are. Scan a product in the grocery store aisle. Photograph an ingredient label at a dinner party. Search before you order. One action. Complete allergen information. No uncertainty.
+            <strong>AllergyBuster puts the information in your hands</strong>, instantly, wherever you are. Scan a product in the grocery store aisle. Photograph an ingredient label at a dinner party. Search before you order. One action, clear allergen information, and the source it came from.
           </p>
         </div>
       </div>
@@ -1297,77 +1438,156 @@
     <div class="container">
       <div class="how-header reveal">
         <span class="section-label">It's this simple</span>
-        <h2>Open. Scan. Get your answer in seconds.</h2>
+        <h2>Scan. Understand. Decide. Shop.</h2>
       </div>
-      <div class="steps-row">
+      <div class="steps-row four">
         <div class="step-card reveal reveal-delay-1">
           <div class="step-num">01</div>
-          <div class="step-icon">📱</div>
-          <h3>Open AllergyBuster</h3>
-          <p>Launch the app on iOS or Android. No account required — instant access, every time.</p>
+          <div class="step-icon">📷</div>
+          <h3>Scan</h3>
+          <p>Scan a barcode, photograph an ingredient label, or search by name. No account needed.</p>
         </div>
         <div class="step-card reveal reveal-delay-2">
           <div class="step-num">02</div>
-          <div class="step-icon">🎯</div>
-          <h3>Scan</h3>
-          <p>Scan a barcode, photograph an ingredient label, or type the product name. Whatever you have, it works.</p>
+          <div class="step-icon">🔍</div>
+          <h3>Understand</h3>
+          <p>See your allergens first, then additives, nutrition, fragrance and label warnings, each with its source.</p>
         </div>
         <div class="step-card reveal reveal-delay-3">
           <div class="step-num">03</div>
-          <div class="step-icon">✅</div>
-          <h3>Know It's Safe</h3>
-          <p>See every allergen instantly. Make a confident decision—before the first bite.</p>
+          <div class="step-icon">⭐</div>
+          <h3>Decide</h3>
+          <p>Mark it Approved, Needs review or Avoid. It's saved to My Products, so you never have to check it twice.</p>
+        </div>
+        <div class="step-card reveal reveal-delay-3">
+          <div class="step-num">04</div>
+          <div class="step-icon">🛒</div>
+          <h3>Shop</h3>
+          <p>Build reusable shopping lists from your approved products and tick them off in the store.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── Features ──────────────────────────────────────────────── -->
-  <section id="features">
+  <!-- ─── What's New in 1.3 ────────────────────────────────────── -->
+  <section id="new">
     <div class="container">
-      <div class="features-header reveal">
-        <span class="section-label" style="color:var(--amber-light);">How it works behind the scenes</span>
-        <h2>Every feature is built around one goal: keeping you safe.</h2>
-        <p>Now that you've seen how simple it is, here's what's working to give you that confidence.</p>
+      <div class="new-header reveal">
+        <span class="section-label">What's new in version 1.3</span>
+        <h2>From allergy scanner to <em>your shopping companion.</em></h2>
+        <p>
+          Version 1.3 keeps everything AllergyBuster already did for food allergies and adds what you need to
+          understand a product, decide about it once, and buy it again with confidence.
+        </p>
       </div>
-      <div class="features-grid">
 
-        <div class="feature-card reveal reveal-delay-1">
-          <div class="feature-icon">📷</div>
-          <h3>Barcode Scan</h3>
-          <p>Point your camera at any product barcode and get a complete allergen breakdown in under a second. Works with millions of products worldwide.</p>
+      <div class="new-grid">
+        <div class="new-card wide reveal reveal-delay-1">
+          <div class="icon">🔬</div>
+          <h3>Product Insights</h3>
+          <p>
+            Every scan now opens a full picture of the product: your allergens first, then additives explained with
+            EFSA evaluation dates, nutrition against your own sugar and sodium limits, packaging and PFAS evidence,
+            fragrance ingredients and household label warnings. Instead of scores or "safe" labels, every finding
+            says what the evidence supports:
+          </p>
+          <div class="evidence-row" aria-label="Evidence statuses">
+            <span class="ev doc">Documented</span>
+            <span class="ev pot">Potential concern</span>
+            <span class="ev ins">Insufficient information</span>
+            <span class="ev rev">Reviewed, no identified concern</span>
+          </div>
         </div>
 
-        <div class="feature-card reveal reveal-delay-2">
-          <div class="feature-icon">🔍</div>
-          <h3>Photo Label Reading</h3>
-          <p>No barcode? Photograph the ingredient label directly. Our OCR technology reads and analyzes the text to surface every allergen present.</p>
+        <div class="new-card reveal reveal-delay-2">
+          <div class="icon">🎯</div>
+          <h3>My Allergies &amp; Preferences</h3>
+          <p>Choose your allergens and what to highlight: additives, added sugar, sodium, packaging, fragrance. Every result is personalized to you. Stored only on your phone.</p>
         </div>
 
-        <div class="feature-card reveal reveal-delay-3">
-          <div class="feature-icon">🔎</div>
-          <h3>Text Search</h3>
-          <p>Search any product, ingredient, or food by name. Perfect for looking up items before you buy, or checking restaurant menu items.</p>
+        <div class="new-card reveal reveal-delay-1">
+          <div class="icon">⭐</div>
+          <h3>My Products</h3>
+          <p>Approve, review or avoid a product once and it's saved. If its ingredients change later, we flag it <strong>Recheck needed</strong>, so a reformulation doesn't catch you out.</p>
         </div>
 
-        <div class="feature-card reveal reveal-delay-1">
-          <div class="feature-icon">🌿</div>
-          <h3>Complete Allergen Coverage</h3>
-          <p>We display <em>all</em> detected allergens — peanuts, tree nuts, dairy, eggs, wheat, soy, fish, shellfish, sesame, and more — every time.</p>
+        <div class="new-card reveal reveal-delay-2">
+          <div class="icon">🛒</div>
+          <h3>Shopping Lists</h3>
+          <p>Reusable lists built from products you've already checked. Add free-text items, set quantities, tick them off in the aisle and keep the list for next week.</p>
         </div>
 
-        <div class="feature-card reveal reveal-delay-2">
-          <div class="feature-icon">💡</div>
-          <h3>Daily Allergy Tips</h3>
-          <p>Wake up to a fresh AI-generated allergy tip. Practical advice, seasonal awareness, hidden allergen alerts, and lifestyle guidance — every day.</p>
+        <div class="new-card reveal reveal-delay-3">
+          <span class="tag">Beta</span>
+          <div class="icon">🧴</div>
+          <h3>Beyond Food</h3>
+          <p>Personal care and household products: fragrance and EU-listed fragrance allergens, DANGER/WARNING label statements, and a prompt to scan the label when a product's ingredients aren't published yet.</p>
         </div>
 
-        <div class="feature-card reveal reveal-delay-3">
-          <div class="feature-icon">🏪</div>
-          <h3>Restaurant Data</h3>
-          <p>Access allergen information for chain restaurants. Help the community by contributing allergen data for the places you eat at most.</p>
+        <div class="new-card reveal reveal-delay-1">
+          <div class="icon">📷</div>
+          <h3>Barcode, Label &amp; Search</h3>
+          <p>One Scan tab for barcodes, ingredient label photos and product search, backed by Open Food Facts, Open Beauty Facts, Open Products Facts and more.</p>
         </div>
 
+        <div class="new-card wide-lg reveal reveal-delay-2">
+          <div class="icon">🍽️</div>
+          <h3>Restaurants &amp; Ask Jeeves</h3>
+          <p>Allergen information for chain restaurants and nearby places with community ratings, plus Ask Jeeves for quick allergy questions and a fresh tip every day.</p>
+        </div>
+      </div>
+      <p class="new-note">AllergyBuster explains the information available from public databases and your label photos. It isn't medical advice and doesn't certify any product as safe. Always read the label.</p>
+    </div>
+  </section>
+
+  <!-- ─── Coming in 2.0 ─────────────────────────────────────────── -->
+  <section id="roadmap">
+    <div class="container">
+      <div class="roadmap-grid">
+        <div class="roadmap-text reveal">
+          <span class="section-label" style="color:var(--amber-light);">Coming in version 2.0</span>
+          <h2>Read the label <em>behind the label.</em></h2>
+          <p>
+            Version 2.0 turns AllergyBuster into a full product intelligence engine: ingredients checked against
+            regulatory hazard lists, label photos that fill in what databases are missing, monitoring that tells you
+            when something you buy changes, and shopping at the store you already use.
+          </p>
+          <p>
+            Same principle as today: every finding names its source, and we explain the evidence instead of
+            calling things "toxic" or "safe".
+          </p>
+          <p class="fine">IN DEVELOPMENT · FEATURES AND TIMING MAY CHANGE</p>
+        </div>
+
+        <div class="facts reveal reveal-delay-1" aria-label="Version 2.0 roadmap presented as a product label">
+          <div class="facts-title">Roadmap Facts</div>
+          <div class="facts-serv"><b>Version 2.0</b> &nbsp;·&nbsp; Serving size: every product you buy</div>
+          <div class="facts-head"><span>Feature</span><span>Status</span></div>
+          <div class="facts-row">
+            <span><b>Ingredient hazard intelligence</b><small>Ingredients checked against California Prop 65, IARC, EU cosmetic bans and restrictions, EPA PFAS lists and GHS hazard classifications, always with the source shown.</small></span>
+            <span class="st">In development</span>
+          </div>
+          <div class="facts-row">
+            <span><b>Labels that fill the gaps</b><small>Photograph a cleaner or shampoo label and its ingredients are read and saved to the product, so missing database entries no longer stop you.</small></span>
+            <span class="st">In development</span>
+          </div>
+          <div class="facts-row">
+            <span><b>Monitoring &amp; recall alerts</b><small>Your saved products are rechecked in the background, with alerts when ingredients change or a product is recalled.</small></span>
+            <span class="st">Planned</span>
+          </div>
+          <div class="facts-row">
+            <span><b>Shop at Kroger</b><small>Your store's prices and availability for your approved products, and send your list to your Kroger cart.</small></span>
+            <span class="st">Planned</span>
+          </div>
+          <div class="facts-row">
+            <span><b>Explanations you can trust</b><small>Plain-language answers to "what is this ingredient?", written only from the documented evidence.</small></span>
+            <span class="st">Planned</span>
+          </div>
+          <div class="facts-foot">
+            Not a significant source of hype. Statuses describe development progress, not release dates.
+            Features may change before release.
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1404,7 +1624,7 @@
           <canvas id="demo4" class="demo-canvas"></canvas>
           <div class="demo-overlay">
             <div class="video-title">Searching by Ingredient Name</div>
-            </div>
+            <div class="video-label">Auto-playing demo</div>
           </div>
         </div>
       </div>
@@ -1551,8 +1771,8 @@
   <section id="download">
     <div class="container">
       <div class="download-inner">
-        <h2>Peace of mind, <em>one scan at a time.</em></h2>
-        <p>Helping families make safer food decisions—every grocery trip, every birthday party, every restaurant. Download free and explore every feature.</p>
+        <h2>Know what's inside, <em>one scan at a time.</em></h2>
+        <p>For every grocery trip, every product you bring home and every restaurant. Download free and get your first 5 scans on us.</p>
         <div class="download-badges">
           <a href="https://apps.apple.com/us/app/allergybuster/id6762054855" target="_blank" rel="noopener" class="download-badge">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
@@ -1573,7 +1793,7 @@
             </div>
           </a>
         </div>
-        <p style="margin-top: 1.5rem; font-size: .78rem; color: rgba(247,242,232,.4); font-family: var(--font-mono); letter-spacing: .08em;">FREE DOWNLOAD · ALL FEATURES INCLUDED · $7.99 LIFETIME UNLOCK</p>
+        <p style="margin-top: 1.5rem; font-size: .78rem; color: rgba(247,242,232,.4); font-family: var(--font-mono); letter-spacing: .08em;">FREE DOWNLOAD · 5 FREE SCANS · THEN A ONE-TIME $7.99 LIFETIME UNLOCK</p>
       </div>
     </div>
   </section>

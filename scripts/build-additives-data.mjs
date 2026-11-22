@@ -20,7 +20,7 @@ const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'AllergyBusterAp
 const en = v => (v && typeof v === 'object' ? v.en : undefined);
 const tag = v => (v ? String(v).replace(/^en:/, '') : undefined);
 
-const res = await fetch(SOURCE_URL, {headers: {'User-Agent': 'AllergyBuster data build (+https://allergybuster.com)'}});
+const res = await fetch(SOURCE_URL, {headers: {'User-Agent': 'AllergyBuster data build (+https://allergybusted.com)'}});
 if (!res.ok) {
   throw new Error(`Download failed: ${res.status}`);
 }
