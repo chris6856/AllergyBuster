@@ -15,6 +15,8 @@
  * Vars:    KROGER_API_BASE (https://api.kroger.com/v1 or https://api-ce.kroger.com/v1)
  */
 
+import {kvDelete, kvGet, kvGetJson, kvPut} from './cache';
+
 export interface KrogerEnv {
   KROGER_CLIENT_ID: string;
   KROGER_CLIENT_SECRET: string;
@@ -53,7 +55,7 @@ function ns(env: KrogerEnv): string {
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 async function getAppToken(env: KrogerEnv): Promise<string> {
-  const cached = await env.TIPS_CACHE.get(`${ns(env)}token`);
+  const cached = await kvGet(env.TIPS_CACHE, `${ns(env)}token`);
   if (cached) {
     return cached;
   }
@@ -75,7 +77,7 @@ async function getAppToken(env: KrogerEnv): Promise<string> {
   }
   const body = (await res.json()) as {access_token: string; expires_in: number};
   const ttl = Math.max(60, (body.expires_in ?? 1800) - 120);
-  await env.TIPS_CACHE.put(`${ns(env)}token`, body.access_token, {expirationTtl: ttl});
+  await kvPut(env.TIPS_CACHE, `${ns(env)}token`, body.access_token, ttl);
   return body.access_token;
 }
 
@@ -90,7 +92,7 @@ async function krogerGet<T>(env: KrogerEnv, path: string, params: Record<string,
   let res = await doFetch(await getAppToken(env));
   if (res.status === 401) {
     // Token revoked or expired early: refresh once.
-    await env.TIPS_CACHE.delete(`${ns(env)}token`);
+    await kvDelete(env.TIPS_CACHE, `${ns(env)}token`);
     res = await doFetch(await getAppToken(env));
   }
   if (!res.ok) {
@@ -101,12 +103,12 @@ async function krogerGet<T>(env: KrogerEnv, path: string, params: Record<string,
 }
 
 async function cached<T>(env: KrogerEnv, key: string, ttl: number, load: () => Promise<T>): Promise<T> {
-  const hit = await env.TIPS_CACHE.get(key, 'json');
+  const hit = await kvGetJson<T>(env.TIPS_CACHE, key);
   if (hit) {
     return hit as T;
   }
   const value = await load();
-  await env.TIPS_CACHE.put(key, JSON.stringify(value), {expirationTtl: ttl});
+  await kvPut(env.TIPS_CACHE, key, JSON.stringify(value), ttl);
   return value;
 }
 

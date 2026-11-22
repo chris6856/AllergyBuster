@@ -22,6 +22,7 @@
  *
  * Secrets: EDAMAM_APP_ID, EDAMAM_APP_KEY (optional: without them, no Edamam fallback)
  */
+import {kvGet, kvGetJson, kvPut} from './cache';
 import {expandUpcE, findKrogerByUpc, KrogerEnv, KrogerProduct} from './kroger';
 
 export interface LookupEnv extends KrogerEnv {
@@ -110,7 +111,7 @@ async function fetchEdamam(env: LookupEnv, code: string): Promise<Raw | null> {
   if (!env.EDAMAM_APP_ID || !env.EDAMAM_APP_KEY) {
     return null;
   }
-  if (await env.TIPS_CACHE.get(EDAMAM_COOLDOWN_KEY)) {
+  if (await kvGet(env.TIPS_CACHE, EDAMAM_COOLDOWN_KEY)) {
     return null;
   }
   const url = new URL(`${EDAMAM_BASE}/parser`);
@@ -123,7 +124,7 @@ async function fetchEdamam(env: LookupEnv, code: string): Promise<Raw | null> {
   }
   if (res.status === 429) {
     console.error('Edamam rate limit hit; pausing Edamam lookups');
-    await env.TIPS_CACHE.put(EDAMAM_COOLDOWN_KEY, '1', {expirationTtl: EDAMAM_COOLDOWN_TTL});
+    await kvPut(env.TIPS_CACHE, EDAMAM_COOLDOWN_KEY, '1', EDAMAM_COOLDOWN_TTL);
     return null;
   }
   if (!res.ok) {
@@ -221,7 +222,7 @@ export async function handleLookup(request: Request, env: LookupEnv): Promise<Re
       : null;
 
   const cacheKey = `lookup:${CACHE_VERSION}:${code}`;
-  let result = (await env.TIPS_CACHE.get(cacheKey, 'json')) as LookupResult | null;
+  let result = await kvGetJson<LookupResult>(env.TIPS_CACHE, cacheKey);
   const cacheHit = result !== null;
   if (!result) {
     try {
@@ -231,7 +232,7 @@ export async function handleLookup(request: Request, env: LookupEnv): Promise<Re
       return json({error: 'Product databases unavailable'}, 502);
     }
     const ttl = result.found ? FOUND_TTL : result.definitive === false ? UNCERTAIN_TTL : NOT_FOUND_TTL;
-    await env.TIPS_CACHE.put(cacheKey, JSON.stringify(result), {expirationTtl: ttl});
+    await kvPut(env.TIPS_CACHE, cacheKey, JSON.stringify(result), ttl);
   }
 
   const {definitive: _definitive, ...publicResult} = result;
