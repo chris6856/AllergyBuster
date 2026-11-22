@@ -48,6 +48,7 @@ const USER_AGENT = 'AllergyBuster/1.2 (Cloudflare Worker; +https://allergybuster
 const CACHE_VERSION = 'v2';
 const FOUND_TTL = 24 * 60 * 60;
 const NOT_FOUND_TTL = 6 * 60 * 60; // retry sooner: community databases grow
+const UNCERTAIN_TTL = 2 * 60; // a fallback source errored: retry soon
 
 const JSON_HEADERS = {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'};
 function json(data: unknown, status = 200): Response {
@@ -62,6 +63,11 @@ interface LookupResult {
   found: boolean;
   source: LookupSource | null;
   product: Raw | null;
+  /**
+   * False when a fallback source failed (e.g. Kroger timeout), so "not found"
+   * may be wrong. Such results are cached only briefly. Not sent to the app.
+   */
+  definitive?: boolean;
 }
 
 // ─── Sources ──────────────────────────────────────────────────────────────────
@@ -167,6 +173,7 @@ async function lookupBarcode(env: LookupEnv, code: string): Promise<LookupResult
     }
   } catch (err) {
     console.error('Kroger fallback failed', err);
+    return {found: false, source: null, product: null, definitive: false};
   }
   return {found: false, source: null, product: null};
 }
@@ -210,12 +217,12 @@ export async function handleLookup(request: Request, env: LookupEnv): Promise<Re
       console.error('Lookup failed', err);
       return json({error: 'Product databases unavailable'}, 502);
     }
-    await env.TIPS_CACHE.put(cacheKey, JSON.stringify(result), {
-      expirationTtl: result.found ? FOUND_TTL : NOT_FOUND_TTL,
-    });
+    const ttl = result.found ? FOUND_TTL : result.definitive === false ? UNCERTAIN_TTL : NOT_FOUND_TTL;
+    await env.TIPS_CACHE.put(cacheKey, JSON.stringify(result), {expirationTtl: ttl});
   }
 
-  const body: Record<string, unknown> = {...result, cached: cacheHit};
+  const {definitive: _definitive, ...publicResult} = result;
+  const body: Record<string, unknown> = {...publicResult, cached: cacheHit};
   if (krogerPromise) {
     body.kroger = await krogerPromise;
   }
