@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <link rel="canonical" href="https://allergybusted.com/allergy-checklist.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Food Allergy Safety Checklist — AllergyBuster</title>
+  <title>Allergy Safety Checklist — AllergyBuster</title>
+  <meta name="description" content="A free one-page allergy safety checklist for home, shopping, personal care and household products, school, restaurants, travel and emergencies. Print or save as PDF." />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -34,47 +35,28 @@
     /* ── Top bar (screen only) ── */
     .top-bar {
       width: 100%;
-      max-width: 720px;
+      max-width: 760px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1.5rem;
     }
-
     .logo {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--ink);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
+      font-size: 1.1rem; font-weight: 700; color: var(--ink); text-decoration: none;
+      display: flex; align-items: center; gap: .4rem;
     }
-
     .logo-dot { color: var(--amber); }
-
     .save-btn {
-      background: var(--amber);
-      color: #fff;
-      font-family: inherit;
-      font-size: .9rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      padding: .55rem 1.2rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      transition: background .15s;
+      background: var(--amber); color: #fff; font-family: inherit; font-size: .9rem; font-weight: 600;
+      border: none; border-radius: 8px; padding: .55rem 1.2rem; cursor: pointer;
+      display: flex; align-items: center; gap: .5rem; transition: background .15s;
     }
-
     .save-btn:hover { background: var(--amber-dark); }
 
     /* ── Document card ── */
     .doc {
       width: 100%;
-      max-width: 720px;
+      max-width: 760px;
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 4px 32px rgba(0,0,0,.12);
@@ -82,187 +64,90 @@
     }
 
     /* Header */
-    .doc-header {
-      background: var(--teal);
-      padding: 2.5rem 2.5rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
+    .doc-header { background: var(--teal); padding: 2.2rem 2.5rem 1.8rem; position: relative; overflow: hidden; }
     .doc-header::after {
-      content: '';
-      position: absolute;
-      right: -40px;
-      top: -40px;
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.06);
+      content: ''; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px;
+      border-radius: 50%; background: rgba(255,255,255,.06);
     }
-
-    .doc-eyebrow {
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.65);
-      margin-bottom: .6rem;
-    }
-
-    .doc-title {
-      font-size: 1.7rem;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.25;
-      max-width: 480px;
-    }
-
+    .doc-eyebrow { font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.65); margin-bottom: .55rem; }
+    .doc-title { font-size: 1.7rem; font-weight: 800; color: #fff; line-height: 1.2; max-width: 520px; }
     .doc-title span { color: var(--amber); }
-
-    .doc-subtitle {
-      margin-top: .75rem;
-      font-size: .9rem;
-      color: rgba(255,255,255,.7);
-      line-height: 1.6;
-    }
+    .doc-subtitle { margin-top: .7rem; font-size: .88rem; color: rgba(255,255,255,.78); line-height: 1.55; max-width: 560px; }
 
     /* Body */
-    .doc-body {
-      padding: 2rem 2.5rem 2.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
+    .doc-body { padding: 1.8rem 2.2rem 1.6rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
 
     /* Section */
-    .section {
-      background: var(--cream);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem 1.25rem 1.25rem;
-    }
-
-    .section-head {
-      display: flex;
-      align-items: center;
-      gap: .55rem;
-      margin-bottom: 1rem;
-      padding-bottom: .75rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .section-icon {
-      font-size: 1.25rem;
-      line-height: 1;
-    }
-
-    .section-title {
-      font-size: .9rem;
-      font-weight: 700;
-      color: var(--teal);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
+    .section { background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem .8rem; }
+    .section-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .55rem; padding-bottom: .55rem; border-bottom: 1px solid var(--border); }
+    .section-icon { font-size: 1.15rem; line-height: 1; }
+    .section-title { font-size: .82rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .06em; }
+    .section-new { margin-left: auto; font-size: .6rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--amber); padding: .12rem .4rem; border-radius: 4px; }
 
     /* Checklist item */
-    .item {
-      display: flex;
-      align-items: flex-start;
-      gap: .65rem;
-      padding: .45rem 0;
-    }
-
-    .item + .item {
-      border-top: 1px solid rgba(0,0,0,.05);
-    }
-
-    .checkbox {
-      flex-shrink: 0;
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--amber);
-      border-radius: 4px;
-      margin-top: 1px;
-      background: #fff;
-    }
-
-    .item-text {
-      font-size: .875rem;
-      color: var(--ink);
-      line-height: 1.5;
-      font-weight: 500;
-    }
+    .item { display: flex; align-items: flex-start; gap: .6rem; padding: .36rem 0; }
+    .item + .item { border-top: 1px solid rgba(0,0,0,.05); }
+    .checkbox { flex-shrink: 0; width: 16px; height: 16px; border: 2px solid var(--amber); border-radius: 4px; margin-top: 2px; background: #fff; }
+    .item-text { font-size: .82rem; color: var(--ink); line-height: 1.45; font-weight: 500; }
+    .item-text b { font-weight: 700; }
 
     /* Emergency section — spans full width */
-    .section.emergency {
-      grid-column: 1 / -1;
-      background: #FFF4E6;
-      border-color: #F5C97A;
-    }
-
+    .section.emergency { grid-column: 1 / -1; background: #FFF4E6; border-color: #F5C97A; }
     .section.emergency .section-title { color: #B45309; }
     .section.emergency .checkbox { border-color: #B45309; }
+    .section.emergency .items { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 1rem; }
+    .section.emergency .item + .item { border-top: none; }
 
-    .section.emergency .items {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0 1rem;
+    /* App box — spans full width */
+    .app-box {
+      grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem;
+      background: var(--teal-light); border: 1px solid #BFE3DD; border-radius: 12px; padding: .85rem 1.1rem;
     }
+    .app-box .app-icon { font-size: 1.5rem; }
+    .app-box p { font-size: .8rem; color: var(--ink); line-height: 1.5; }
+    .app-box p b { color: var(--teal); }
 
     /* Footer strip */
-    .doc-footer {
-      background: var(--ink);
-      padding: 1rem 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .doc-footer-brand {
-      font-size: .8rem;
-      font-weight: 700;
-      color: rgba(255,255,255,.9);
-    }
-
+    .doc-footer { background: var(--ink); padding: .85rem 2.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .doc-footer-brand { font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.9); white-space: nowrap; }
     .doc-footer-brand span { color: var(--amber); }
+    .doc-footer-note { font-size: .66rem; color: rgba(255,255,255,.5); text-align: center; line-height: 1.4; }
+    .doc-footer-url { font-size: .75rem; color: rgba(255,255,255,.6); white-space: nowrap; }
 
-    .doc-footer-url {
-      font-size: .75rem;
-      color: rgba(255,255,255,.45);
-    }
-
-    /* ── Print styles ── */
+    /* ── Print styles: one page (US Letter or A4) ── */
     @media print {
-      @page {
-        size: A4;
-        margin: 1.2cm 1.4cm;
-      }
-
-      body {
-        background: #fff;
-        padding: 0;
-      }
-
+      @page { size: auto; margin: .9cm 1.1cm; }
+      body { background: #fff; padding: 0; display: block; }
       .top-bar { display: none; }
-
-      .doc {
-        box-shadow: none;
-        border-radius: 0;
-        max-width: 100%;
-      }
-
-      .doc-body { gap: 1rem; }
-
-      .section { break-inside: avoid; }
+      .doc { box-shadow: none; border-radius: 0; max-width: 100%; }
+      .doc-header { padding: .9rem 1.2rem .8rem; }
+      .doc-header::after { display: none; }
+      .doc-eyebrow { font-size: .62rem; margin-bottom: .3rem; }
+      .doc-title { font-size: 1.3rem; line-height: 1.15; }
+      .doc-subtitle { font-size: .72rem; margin-top: .3rem; line-height: 1.4; }
+      .doc-body { padding: .75rem 0 .6rem; gap: .55rem; }
+      .section { break-inside: avoid; padding: .55rem .75rem .35rem; border-radius: 8px; }
+      .section-head { margin-bottom: .25rem; padding-bottom: .3rem; }
+      .section-icon { font-size: .95rem; }
+      .section-title { font-size: .72rem; }
+      .item { padding: .16rem 0; gap: .5rem; }
+      .checkbox { width: 13px; height: 13px; margin-top: 1px; }
+      .item-text { font-size: .68rem; line-height: 1.35; }
+      .app-box { padding: .45rem .75rem; gap: .6rem; break-inside: avoid; border-radius: 8px; }
+      .app-box .app-icon { font-size: 1.1rem; }
+      .app-box p { font-size: .66rem; line-height: 1.4; }
+      .doc-footer { padding: .45rem 1.2rem; }
+      .doc-footer-note { font-size: .58rem; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
 
     /* ── Responsive ── */
-    @media (max-width: 580px) {
-      .doc-body { grid-template-columns: 1fr; }
-      .section.emergency { grid-column: 1; }
+    @media (max-width: 600px) {
+      .doc-body { grid-template-columns: 1fr; padding: 1.4rem; }
+      .section.emergency, .app-box { grid-column: 1; }
       .section.emergency .items { grid-template-columns: 1fr; }
+      .section.emergency .item + .item { border-top: 1px solid rgba(0,0,0,.05); }
       .doc-header { padding: 1.75rem 1.5rem 1.5rem; }
-      .doc-body { padding: 1.5rem; }
       .doc-footer { flex-direction: column; gap: .4rem; text-align: center; }
     }
   </style>
@@ -286,23 +171,39 @@
   <div class="doc">
 
     <div class="doc-header">
-      <p class="doc-eyebrow">Free Resource — AllergyBuster</p>
-      <h1 class="doc-title">Food Allergy Safety Checklist<br><span>Everyday Situations</span></h1>
-      <p class="doc-subtitle">Use this checklist to stay prepared at home, school, work, restaurants, and while traveling.</p>
+      <p class="doc-eyebrow">Free Resource — AllergyBuster · Updated November 2026</p>
+      <h1 class="doc-title">Allergy Safety Checklist<br><span>Food &amp; Everyday Products</span></h1>
+      <p class="doc-subtitle">Stay prepared at home, in the store, at school or work, when eating out, and while traveling, for the food you eat and the products you use.</p>
     </div>
 
     <div class="doc-body">
 
-      <!-- Home -->
+      <!-- Home & Shopping -->
       <div class="section">
         <div class="section-head">
-          <span class="section-icon">🏠</span>
-          <span class="section-title">Home &amp; Daily Life</span>
+          <span class="section-icon">🛒</span>
+          <span class="section-title">Home &amp; Shopping</span>
         </div>
         <div class="items">
-          <div class="item"><div class="checkbox"></div><span class="item-text">Read labels carefully every time</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Avoid cross-contact in shared kitchens</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Store safe foods separately</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Read the label <b>every time</b>, even on products you buy often. Recipes change.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Know the <b>9 major U.S. allergens</b>: milk, eggs, fish, shellfish, tree nuts, peanuts, wheat, soy and sesame (added in 2023).</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">"May contain" warnings are <b>voluntary</b>. No warning doesn't guarantee no cross-contact.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Store safe foods separately; clean surfaces, utensils and hands to avoid cross-contact.</span></div>
+        </div>
+      </div>
+
+      <!-- Personal care & household -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-icon">🧴</span>
+          <span class="section-title">Personal Care &amp; Home</span>
+          <span class="section-new">New</span>
+        </div>
+        <div class="items">
+          <div class="item"><div class="checkbox"></div><span class="item-text">Check lotions, shampoos and cosmetics for <b>food-derived ingredients</b> like almond oil, wheat protein or milk.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">"Fragrance" or "parfum" can be a <b>mix of ingredients</b> that aren't listed individually.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Read warning labels on cleaners, and <b>never mix</b> cleaning products.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Recheck products labeled "new" or "improved": the formula may have changed.</span></div>
         </div>
       </div>
 
@@ -313,22 +214,22 @@
           <span class="section-title">School / Work</span>
         </div>
         <div class="items">
-          <div class="item"><div class="checkbox"></div><span class="item-text">Inform teachers, staff, or coworkers</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Share a clear allergy action plan</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Keep emergency medication accessible</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Share your allergy and <b>emergency action plan</b> with teachers, staff or coworkers.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Keep epinephrine within reach, and make sure people know <b>where it is</b>.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Plan ahead for parties, celebrations and shared snacks.</span></div>
         </div>
       </div>
 
-      <!-- Restaurants -->
+      <!-- Restaurants & gatherings -->
       <div class="section">
         <div class="section-head">
           <span class="section-icon">🍽️</span>
-          <span class="section-title">Restaurants</span>
+          <span class="section-title">Restaurants &amp; Gatherings</span>
         </div>
         <div class="items">
-          <div class="item"><div class="checkbox"></div><span class="item-text">Ask about ingredients and preparation</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Confirm cross-contact precautions</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Avoid unclear or risky menu items</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Tell staff about your allergy and ask <b>how food is prepared</b>, including shared fryers, grills and utensils.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">At gatherings, ask hosts what's in each dish and <b>serve yourself first</b>.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">When ingredients are unclear, <b>skip it</b>.</span></div>
         </div>
       </div>
 
@@ -339,9 +240,22 @@
           <span class="section-title">Travel</span>
         </div>
         <div class="items">
-          <div class="item"><div class="checkbox"></div><span class="item-text">Pack safe snacks for the journey</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Research allergy-friendly options ahead</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Carry medication at all times</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Keep epinephrine in your <b>carry-on</b>, never in checked bags.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Pack safe snacks for delays and research options at your destination.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Bring a copy of your emergency action plan.</span></div>
+        </div>
+      </div>
+
+      <!-- Product check (app) — fills the grid next to Travel -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-icon">🔍</span>
+          <span class="section-title">Before You Buy</span>
+        </div>
+        <div class="items">
+          <div class="item"><div class="checkbox"></div><span class="item-text">Scan or photograph the label of anything new, <b>including gifts and seasonal versions</b> of favorites.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Keep a list of products you've already checked and trust.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">If a label is missing or unclear, ask the maker, or set it aside.</span></div>
         </div>
       </div>
 
@@ -352,17 +266,31 @@
           <span class="section-title">Emergency Readiness</span>
         </div>
         <div class="items">
-          <div class="item"><div class="checkbox"></div><span class="item-text">Always have epinephrine available</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Make sure others know how to respond</span></div>
-          <div class="item"><div class="checkbox"></div><span class="item-text">Wear medical identification if needed</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Carry <b>two</b> epinephrine doses, as allergists recommend.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Check <b>expiration dates</b> and replace expired devices.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">For anaphylaxis, use <b>epinephrine first</b>. Antihistamines don't stop anaphylaxis.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">After using epinephrine, <b>call 911</b> and follow your emergency action plan.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Make sure family, friends and caregivers know how to respond.</span></div>
+          <div class="item"><div class="checkbox"></div><span class="item-text">Wear medical identification if your doctor recommends it.</span></div>
         </div>
+      </div>
+
+      <!-- App box — full width -->
+      <div class="app-box">
+        <span class="app-icon">📱</span>
+        <p>
+          <b>AllergyBuster can help:</b> set your allergens once, then scan barcodes or photograph labels for foods,
+          personal care and household products. Save the products you trust, build shopping lists, and get a
+          <b>Recheck needed</b> alert when a saved product's ingredients change. Free on iOS and Android.
+        </p>
       </div>
 
     </div><!-- /doc-body -->
 
     <div class="doc-footer">
       <span class="doc-footer-brand">AllergyBuster<span>.</span></span>
-      <span class="doc-footer-url">allergybuster.app</span>
+      <span class="doc-footer-note">General information, not medical advice. Follow your allergist's emergency action plan.</span>
+      <span class="doc-footer-url">allergybusted.com</span>
     </div>
 
   </div><!-- /doc -->
