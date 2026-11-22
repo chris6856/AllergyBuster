@@ -12,14 +12,14 @@ export function analyzeAllergy(p: ProductRecord, profileKeys: string[]): Insight
     return {
       id: 'allergy',
       title: 'Allergy Check',
-      summary: 'No ingredient information. Check the package label.',
+      summary: 'Ingredient details not available yet. Scan the label to check.',
       status: 'insufficient_information',
       level: 'caution',
       findings: [{
         id: 'allergy-no-data',
         level: 'caution',
         title: 'No ingredient or allergen information',
-        detail: "This product's listing has no ingredients, so allergens can't be checked. Read the label, or photograph the ingredient list with Scan Label.",
+        detail: "Ingredient details for this product haven't been added to the product databases we search yet, so allergens can't be checked. Scan the ingredient label to check it.",
       }],
     };
   }

@@ -26,9 +26,9 @@ export function AllergenList({allergens, hasIngredientData = true}: Props) {
         </View>
         <Text style={[styles.safeTitle, styles.unknownTitle]}>No Ingredient Information</Text>
         <Text style={styles.emptyText}>
-          This product's listing has no ingredients or allergen details, so we can't
-          check it. Read the package label, or use Scan Label to photograph the
-          ingredient list.
+          This product's ingredient details haven't been added to the product
+          databases we search yet, so we can't check it. Scan the ingredient label,
+          or read the package before use.
         </Text>
       </View>
     );

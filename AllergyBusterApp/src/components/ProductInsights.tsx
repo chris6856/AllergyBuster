@@ -45,6 +45,7 @@ export function ProductInsights({record, refreshSaved = false}: {record: Product
     }
   }, [refreshSaved, saved, record, refresh]);
 
+  const hasData = hasIngredientData(record);
   const analysis = useMemo(
     () => analyzeProduct(record, profile.allergens, preferences),
     [record, profile.allergens, preferences],
@@ -58,32 +59,34 @@ export function ProductInsights({record, refreshSaved = false}: {record: Product
         {record.category === 'household' ? <Text style={styles.beta}>Beta</Text> : null}
       </View>
 
-      <View style={styles.sections}>
-        {analysis.sections.map((s, i) => (
-          <InsightSectionCard key={s.id} section={s} initiallyOpen={i === 0}>
-            {s.id === 'allergy' ? (
-              <AllergenList allergens={record.allergens} hasIngredientData={hasIngredientData(record)} />
-            ) : undefined}
-          </InsightSectionCard>
-        ))}
-      </View>
-
-      {!hasIngredientData(record) ? (
+      {/* Recognised, but no ingredient data in any database we search. */}
+      {!hasData ? (
         <View style={styles.labelPrompt}>
-          <Text style={styles.labelPromptTitle}>No ingredient list for this product yet</Text>
+          <Text style={styles.labelPromptTitle}>✓ Product found</Text>
           <Text style={styles.labelPromptText}>
-            We recognized it, but its listing doesn't include ingredients. Photograph the
-            ingredient label to check allergens{record.category === 'household' ? ' and label warnings' : ''}.
+            We recognized this product, but its ingredient details haven't been added to the
+            product databases we search yet. Scan the ingredient label to check it for
+            allergens{record.category === 'household' ? ' and label warnings' : ''}.
           </Text>
           <TouchableOpacity
             style={styles.labelPromptButton}
             onPress={() => navigation.navigate('ScanTab', {screen: 'PhotoCapture'})}
             accessibilityRole="button"
-            accessibilityLabel="Photograph the ingredient label">
-            <Text style={styles.labelPromptButtonText}>📸  Photograph the label</Text>
+            accessibilityLabel="Scan the ingredient label">
+            <Text style={styles.labelPromptButtonText}>📸  Scan the Label</Text>
           </TouchableOpacity>
         </View>
       ) : null}
+
+      <View style={styles.sections}>
+        {analysis.sections.map((s, i) => (
+          <InsightSectionCard key={s.id} section={s} initiallyOpen={i === 0 && hasData}>
+            {s.id === 'allergy' ? (
+              <AllergenList allergens={record.allergens} hasIngredientData={hasData} />
+            ) : undefined}
+          </InsightSectionCard>
+        ))}
+      </View>
 
       {record.ingredientsText ? (
         <TouchableOpacity
@@ -125,8 +128,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   sections: {paddingTop: spacing.md},
-  labelPrompt: {backgroundColor: colors.warningLight, marginHorizontal: spacing.md, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm},
-  labelPromptTitle: {fontSize: fontSizes.md, fontWeight: '800', color: colors.textPrimary},
+  labelPrompt: {backgroundColor: '#E8F5E9', borderWidth: 1, borderColor: colors.primary, marginHorizontal: spacing.md, marginTop: spacing.md, borderRadius: borderRadius.lg, padding: spacing.md},
+  labelPromptTitle: {fontSize: fontSizes.lg, fontWeight: '800', color: colors.primary},
   labelPromptText: {fontSize: fontSizes.sm, color: colors.textPrimary, lineHeight: 18, marginTop: spacing.xs},
   labelPromptButton: {marginTop: spacing.sm, backgroundColor: colors.primary, borderRadius: borderRadius.lg, paddingVertical: spacing.sm, alignItems: 'center'},
   labelPromptButtonText: {color: colors.white, fontWeight: '700', fontSize: fontSizes.md},
