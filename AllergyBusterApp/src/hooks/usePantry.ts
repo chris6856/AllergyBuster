@@ -1,5 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {ProductCategory, ProductRecord} from '../types/product';
+import {productListLabel} from '../utils/productRecord';
 import {ApprovalStatus} from '../types/pantry';
 import {
   clearDecision,
@@ -94,7 +95,7 @@ export function usePantryActions() {
   const addToList = useAction(async (record: ProductRecord, listId?: string) => {
     await saveProduct(record);
     const id = listId ?? (await ensureDefaultList());
-    await addItem(id, {gtin: record.gtin, label: [record.brand, record.name].filter(Boolean).join(' ')});
+    await addItem(id, {gtin: record.gtin, label: productListLabel(record.name, record.brand)});
   });
   /** Refresh a saved product's data from a new scan (may set "recheck needed"). */
   const refresh = useAction((record: ProductRecord) => saveProduct(record));

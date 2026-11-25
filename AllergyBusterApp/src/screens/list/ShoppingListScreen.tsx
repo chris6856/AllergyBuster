@@ -15,6 +15,7 @@ import {borderRadius, colors, fontSizes, spacing} from '../../constants/theme';
 import {ShoppingListItem} from '../../types/pantry';
 import {useListActions, useListItems, useSavedProducts, useShoppingLists} from '../../hooks/usePantry';
 import {ApprovalBadge} from '../../components/ApprovalBadge';
+import {displayProductName, productListLabel} from '../../utils/productRecord';
 import {ListStackScreenProps} from '../../navigation/navigationTypes';
 
 type Nav = ListStackScreenProps<'ShoppingList'>['navigation'];
@@ -124,7 +125,7 @@ export function ShoppingListScreen() {
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.lists}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.listsScroll} contentContainerStyle={styles.lists}>
           {lists.map(l => (
             <TouchableOpacity
               key={l.id}
@@ -209,12 +210,12 @@ export function ShoppingListScreen() {
               <TouchableOpacity
                 key={p.gtin}
                 style={styles.quick}
-                onPress={() => actions.addProduct.mutate([activeId, p.gtin, [p.brand, p.name].filter(Boolean).join(' ')])}
+                onPress={() => actions.addProduct.mutate([activeId, p.gtin, productListLabel(p.name, p.brand)])}
                 accessibilityRole="button"
                 accessibilityLabel={`Add ${p.name}`}>
                 <Text style={styles.quickPlus}>+</Text>
                 <View style={styles.itemBody}>
-                  <Text style={styles.itemLabel} numberOfLines={1}>{p.name}</Text>
+                  <Text style={styles.itemLabel} numberOfLines={1}>{displayProductName(p.name, p.brand)}</Text>
                   {p.recheckNeeded ? <ApprovalBadge status={null} recheck /> : null}
                 </View>
               </TouchableOpacity>
@@ -234,7 +235,8 @@ export function ShoppingListScreen() {
 const styles = StyleSheet.create({
   screen: {flex: 1, backgroundColor: colors.background},
   content: {padding: spacing.md, paddingBottom: spacing.xl},
-  lists: {paddingBottom: spacing.sm},
+  listsScroll: {flexGrow: 0},
+  lists: {paddingBottom: spacing.sm, alignItems: 'center'},
   listChip: {borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, borderRadius: borderRadius.full, paddingVertical: spacing.xs, paddingHorizontal: spacing.md, marginRight: spacing.xs},
   listChipOn: {backgroundColor: colors.primary, borderColor: colors.primary},
   listChipText: {fontSize: fontSizes.sm, fontWeight: '600', color: colors.textPrimary},

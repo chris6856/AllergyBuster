@@ -1,6 +1,6 @@
 import {normalize as normalizeOff} from '../src/services/openFoodFacts';
 import {normalize as normalizeEdamam} from '../src/services/edamam';
-import {inferCategory, toGtin13} from '../src/utils/productRecord';
+import {displayProductName, inferCategory, productListLabel, toGtin13} from '../src/utils/productRecord';
 
 jest.mock('../src/services/http', () => ({offClient: {}, edamamClient: {}}));
 jest.mock('../src/constants/config', () => ({EDAMAM_APP_ID: 'x', EDAMAM_APP_KEY: 'y'}));
@@ -146,5 +146,27 @@ describe('helpers', () => {
     [undefined, [], 'food'],
   ])('inferCategory(%s, %j) = %s', (type, tags, expected) => {
     expect(inferCategory(type as string | undefined, tags as string[])).toBe(expected);
+  });
+});
+
+describe('display names', () => {
+  it.each([
+    ['www.pg.com', 'P&G', 'P&G product'],
+    ['https://example.com/x', '', 'Unnamed product'],
+    ['pg.com', 'Procter & Gamble, P&G', 'Procter & Gamble product'],
+    ['0068156986142', 'Seventh Generation', 'Seventh Generation product'],
+    ['', 'Tums', 'Tums product'],
+    ['Unknown Product', '', 'Unnamed product'],
+    ['Antacid', 'Tums', 'Antacid'],
+    ['Cheerios', 'General Mills', 'Cheerios'],
+  ])('displayProductName(%j, %j) = %j', (name, brand, expected) => {
+    expect(displayProductName(name, brand)).toBe(expected);
+  });
+
+  it('list labels add the brand once', () => {
+    expect(productListLabel('Antacid', 'Tums')).toBe('Tums Antacid');
+    expect(productListLabel('Pantene Strong Hold Hairspray', 'Pantene')).toBe('Pantene Strong Hold Hairspray');
+    expect(productListLabel('www.pg.com', 'P&G')).toBe('P&G product');
+    expect(productListLabel('Cheerios', '')).toBe('Cheerios');
   });
 });

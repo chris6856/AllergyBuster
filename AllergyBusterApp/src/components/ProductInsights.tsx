@@ -10,6 +10,7 @@ import {usePantryActions, useSavedProduct} from '../hooks/usePantry';
 import {hasIngredientData} from '../services/productService';
 import {borderRadius, colors, fontSizes, spacing} from '../constants/theme';
 import {ProductHeader} from './ProductHeader';
+import {displayProductName} from '../utils/productRecord';
 import {InsightSectionCard} from './InsightSectionCard';
 import {AllergenList} from './AllergenList';
 import {DecisionBar} from './DecisionBar';
@@ -53,7 +54,7 @@ export function ProductInsights({record, refreshSaved = false}: {record: Product
 
   return (
     <View>
-      <ProductHeader name={record.name} brand={record.brand} imageUrl={record.imageUrl} source={record.source} />
+      <ProductHeader name={displayProductName(record.name, record.brand)} brand={record.brand} imageUrl={record.imageUrl} source={record.source} />
       <View style={styles.metaRow}>
         <Text style={styles.category}>{CATEGORY_LABELS[record.category]}</Text>
         {record.category === 'household' ? <Text style={styles.beta}>Beta</Text> : null}

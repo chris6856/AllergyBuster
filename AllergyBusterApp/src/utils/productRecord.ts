@@ -1,5 +1,35 @@
 import {Nutrients, ProductCategory} from '../types/product';
 
+/**
+ * A readable product name. Community databases sometimes hold junk names
+ * (a website like "www.pg.com", a bare barcode, a single character); in
+ * that case fall back to the brand, then to "Unnamed product".
+ */
+export function displayProductName(name: string | null | undefined, brand?: string | null): string {
+  const n = (name ?? '').trim();
+  const junk =
+    n.length < 2 ||
+    /^(https?:\/\/|www\.)/i.test(n) ||
+    /^[a-z0-9-]+\.(com|net|org|co|us|uk|ca|de|fr)(\/.*)?$/i.test(n) ||
+    /^\d{6,14}$/.test(n) ||
+    /^unknown product$/i.test(n);
+  if (!junk) {
+    return n;
+  }
+  const b = (brand ?? '').split(',')[0].trim();
+  return b ? `${b} product` : 'Unnamed product';
+}
+
+/** Label for a shopping list: brand + name, without repeating the brand. */
+export function productListLabel(name: string | null | undefined, brand?: string | null): string {
+  const shown = displayProductName(name, brand);
+  const b = (brand ?? '').split(',')[0].trim();
+  if (!b || shown.toLowerCase().includes(b.toLowerCase())) {
+    return shown;
+  }
+  return `${b} ${shown}`;
+}
+
 /** Normalises a barcode to a 13-digit GTIN (UPC-A → leading 0). Null if not a barcode. */
 export function toGtin13(code: string | null | undefined): string | null {
   const digits = (code ?? '').replace(/\D/g, '');
